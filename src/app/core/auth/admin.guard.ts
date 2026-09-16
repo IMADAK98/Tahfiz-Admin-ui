@@ -1,13 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { canAccessAdmin, isAccessTokenValid, isTeacherRole } from './auth-role.helpers';
 import { AuthService } from './auth.service';
-import { canAccessAdmin, isTeacherRole } from './auth-role.helpers';
 
 export const adminGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (!auth.isAuthenticated()) {
+  if (!isAccessTokenValid(auth.getAccessToken())) {
     return router.createUrlTree(['/login'], {
       queryParams: { redirect: state.url },
     });
@@ -27,6 +27,6 @@ export const adminGuard: CanActivateFn = (_route, state) => {
 
   auth.clearSession();
   return router.createUrlTree(['/login'], {
-    queryParams: { redirect: state.url },
+    queryParams: { reason: 'denied' },
   });
 };

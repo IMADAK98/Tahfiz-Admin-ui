@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError } from '../../core/api/api-error';
 import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers';
 import { AuthService } from '../../core/auth/auth.service';
+import { safeRedirectPath } from '../../core/auth/redirect.helpers';
 
 @Component({
   selector: 'app-login-page',
@@ -76,6 +77,8 @@ export class LoginPageComponent {
     const reason = this.route.snapshot.queryParamMap.get('reason');
     if (reason === 'teacher') {
       this.infoMessage.set('استخدم تطبيق المعلم — لا يمكن الدخول إلى لوحة الإدارة من الويب.');
+    } else if (reason === 'denied') {
+      this.infoMessage.set('لا تملك صلاحية الوصول إلى لوحة الإدارة.');
     }
   }
 
@@ -100,8 +103,8 @@ export class LoginPageComponent {
           return;
         }
 
-        const redirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/admin';
-        void this.router.navigateByUrl(redirect);
+        const redirect = this.route.snapshot.queryParamMap.get('redirect');
+        void this.router.navigateByUrl(safeRedirectPath(redirect));
       },
       error: (error: unknown) => {
         this.submitting.set(false);

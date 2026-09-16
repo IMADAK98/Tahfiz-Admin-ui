@@ -1,9 +1,12 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
-import { AuthApiService } from '../api/auth-api.service';
+import { AuthService } from './auth.service';
+import { safeRedirectPath } from './redirect.helpers';
 import { TokenStorageService } from './token-storage.service';
+
+export const AUTH_RETRY = new HttpContextToken<boolean>(() => false);
 
 const AUTH_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'] as const;
 
@@ -24,18 +27,19 @@ function withBearer(url: string, req: Parameters<HttpInterceptorFn>[0], token: s
   });
 }
 
-function redirectToLogin(router: Router, redirect?: string): void {
+function redirectToLogin(router: Router, redirectUrl?: string): void {
+  const redirect = redirectUrl ? safeRedirectPath(redirectUrl, '') : '';
   router.navigate(['/login'], {
     queryParams: redirect ? { redirect } : undefined,
   });
 }
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const auth = inject(AuthService);
   const tokenStorage = inject(TokenStorageService);
-  const authApi = inject(AuthApiService);
   const router = inject(Router);
 
-  const authedReq = withBearer(req.url, req, tokenStorage.getAccessToken());
+  const authedReq = withBearer(req.url, req, auth.getAccessToken());
 
   return next(authedReq).pipe(
     catchError((error: unknown) => {
@@ -43,11 +47,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      if (isAuthEndpoint(req.url)) {
+      if (req.context.get(AUTH_RETRY) || isAuthEndpoint(req.url)) {
+        tokenStorage.clearTokens();
+        redirectToLogin(router, router.url);
         return throwError(() => error);
       }
 
-      const refreshToken = tokenStorage.getRefreshToken();
+      const refreshToken = auth.getRefreshToken();
       if (!refreshToken) {
         tokenStorage.clearTokens();
         redirectToLogin(router, router.url);
@@ -58,12 +64,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         refreshInFlight = true;
         refreshedAccessToken$.next(null);
 
-        return authApi.refresh({ refreshToken }).pipe(
-          switchMap((tokens) => {
-            tokenStorage.setTokens(tokens);
+        return auth.refresh().pipe(
+          switchMap(() => {
+            const token = auth.getAccessToken();
+            if (!token) {
+              return throwError(() => error);
+            }
+
             refreshInFlight = false;
-            refreshedAccessToken$.next(tokens.accessToken);
-            return next(withBearer(req.url, req, tokens.accessToken));
+            refreshedAccessToken$.next(token);
+            const retryReq = req.clone({
+              context: req.context.set(AUTH_RETRY, true),
+            });
+            return next(withBearer(req.url, retryReq, token));
           }),
           catchError((refreshError) => {
             refreshInFlight = false;
@@ -78,7 +91,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       return refreshedAccessToken$.pipe(
         filter((token): token is string => token !== null),
         take(1),
-        switchMap((token) => next(withBearer(req.url, req, token))),
+        switchMap((token) => {
+          const retryReq = req.clone({
+            context: req.context.set(AUTH_RETRY, true),
+          });
+          return next(withBearer(req.url, retryReq, token));
+        }),
       );
     }),
   );
