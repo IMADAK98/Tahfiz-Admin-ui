@@ -96,8 +96,14 @@ export function validateTeacherForm(form: TeacherFormModel, mode: TeacherFormMod
   if (!form.hasCertificate) {
     return 'اختر حالة شهادة مكنون';
   }
-  if (form.numberOfMemorizedJuz === null || form.numberOfMemorizedJuz < 0 || form.numberOfMemorizedJuz > 30) {
-    return 'أدخل عدد الأجزاء المحفوظة (0 إلى 30)';
+  // CreatePendingTeacherRequestDto requires numberOfMemorizedJuz >= 1; UpdateTeacherProfileDto allows 0.
+  const minJuz = mode === 'add' ? 1 : 0;
+  if (
+    form.numberOfMemorizedJuz === null ||
+    form.numberOfMemorizedJuz < minJuz ||
+    form.numberOfMemorizedJuz > 30
+  ) {
+    return `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
   }
   if (!form.hasSanadInHifz) {
     return 'اختر حالة السند';

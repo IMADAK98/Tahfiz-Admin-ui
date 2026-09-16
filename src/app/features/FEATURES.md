@@ -36,6 +36,8 @@ Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`) ra
 - Live qualification/tajweed/age-group/work-period are fixed backend enums, not the mock's free-text options — selects use the verified enum values with best-fit Arabic labels (see `teachers/enums/`). Dropped the mock's `رقم الهوية` field (not accepted by either the create or update DTO).
 - Mock's single "السند" field maps to two backend booleans (`hasSanadInHifz`, `hasIjazahInHifz`) — split into two selects.
 - Ids may be returned as JSON strings; all mappers coerce via `coerceTeacherId`. Approve/create responses may have `data: null` — callers always re-list after success.
+- `GET /halqa/by-teacher-id/{id}` is locked self-only for the `TEACHER` role (IDOR) — matches the existing `halqa-api.service.ts`/`halaqat.service.ts` "never by-teacher-id" convention. Teacher detail's "الحلقات المعيَّنة" section instead loads the center-scoped `GET /halqa?centerId=` list (same endpoint `halaqat.service.ts` already uses as its fallback) and filters client-side by teacher id.
+- `numberOfMemorizedJuz` minimum differs by DTO: `CreatePendingTeacherRequestDto` requires ≥1 (add form), `UpdateTeacherProfileDto` allows 0 (edit form) — validated per mode.
 
 ## Future public (not routed yet)
 

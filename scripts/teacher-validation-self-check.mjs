@@ -26,8 +26,13 @@ function validateTeacherForm(form, mode) {
   }
   if (!form.qualification) return 'اختر المؤهل الأكاديمي';
   if (!form.hasCertificate) return 'اختر حالة شهادة مكنون';
-  if (form.numberOfMemorizedJuz === null || form.numberOfMemorizedJuz < 0 || form.numberOfMemorizedJuz > 30) {
-    return 'أدخل عدد الأجزاء المحفوظة (0 إلى 30)';
+  const minJuz = mode === 'add' ? 1 : 0;
+  if (
+    form.numberOfMemorizedJuz === null ||
+    form.numberOfMemorizedJuz < minJuz ||
+    form.numberOfMemorizedJuz > 30
+  ) {
+    return `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
   }
   if (!form.hasSanadInHifz) return 'اختر حالة السند';
   if (!form.hasIjazahInHifz) return 'اختر حالة الإجازة';
@@ -66,8 +71,14 @@ assert.equal(
 );
 assert.equal(
   validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 31 }, 'add'),
-  'أدخل عدد الأجزاء المحفوظة (0 إلى 30)',
+  'أدخل عدد الأجزاء المحفوظة (1 إلى 30)',
 );
+// CreatePendingTeacherRequestDto requires numberOfMemorizedJuz >= 1 (not 0 like update).
+assert.equal(
+  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'add'),
+  'أدخل عدد الأجزاء المحفوظة (1 إلى 30)',
+);
+assert.equal(validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'edit'), null);
 
 assert.equal(coerceTeacherId('27'), 27);
 assert.equal(coerceTeacherId(27), 27);

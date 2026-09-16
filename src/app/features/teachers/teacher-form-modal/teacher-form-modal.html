@@ -156,7 +156,7 @@
                 id="tf-parts"
                 name="numberOfMemorizedJuz"
                 type="number"
-                min="0"
+                [attr.min]="isAdd ? 1 : 0"
                 max="30"
                 required
                 [(ngModel)]="form.numberOfMemorizedJuz"
