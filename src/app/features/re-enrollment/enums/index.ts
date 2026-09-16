@@ -1,4 +1,3 @@
 export { educationStageLabel } from './education-stage-labels';
-export { ReEnrollmentListTab } from './re-enrollment-list-tab.enum';
 export { ReEnrollmentLoadState } from './re-enrollment-load-state.enum';
 export { ReEnrollmentStatus } from './re-enrollment-status.enum';

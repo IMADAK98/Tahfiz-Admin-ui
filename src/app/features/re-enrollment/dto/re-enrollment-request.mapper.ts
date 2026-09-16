@@ -11,18 +11,16 @@ export interface ReEnrollmentRequestView {
   status: ReEnrollmentStatus;
   name: string;
   email: string | null;
-  phone: string | null;
-  parentPhone: string | null;
-  identityLabel: string | null;
-  educationStage: string | null;
-  address: string | null;
-  birthDate: string | null;
-  hifzSummary: string | null;
+  guardianLabel: string | null;
+  previousTermLabel: string | null;
   termLabel: string;
+  halqaLabel: string | null;
+  hifzSummary: string | null;
+  suggestedTeacherLabel: string | null;
+  educationStage: string | null;
   rejectionReason: string | null;
   createdAt: string | null;
   updatedAt: string | null;
-  hasOptionalDetails: boolean;
 }
 
 export function coerceId(value: unknown): number {
@@ -44,13 +42,13 @@ function normalizeStatus(value: unknown): ReEnrollmentStatus {
   return ReEnrollmentStatus.Pending;
 }
 
-function buildIdentityLabel(raw: ReEnrollmentRequest): string | null {
-  const identificationNumber = raw.identificationNumber?.trim();
-  if (identificationNumber) {
-    return identificationNumber;
+function buildGuardianLabel(raw: ReEnrollmentRequest): string | null {
+  const name = raw.guardianName?.trim();
+  const phone = raw.parentPhone?.trim();
+  if (name && phone) {
+    return `${name} · ${phone}`;
   }
-  const passportNumber = raw.passportNumber?.trim();
-  return passportNumber || null;
+  return name ?? phone ?? null;
 }
 
 function buildHifzSummary(raw: ReEnrollmentRequest): string | null {
@@ -62,21 +60,30 @@ function buildHifzSummary(raw: ReEnrollmentRequest): string | null {
   const to = raw.surah_to?.trim();
   if (from && to) {
     const quality = raw.hifzQuality?.trim();
-    return quality ? `من ${from} إلى ${to} — ${quality}` : `من ${from} إلى ${to}`;
-  }
-  if (from || to) {
-    return [from, to].filter(Boolean).join(' — ');
+    if (quality) {
+      return `جزئي — ${quality} — حتى ${to}`;
+    }
+    return `جزئي — حتى ${to}`;
   }
   return raw.hifzQuality?.trim() || null;
 }
 
-function formatBirthDate(value: string | null | undefined): string | null {
-  const trimmed = value?.trim();
-  if (!trimmed) {
-    return null;
+function buildHalqaLabel(raw: ReEnrollmentRequest): string | null {
+  const halqaId = raw.halqaId != null ? coerceId(raw.halqaId) : null;
+  const halqaName = raw.halqaName?.trim();
+  if (halqaName && halqaId) {
+    return `${halqaName} (ḥalaqaId ${halqaId})`;
   }
-  const normalized = trimmed.slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(normalized) ? normalized : trimmed;
+  return halqaName || null;
+}
+
+function buildSuggestedTeacherLabel(raw: ReEnrollmentRequest): string | null {
+  const teacherId = raw.suggestedTeacherId != null ? coerceId(raw.suggestedTeacherId) : null;
+  const teacherName = raw.suggestedTeacherName?.trim();
+  if (teacherName && teacherId) {
+    return `${teacherName} (userId ${teacherId})`;
+  }
+  return teacherName || null;
 }
 
 export function mapReEnrollmentRequest(
@@ -87,10 +94,6 @@ export function mapReEnrollmentRequest(
   const termName = termNames.get(termId);
   const termLabel = termName ? `${termName} (termId ${termId})` : `termId ${termId}`;
 
-  const address = raw.address?.trim() || null;
-  const birthDate = formatBirthDate(raw.birthDate);
-  const hifzSummary = buildHifzSummary(raw);
-
   return {
     id: coerceId(raw.id),
     existingUserId: coerceId(raw.existingUserId),
@@ -99,36 +102,21 @@ export function mapReEnrollmentRequest(
     status: normalizeStatus(raw.status),
     name: raw.name?.trim() || `طالب #${coerceId(raw.existingUserId)}`,
     email: raw.email?.trim() || null,
-    phone: raw.phone?.trim() || null,
-    parentPhone: raw.parentPhone?.trim() || null,
-    identityLabel: buildIdentityLabel(raw),
-    educationStage: educationStageLabel(raw.educationStage),
-    address,
-    birthDate,
-    hifzSummary,
+    guardianLabel: buildGuardianLabel(raw),
+    previousTermLabel: raw.previousTermName?.trim() || null,
     termLabel,
+    halqaLabel: buildHalqaLabel(raw),
+    hifzSummary: buildHifzSummary(raw),
+    suggestedTeacherLabel: buildSuggestedTeacherLabel(raw),
+    educationStage: educationStageLabel(raw.educationStage),
     rejectionReason: raw.rejectionReason?.trim() || null,
     createdAt: raw.createdAt ?? null,
     updatedAt: raw.updatedAt ?? null,
-    hasOptionalDetails: !!(address || birthDate || hifzSummary),
   };
 }
 
 export function sortRequestsPendingFirst(requests: ReEnrollmentRequestView[]): ReEnrollmentRequestView[] {
-  const rank = (status: ReEnrollmentStatus): number => {
-    if (status === ReEnrollmentStatus.Pending) {
-      return 0;
-    }
-    return 1;
-  };
-
-  return [...requests].sort((left, right) => {
-    const byStatus = rank(left.status) - rank(right.status);
-    if (byStatus !== 0) {
-      return byStatus;
-    }
-    return right.id - left.id;
-  });
+  return [...requests].sort((left, right) => right.id - left.id);
 }
 
 export function isAlreadyProcessedError(error: unknown): boolean {

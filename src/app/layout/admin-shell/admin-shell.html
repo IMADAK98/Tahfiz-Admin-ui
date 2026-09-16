@@ -67,7 +67,12 @@
   <div class="main">
     <header class="topbar">
       @if (!isDashboard()) {
-        <h1 class="topbar-title">{{ pageTitle() }}</h1>
+        <div>
+          <h1 class="topbar-title">{{ pageTitle() }}</h1>
+          @if (pageSubtitle()) {
+            <p class="topbar-subtitle">{{ pageSubtitle() }}</p>
+          }
+        </div>
       } @else {
         <div aria-hidden="true"></div>
       }

@@ -1,10 +1,4 @@
 <section class="re-enrollment-page">
-  <header class="re-enrollment-header">
-    <div>
-      <p class="page-subtitle">{{ 'reEnrollment.subtitle' | translate }}</p>
-    </div>
-  </header>
-
   @if (loadState() === ReEnrollmentLoadState.Loading) {
     <p style="color: var(--color-muted)">{{ 'reEnrollment.loading' | translate }}</p>
   } @else if (loadState() === ReEnrollmentLoadState.Error) {
@@ -12,135 +6,82 @@
     <button type="button" class="btn btn-secondary" (click)="reload()">
       {{ 'reEnrollment.retry' | translate }}
     </button>
+  } @else if (!requests().length) {
+    <div class="empty-block">
+      <h2>{{ 'reEnrollment.empty.title' | translate }}</h2>
+      <p>{{ 'reEnrollment.empty.body' | translate }}</p>
+      <a class="btn btn-secondary" routerLink="/admin/students">
+        {{ 'reEnrollment.empty.studentsLink' | translate }}
+      </a>
+      <p class="admin-note">{{ 'reEnrollment.empty.hint' | translate }}</p>
+    </div>
   } @else {
-    <div class="tab-bar" role="tablist" [attr.aria-label]="'reEnrollment.tabsLabel' | translate">
-      <button
-        type="button"
-        class="tab-pill"
-        [class.active]="activeTab() === ReEnrollmentListTab.Pending"
-        (click)="setTab(ReEnrollmentListTab.Pending)"
-      >
-        {{ 'reEnrollment.tabs.pending' | translate }}
-      </button>
-      <button
-        type="button"
-        class="tab-pill"
-        [class.active]="activeTab() === ReEnrollmentListTab.Processed"
-        (click)="setTab(ReEnrollmentListTab.Processed)"
-      >
-        {{ 'reEnrollment.tabs.processed' | translate }}
-      </button>
+    <div class="toolbar">
+      <div class="toolbar-badges">
+        <span class="badge badge-warning">{{ pendingCountLabel() }}</span>
+        @if (targetTermLabel(); as termLabel) {
+          <span class="badge badge-neutral">{{ termLabel }}</span>
+        }
+      </div>
     </div>
 
-    @if (!visibleRequests().length) {
-      <div class="empty-block">
-        @if (activeTab() === ReEnrollmentListTab.Pending) {
-          <h2>{{ 'reEnrollment.empty.pendingTitle' | translate }}</h2>
-          <p>{{ 'reEnrollment.empty.pendingBody' | translate }}</p>
-        } @else {
-          <h2>{{ 'reEnrollment.empty.processedTitle' | translate }}</h2>
-          <p>{{ 'reEnrollment.empty.processedBody' | translate }}</p>
-        }
-        <a class="btn btn-secondary" routerLink="/admin/students">
-          {{ 'reEnrollment.empty.studentsLink' | translate }}
-        </a>
-        <p class="admin-note">{{ 'reEnrollment.empty.hint' | translate }}</p>
-      </div>
-    } @else {
-      @if (activeTab() === ReEnrollmentListTab.Pending) {
-        <div class="toolbar">
-          <div class="toolbar-badges">
-            <span class="badge badge-warning">{{ pendingCountLabel() }}</span>
-            @if (targetTermLabel(); as termLabel) {
-              <span class="badge badge-neutral">{{ termLabel }}</span>
-            }
-          </div>
-        </div>
-      }
-
-      @for (request of visibleRequests(); track request.id) {
-        <article class="card req-card" [attr.aria-labelledby]="'re-' + request.id">
-          <div class="req-card-head">
+    @for (request of requests(); track request.id) {
+      <article class="card req-card" [attr.aria-labelledby]="'re-' + request.id">
+        <button
+          type="button"
+          class="req-card-head"
+          (click)="toggleCard(request.id)"
+          [attr.aria-expanded]="cardExpanded(request.id)"
+          [attr.aria-controls]="'re-body-' + request.id"
+        >
+          <div class="req-card-head-main">
             <div>
               <h2 [id]="'re-' + request.id">{{ request.name }}</h2>
               <p class="req-meta">{{ studentMeta(request) }}</p>
             </div>
-            <span class="badge" [class]="statusBadgeClass(request)">
-              {{ statusBadgeKey(request) | translate }}
-            </span>
+            <span class="badge badge-warning">{{ 'reEnrollment.status.pending' | translate }}</span>
           </div>
+          <span class="req-card-chevron" aria-hidden="true">{{ cardExpanded(request.id) ? '▾' : '◂' }}</span>
+        </button>
 
-          <dl class="detail-grid">
-            <div>
-              <dt>{{ 'reEnrollment.fields.parentPhone' | translate }}</dt>
-              <dd>{{ request.parentPhone ?? '—' }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'reEnrollment.fields.phone' | translate }}</dt>
-              <dd>{{ request.phone ?? '—' }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'reEnrollment.fields.identity' | translate }}</dt>
-              <dd>{{ request.identityLabel ?? '—' }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'reEnrollment.fields.term' | translate }}</dt>
-              <dd>{{ request.termLabel }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'reEnrollment.fields.educationStage' | translate }}</dt>
-              <dd>{{ request.educationStage ?? '—' }}</dd>
-            </div>
-            <div>
-              <dt>{{ 'reEnrollment.fields.hifz' | translate }}</dt>
-              <dd>{{ request.hifzSummary ?? '—' }}</dd>
-            </div>
-            @if (request.status === ReEnrollmentStatus.Rejected && request.rejectionReason) {
-              <div class="detail-span-2">
-                <dt>{{ 'reEnrollment.fields.rejectionReason' | translate }}</dt>
-                <dd>{{ request.rejectionReason }}</dd>
+        @if (cardExpanded(request.id)) {
+          <div class="req-card-body" [id]="'re-body-' + request.id">
+            <dl class="detail-grid">
+              <div>
+                <dt>{{ 'reEnrollment.fields.guardian' | translate }}</dt>
+                <dd>{{ request.guardianLabel ?? '—' }}</dd>
               </div>
-            }
-          </dl>
+              <div>
+                <dt>{{ 'reEnrollment.fields.previousTerm' | translate }}</dt>
+                <dd>{{ request.previousTermLabel ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'reEnrollment.fields.term' | translate }}</dt>
+                <dd>{{ request.termLabel }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'reEnrollment.fields.halqa' | translate }}</dt>
+                <dd>{{ request.halqaLabel ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'reEnrollment.fields.hifz' | translate }}</dt>
+                <dd>{{ request.hifzSummary ?? '—' }}</dd>
+              </div>
+              <div>
+                <dt>{{ 'reEnrollment.fields.suggestedTeacher' | translate }}</dt>
+                <dd>{{ request.suggestedTeacherLabel ?? '—' }}</dd>
+              </div>
+            </dl>
 
-          @if (request.hasOptionalDetails) {
-            <button
-              type="button"
-              class="btn btn-ghost btn-sm details-toggle"
-              (click)="toggleDetails(request.id)"
-              [attr.aria-expanded]="detailsExpanded(request.id)"
-            >
-              {{
-                detailsExpanded(request.id) ?
-                  ('reEnrollment.details.hide' | translate)
-                : ('reEnrollment.details.show' | translate)
-              }}
-            </button>
-
-            @if (detailsExpanded(request.id)) {
-              <dl class="detail-grid detail-grid--optional">
-                <div>
-                  <dt>{{ 'reEnrollment.fields.address' | translate }}</dt>
-                  <dd>{{ request.address ?? '—' }}</dd>
-                </div>
-                <div>
-                  <dt>{{ 'reEnrollment.fields.birthDate' | translate }}</dt>
-                  <dd>{{ request.birthDate ?? '—' }}</dd>
-                </div>
-              </dl>
-            }
-          }
-
-          @if (request.status === ReEnrollmentStatus.Pending) {
             <div class="row-actions">
               <button
                 type="button"
                 class="btn btn-primary"
-                (click)="confirmApprove(request)"
-                [disabled]="isActingOn(request) || rejectSubmitting()"
+                (click)="showApproveConfirm(request, $event)"
+                [disabled]="isActingOn(request)"
               >
                 {{
-                  isActingOn(request) ?
+                  isActingOn(request) && isConfirmOpen(request.id, 'approve') ?
                     ('reEnrollment.actions.approving' | translate)
                   : ('reEnrollment.actions.approve' | translate)
                 }}
@@ -148,26 +89,85 @@
               <button
                 type="button"
                 class="btn btn-danger"
-                (click)="openRejectDialog(request)"
-                [disabled]="isActingOn(request) || rejectSubmitting()"
+                (click)="showRejectConfirm(request, $event)"
+                [disabled]="isActingOn(request)"
               >
                 {{ 'reEnrollment.actions.reject' | translate }}
               </button>
             </div>
-          }
-        </article>
-      }
+
+            @if (isConfirmOpen(request.id, 'approve')) {
+              <div class="confirm-box confirm-box--approve" role="region" aria-live="polite">
+                <p>{{ approveMessage(request) }}</p>
+                <p class="confirm-note">{{ 'reEnrollment.approve.h1Note' | translate }}</p>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    (click)="confirmApprove(request, $event)"
+                    [disabled]="isActingOn(request)"
+                  >
+                    {{ 'reEnrollment.approve.confirm' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    (click)="cancelConfirm(request.id, $event)"
+                    [disabled]="isActingOn(request)"
+                  >
+                    {{ 'reEnrollment.approve.cancel' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (isConfirmOpen(request.id, 'reject')) {
+              <div class="confirm-box confirm-box--reject" role="region" aria-live="polite">
+                <p>{{ 'reEnrollment.reject.prompt' | translate }}</p>
+                <div class="input-group">
+                  <label [for]="'reject-reason-' + request.id">
+                    {{ 'reEnrollment.reject.reasonLabel' | translate }}
+                  </label>
+                  <textarea
+                    class="input"
+                    [id]="'reject-reason-' + request.id"
+                    rows="3"
+                    [ngModel]="rejectReason(request.id)"
+                    (ngModelChange)="setRejectReason(request.id, $event)"
+                    [placeholder]="'reEnrollment.reject.reasonPlaceholder' | translate"
+                    [disabled]="isActingOn(request)"
+                  ></textarea>
+                </div>
+                @if (rejectError(request.id); as error) {
+                  <p class="form-error" role="alert">{{ error }}</p>
+                }
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    (click)="confirmReject(request, $event)"
+                    [disabled]="!canSubmitReject(request.id)"
+                  >
+                    {{
+                      isActingOn(request) ?
+                        ('reEnrollment.reject.submitting' | translate)
+                      : ('reEnrollment.reject.submit' | translate)
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    (click)="cancelConfirm(request.id, $event)"
+                    [disabled]="isActingOn(request)"
+                  >
+                    {{ 'reEnrollment.reject.cancel' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </article>
     }
   }
 </section>
-
-<p-confirmdialog />
-
-<app-reject-re-enrollment-dialog
-  [visible]="!!rejectTarget()"
-  [studentName]="rejectTarget()?.name ?? ''"
-  [submitting]="rejectSubmitting()"
-  [serverError]="rejectServerError()"
-  (confirmed)="onRejectConfirmed($event)"
-  (closed)="closeRejectDialog()"
-/>

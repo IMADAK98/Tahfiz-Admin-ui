@@ -27,45 +27,28 @@
     "sessionExpired": "TODO: Your session has expired. Please sign in again."
   },
   "reEnrollment": {
-    "subtitle": "TODO: Students requesting enrollment in a new term after a prior term ended",
     "loading": "TODO: Loading re-enrollment requests…",
     "retry": "TODO: Retry",
-    "tabsLabel": "TODO: Filter requests",
-    "tabs": {
-      "pending": "TODO: Pending review",
-      "processed": "TODO: Processed"
-    },
     "requestMeta": "TODO: Re-enrollment request",
     "countLabel": "TODO: {{count}} request(s)",
     "targetTerm": "TODO: Target term: {{term}}",
     "multipleTargetTerms": "TODO: {{count}} target terms",
     "empty": {
-      "pendingTitle": "TODO: No re-enrollment requests",
-      "pendingBody": "TODO: Returning students appear here after a new term and registration link — not from available-students.",
-      "processedTitle": "TODO: No processed requests",
-      "processedBody": "TODO: Approved or rejected requests appear here.",
+      "title": "TODO: No re-enrollment requests",
+      "body": "TODO: When a term ends and a student requests re-enrollment, requests appear here.",
       "studentsLink": "TODO: Active students",
-      "hint": "TODO: Requests are created via public activate-student — this page is admin review only."
+      "hint": "TODO: Do not mix available-students with re-enrollment."
     },
     "fields": {
-      "parentPhone": "TODO: Parent phone",
-      "phone": "TODO: Student phone",
-      "identity": "TODO: ID / passport",
+      "guardian": "TODO: Guardian",
+      "previousTerm": "TODO: Previous term",
       "term": "TODO: Requested term",
-      "educationStage": "TODO: Education stage",
-      "hifz": "TODO: Memorization status",
-      "address": "TODO: Address",
-      "birthDate": "TODO: Birth date",
-      "rejectionReason": "TODO: Rejection reason"
-    },
-    "details": {
-      "show": "TODO: Show additional details",
-      "hide": "TODO: Hide additional details"
+      "halqa": "TODO: Requested halaqa",
+      "hifz": "TODO: Current memorization status",
+      "suggestedTeacher": "TODO: Suggested teacher"
     },
     "status": {
-      "pending": "TODO: Pending review",
-      "approved": "TODO: Approved",
-      "rejected": "TODO: Rejected"
+      "pending": "TODO: Pending review"
     },
     "actions": {
       "approve": "TODO: Approve",
@@ -73,17 +56,15 @@
       "reject": "TODO: Reject"
     },
     "approve": {
-      "header": "TODO: Approve re-enrollment",
-      "message": "TODO: Approve re-enrollment for {{name}} in {{term}}?\n\nTerm enroll only — no halaqa assignment.",
+      "message": "TODO: Approve re-enrollment for {{name}} in {{term}}?",
+      "h1Note": "TODO: Term enroll only — no halaqa assignment.",
       "confirm": "TODO: Confirm approval",
       "cancel": "TODO: Cancel"
     },
     "reject": {
-      "title": "TODO: Reject re-enrollment request",
-      "requestLabel": "TODO: Request:",
+      "prompt": "TODO: Confirm rejection of this re-enrollment request?",
       "reasonLabel": "TODO: Rejection reason",
       "reasonPlaceholder": "TODO: Enter rejection reason…",
-      "reasonHint": "TODO: Required — sent as rejectionReason",
       "submit": "TODO: Confirm rejection",
       "submitting": "TODO: Rejecting…",
       "cancel": "TODO: Cancel"

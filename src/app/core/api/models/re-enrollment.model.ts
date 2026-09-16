@@ -10,6 +10,7 @@ export interface ReEnrollmentRequest {
   email?: string | null;
   phone?: string | null;
   parentPhone?: string | null;
+  guardianName?: string | null;
   identificationNumber?: string | null;
   passportNumber?: string | null;
   educationStage?: string | null;
@@ -19,6 +20,11 @@ export interface ReEnrollmentRequest {
   surah_to?: string | null;
   hifzQuality?: string | null;
   isHafiz?: boolean | null;
+  previousTermName?: string | null;
+  halqaId?: number | string | null;
+  halqaName?: string | null;
+  suggestedTeacherId?: number | string | null;
+  suggestedTeacherName?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }

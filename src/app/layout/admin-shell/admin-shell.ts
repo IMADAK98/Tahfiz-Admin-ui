@@ -13,8 +13,14 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
   '/admin/students': 'الطلاب',
   '/admin/student-requests': 'طلبات الطلاب',
   '/admin/re-enrollment': 'طلبات إعادة التسجيل',
+  '/admin/re-enrollment-requests': 'طلبات إعادة التسجيل',
   '/admin/reports/attendance': 'تقرير الحضور',
   '/admin/reports/progress': 'تقرير التقدّم',
+};
+
+const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
+  '/admin/re-enrollment': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
+  '/admin/re-enrollment-requests': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
 };
 
 @Component({
@@ -30,6 +36,7 @@ export class AdminShellComponent {
   protected readonly displayName = signal('مشرف');
   protected readonly avatarInitial = signal('م');
   protected readonly pageTitle = signal('لوحة التحكم');
+  protected readonly pageSubtitle = signal<string | null>(null);
   protected readonly isDashboard = signal(false);
 
   constructor() {
@@ -62,8 +69,10 @@ export class AdminShellComponent {
     );
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');
+      this.pageSubtitle.set(null);
       return;
     }
     this.pageTitle.set(ADMIN_PAGE_TITLES[path] ?? 'لوحة التحكم');
+    this.pageSubtitle.set(ADMIN_PAGE_SUBTITLES[path] ?? null);
   }
 }
