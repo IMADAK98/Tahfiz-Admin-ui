@@ -7,6 +7,7 @@ import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { CreateHalqaPayload, HalqaApiRecord } from './models/halqa.model';
 
+/** Center-admin halqa HTTP — list by term/center; create/update. No by-teacher-id (TEACHER/mobile). */
 @Injectable({ providedIn: 'root' })
 export class HalqaApiService {
   private readonly http = inject(HttpClient);

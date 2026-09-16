@@ -56,6 +56,13 @@
   font-size: 0.875rem;
 }
 
+.picker-hint {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
 .student-picker {
   min-height: 110px;
 }

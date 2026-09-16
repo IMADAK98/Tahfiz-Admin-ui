@@ -34,6 +34,10 @@ export class CreateHalaqaModalComponent {
   protected readonly teachers = signal<ActiveTeacher[]>([]);
   protected readonly students = signal<ActiveStudent[]>([]);
   protected readonly pickersLoading = signal(false);
+  protected readonly studentsAvailableEmpty = signal(false);
+  protected readonly teachersAvailableEmpty = signal(false);
+  protected readonly studentsShowingActiveFallback = signal(false);
+  protected readonly teachersShowingActiveFallback = signal(false);
 
   protected readonly termLabel = computed(() => {
     const term = this.activeTerm();
@@ -150,19 +154,13 @@ export class CreateHalaqaModalComponent {
 
     this.pickersLoading.set(true);
     this.halaqatService.loadCreatePickers(centerId).subscribe({
-      next: ({ teachers, students }) => {
-        this.teachers.set(
-          teachers.map((teacher) => ({
-            ...teacher,
-            id: typeof teacher.id === 'string' ? Number(teacher.id) : teacher.id,
-          })),
-        );
-        this.students.set(
-          students.map((student) => ({
-            ...student,
-            id: typeof student.id === 'string' ? Number(student.id) : student.id,
-          })),
-        );
+      next: (pickers) => {
+        this.teachers.set(pickers.teachers);
+        this.students.set(pickers.students);
+        this.teachersAvailableEmpty.set(pickers.teachersAvailableEmpty);
+        this.studentsAvailableEmpty.set(pickers.studentsAvailableEmpty);
+        this.teachersShowingActiveFallback.set(pickers.teachersShowingActiveFallback);
+        this.studentsShowingActiveFallback.set(pickers.studentsShowingActiveFallback);
         this.pickersLoading.set(false);
       },
       error: (error: unknown) => {

@@ -3,3 +3,4 @@ export * from './create-halaqa-request.dto';
 export * from './create-halaqa-validation';
 export * from './halaqat-filters.model';
 export * from './halqa-list.mapper';
+export * from './person-id.helpers';
