@@ -29,6 +29,10 @@ export const appConfig: ApplicationConfig = {
       loader: provideTranslateHttpLoader({
         prefix: '/i18n/',
         suffix: '.json',
+        // ToastErrorService (used by errorToastInterceptor) injects TranslateService; routing the
+        // loader's own HTTP call through HttpClient (and therefore through that interceptor) while
+        // TranslateService is still constructing itself throws NG0204. HttpBackend bypasses interceptors.
+        useHttpBackend: true,
       }),
     }),
     {
