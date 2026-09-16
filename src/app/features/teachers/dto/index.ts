@@ -1,2 +1,3 @@
-/** Placeholder — add feature DTOs when API wiring lands. */
-export {};
+export * from './teacher-detail-view.model';
+export * from './teacher-form.model';
+export * from './teacher-id.helpers';
