@@ -2,7 +2,6 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { Toast } from 'primeng/toast';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
@@ -14,8 +13,8 @@ import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CreateTermModalComponent, Toast, ConfirmDialog],
-  providers: [MessageService, ConfirmationService],
+  imports: [RouterLink, CreateTermModalComponent, ConfirmDialog],
+  providers: [ConfirmationService],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })

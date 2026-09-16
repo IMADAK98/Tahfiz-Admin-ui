@@ -1,8 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
 import { ApiError } from '../../core/api/api-error';
 import { HalqaListItem } from '../../core/api/models/halqa.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
@@ -20,8 +18,7 @@ import { HalaqatService } from './halaqat.service';
 
 @Component({
   selector: 'app-halaqat',
-  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent, Toast],
-  providers: [MessageService],
+  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent],
   templateUrl: './halaqat.html',
   styleUrl: './halaqat.scss',
 })

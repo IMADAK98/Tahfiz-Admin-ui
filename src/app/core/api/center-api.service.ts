@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
+import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { ActiveTerm } from './models/term.model';
@@ -35,10 +36,10 @@ export class CenterApiService {
     }
 
     return this.http
-      .get<ApiEnvelope<ActiveTeacher[]>>(`${this.apiBaseUrl}/center/${centerId}/active-teachers`, {
-        observe: 'response',
-        params,
-      })
+      .get<ApiEnvelope<ActiveTeacher[]>>(
+        `${this.apiBaseUrl}/center/${centerId}/active-teachers`,
+        withSkipGlobalErrorToast({ observe: 'response', params }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
@@ -48,9 +49,10 @@ export class CenterApiService {
 
   getAvailableStudents(centerId: number): Observable<ActiveStudent[]> {
     return this.http
-      .get<ApiEnvelope<ActiveStudent[]>>(`${this.apiBaseUrl}/center/${centerId}/available-students`, {
-        observe: 'response',
-      })
+      .get<ApiEnvelope<ActiveStudent[]>>(
+        `${this.apiBaseUrl}/center/${centerId}/available-students`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
@@ -67,10 +69,10 @@ export class CenterApiService {
     }
 
     return this.http
-      .get<ApiEnvelope<ActiveStudent[]>>(`${this.apiBaseUrl}/center/${centerId}/active-students`, {
-        observe: 'response',
-        params,
-      })
+      .get<ApiEnvelope<ActiveStudent[]>>(
+        `${this.apiBaseUrl}/center/${centerId}/active-students`,
+        withSkipGlobalErrorToast({ observe: 'response', params }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
@@ -87,7 +89,7 @@ export class CenterApiService {
     }
 
     return this.http
-      .get<ApiEnvelope<ActiveTeacher[]>>(url, { observe: 'response', params })
+      .get<ApiEnvelope<ActiveTeacher[]>>(url, withSkipGlobalErrorToast({ observe: 'response', params }))
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 }

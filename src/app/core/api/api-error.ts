@@ -1,3 +1,4 @@
+import { formatNestMessage } from './error-message.helpers';
 import { NestErrorBody } from './models/api-envelope.model';
 
 export class ApiError extends Error {
@@ -19,14 +20,4 @@ export function apiErrorFromBody(body: unknown, httpStatus: number): ApiError {
     return new ApiError(message, httpStatus, nest.statusCode);
   }
   return new ApiError('Request failed', httpStatus);
-}
-
-function formatNestMessage(message: NestErrorBody['message']): string | undefined {
-  if (typeof message === 'string') {
-    return message;
-  }
-  if (Array.isArray(message)) {
-    return message.join(', ');
-  }
-  return undefined;
 }

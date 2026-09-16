@@ -1,0 +1,16 @@
+<router-outlet />
+
+<p-toast position="top-left" styleClass="tahfiz-toast-stack">
+  <ng-template #message let-message>
+    <div
+      class="tahfiz-toast__content"
+      [class.tahfiz-toast__content--success]="message.severity === 'success'"
+      [class.tahfiz-toast__content--error]="message.severity === 'error'"
+      [class.tahfiz-toast__content--warn]="message.severity === 'warn'"
+      [class.tahfiz-toast__content--info]="message.severity === 'info'"
+    >
+      <span class="tahfiz-toast__icon" aria-hidden="true">{{ toastIcon(message.severity) }}</span>
+      <p class="tahfiz-toast__body">{{ message.summary || message.detail }}</p>
+    </div>
+  </ng-template>
+</p-toast>
