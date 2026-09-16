@@ -1,6 +1,6 @@
 # Tahfiz Admin (ثفيز)
 
-Center-admin web app for Thafiz (نظام التحفيظ). PR1 scaffold — empty shell, routing, theming, and auth stub.
+Center-admin web app for Thafiz (نظام التحفيظ). Angular 22 + PrimeNG 22 RTL admin shell.
 
 ## Locked stack (2026-09-16)
 
@@ -47,7 +47,9 @@ src/
     _components.scss     # .btn, .card, .input, …
     styles.scss          # Global entry
   app/
-    core/                # auth stub, API config
+    core/
+      api/               # envelope helpers, AuthApiService, CenterApiService
+      auth/              # AuthService, JWT decode, sessionStorage tokens
     layout/              # public-shell, admin-shell
     features/            # landing, login, dashboard
 ```
@@ -60,12 +62,27 @@ npm run build      # production build
 npm run watch      # dev build with watch
 ```
 
-## Out of scope (PR1)
+## Core API (PR2)
 
-Feature screens (ḥalaqāt, teachers, plans), Nest guard, Figma, Flutter, re-enrollment routes, Angular Material.
+Nest returns HTTP **201** with `{ statusCode: 200, data: … }` on many auth routes. Use `envelope.helpers.ts` to unwrap safely.
+
+| Service | Methods |
+|---|---|
+| `AuthApiService` | `login`, `refresh`, `logout` |
+| `CenterApiService` | `getActiveTerm(centerId)`, `getActiveTeachers(centerId, query?)` |
+| `AuthService` | stores tokens in **sessionStorage**, `decodeJwtClaims` → `role`, `userId`, `centerId` |
+
+```bash
+npm run check:envelope   # assert-based envelope self-check
+```
+
+Bearer attachment is manual per call until PR3 interceptor.
+
+## Out of scope (PR2)
+
+HTTP interceptor, refresh queue, `adminGuard`, feature pages.
 
 ## Next PRs
 
-2. Core API client + envelope helpers  
-3. Auth (login, interceptor, refresh, adminGuard)  
+3. Auth UI + interceptor + refresh queue + adminGuard  
 4. Shell + dashboard wired to live data  
