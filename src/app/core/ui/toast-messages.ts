@@ -61,3 +61,15 @@ export function resolveServerErrorToastDisplay(
     detail: message,
   };
 }
+
+/**
+ * Collapses `resolveServerErrorToastDisplay` into a single toast body for callers using
+ * `notifyErrorBody` (no title/detail split UI available there).
+ */
+export function formatServerErrorToastBody(
+  serverMessage: string,
+  requestFailedWithMessage: (message: string) => string,
+): string {
+  const display = resolveServerErrorToastDisplay(serverMessage, '', requestFailedWithMessage);
+  return display.mode === 'single' ? display.body : `${display.summary}: ${display.detail}`;
+}
