@@ -14,9 +14,9 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 
 | Folder | Route | Mock | Status |
 |---|---|---|---|
-| `dashboard/` | `/admin`, `/admin/dashboard` | `03` | Stub KPIs |
+| `dashboard/` | `/admin`, `/admin/dashboard` | `03` | Implemented |
 | `terms/` | `/admin/terms` | `04` | Placeholder |
-| `halaqat/` | `/admin/halaqat` | `05` | Placeholder |
+| `halaqat/` | `/admin/halaqat` | `05` | Implemented |
 | `halaqa-detail/` | `/admin/halaqat/:id` | `18` (detail+Plans) | Placeholder |
 | `teachers/` | `/admin/teachers` | `07` | Placeholder |
 | `teacher-requests/` | `/admin/teacher-requests` | `08` | Placeholder |

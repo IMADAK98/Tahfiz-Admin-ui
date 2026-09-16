@@ -1,2 +1,3 @@
-/** Placeholder — add feature enums when needed. */
-export {};
+export * from './halqa-category.enum';
+export * from './halqa-period.enum';
+export * from './halaqat-load-state.enum';

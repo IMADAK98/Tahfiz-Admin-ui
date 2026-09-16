@@ -1,0 +1,154 @@
+.halaqat-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.halaqat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.halaqat-header h1 {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin: 0 0 4px;
+}
+
+.halaqat-header p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.halaqat-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+}
+
+.search {
+  min-width: 220px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.halaqa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: start;
+    padding: 12px 14px;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  td {
+    padding: 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: var(--color-surface);
+  }
+}
+
+.name-cell strong {
+  display: block;
+  font-size: 0.9375rem;
+}
+
+.name-cell span {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.students-cell strong {
+  display: block;
+}
+
+.students-cell .student-names {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.empty-block {
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+
+  h2 {
+    margin-bottom: var(--space-2);
+    color: var(--color-primary);
+  }
+
+  p {
+    color: var(--color-muted);
+    margin-bottom: var(--space-5);
+    max-width: 30em;
+    margin-inline: auto;
+  }
+}
+
+.load-error {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.no-results {
+  margin: 0;
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--color-muted);
+}
