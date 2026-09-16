@@ -1,36 +1,78 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { API_BASE_URL } from '../config/api-config';
-
-const ACCESS_TOKEN_KEY = 'tahfiz_access_token';
-const REFRESH_TOKEN_KEY = 'tahfiz_refresh_token';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { AuthApiService } from '../api/auth-api.service';
+import { ApiError } from '../api/api-error';
+import { decodeJwtClaims, JwtClaims } from './jwt.helpers';
+import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = inject(API_BASE_URL);
+  private readonly authApi = inject(AuthApiService);
+  private readonly tokenStorage = inject(TokenStorageService);
 
   getAccessToken(): string | null {
-    return sessionStorage.getItem(ACCESS_TOKEN_KEY);
+    return this.tokenStorage.getAccessToken();
+  }
+
+  getRefreshToken(): string | null {
+    return this.tokenStorage.getRefreshToken();
   }
 
   isAuthenticated(): boolean {
     return !!this.getAccessToken();
   }
 
-  /** Stub — full login flow lands in PR3. */
-  login(_email: string, _password: string): Observable<boolean> {
-    return of(false);
+  getClaims(): JwtClaims | null {
+    const token = this.getAccessToken();
+    return token ? decodeJwtClaims(token) : null;
   }
 
-  logout(): void {
-    sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-    sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+  login(email: string, password: string): Observable<JwtClaims> {
+    return this.authApi.login({ email, password }).pipe(
+      tap((tokens) => this.tokenStorage.setTokens(tokens)),
+      map(() => {
+        const claims = this.getClaims();
+        if (!claims) {
+          throw new ApiError('Could not decode access token', 200);
+        }
+        return claims;
+      }),
+    );
   }
 
-  /** Reserved for PR3 interceptor refresh queue. */
-  protected get refreshUrl(): string {
-    return `${this.apiBaseUrl}/auth/refresh`;
+  refresh(): Observable<JwtClaims> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new ApiError('No refresh token', 401));
+    }
+
+    return this.authApi.refresh({ refreshToken }).pipe(
+      tap((tokens) => this.tokenStorage.setTokens(tokens)),
+      map(() => {
+        const claims = this.getClaims();
+        if (!claims) {
+          throw new ApiError('Could not decode access token', 200);
+        }
+        return claims;
+      }),
+    );
+  }
+
+  logout(): Observable<void> {
+    const accessToken = this.getAccessToken();
+
+    if (!accessToken && !this.getRefreshToken()) {
+      this.tokenStorage.clearTokens();
+      return of(undefined);
+    }
+
+    return this.authApi.logout(accessToken).pipe(
+      tap(() => this.tokenStorage.clearTokens()),
+      catchError(() => {
+        this.tokenStorage.clearTokens();
+        return of(undefined);
+      }),
+    );
   }
 }
