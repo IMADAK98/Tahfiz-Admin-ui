@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
+import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
 
 @Component({
   selector: 'app-public-shell',
@@ -15,7 +15,7 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
         <nav class="header-nav" aria-label="التنقل الرئيسي">
           <a class="nav-text" routerLink="/" fragment="features">المميزات</a>
           <a class="nav-text" routerLink="/login">تسجيل الدخول</a>
-          <a class="btn btn-primary" [href]="centerSignupUrl" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
+          <a class="btn btn-primary" [routerLink]="centerSignupRoute" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
         </nav>
       </header>
       <main class="public-main landing-main">
@@ -25,5 +25,5 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
   `,
 })
 export class PublicShellComponent {
-  protected readonly centerSignupUrl = CENTER_SIGNUP_URL;
+  protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
 }

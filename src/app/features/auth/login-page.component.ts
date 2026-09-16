@@ -9,7 +9,7 @@ import { ApiError } from '../../core/api/api-error';
 import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers';
 import { AuthService } from '../../core/auth/auth.service';
 import { safeRedirectPath } from '../../core/auth/redirect.helpers';
-import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
+import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
 
 @Component({
   selector: 'app-login-page',
@@ -114,7 +114,7 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
           <div class="login-divider">أو</div>
           <p style="text-align: center; font-size: 0.9375rem; color: var(--color-muted)">
             ليس لديك حساب مركز؟
-            <a [href]="centerSignupUrl" style="font-weight: 700" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
+            <a [routerLink]="centerSignupRoute" style="font-weight: 700" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
           </p>
         </div>
 
@@ -130,7 +130,7 @@ export class LoginPageComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  protected readonly centerSignupUrl = CENTER_SIGNUP_URL;
+  protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
   protected email = '';
   protected password = '';
   protected resetEmail = '';

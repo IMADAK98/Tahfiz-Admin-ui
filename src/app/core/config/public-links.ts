@@ -1,2 +1,2 @@
-/** Public product URLs — rewrite reg/signup links per brief */
-export const CENTER_SIGNUP_URL = 'https://www.tahfiz.work/user/signup';
+/** In-app center signup route (mock 17 — POST /pending-center-request) */
+export const CENTER_SIGNUP_ROUTE = '/user/signup';

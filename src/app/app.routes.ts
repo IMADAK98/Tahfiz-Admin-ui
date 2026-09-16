@@ -8,6 +8,11 @@ export const routes: Routes = [
       import('./features/auth/login-page.component').then((m) => m.LoginPageComponent),
   },
   {
+    path: 'user/signup',
+    loadComponent: () =>
+      import('./features/auth/center-signup-page.component').then((m) => m.CenterSignupPageComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layout/public-shell/public-shell.component').then((m) => m.PublicShellComponent),

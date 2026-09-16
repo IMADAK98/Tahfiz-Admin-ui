@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
+import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
 
 @Component({
   selector: 'app-landing-page',
@@ -12,7 +12,7 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
         <h1>أدِر حلقات التحفيظ بوضوح — من التسجيل حتى التقارير</h1>
         <div class="hero-ctas">
           <a routerLink="/login" class="btn btn-primary btn-lg">تسجيل الدخول</a>
-          <a [href]="centerSignupUrl" class="btn btn-secondary btn-lg" title="نموذج تسجيل المركز">إنشاء حساب مركز</a>
+          <a [routerLink]="centerSignupRoute" class="btn btn-secondary btn-lg" title="نموذج تسجيل المركز">إنشاء حساب مركز</a>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
         <p>أنشئ مركزًا جديدًا، أو سجّل دخولك إن كان لديك حساب</p>
       </div>
       <div class="cta-band-actions">
-        <a [href]="centerSignupUrl" class="btn btn-accent btn-lg" title="نموذج تسجيل المركز">إنشاء مركز</a>
+        <a [routerLink]="centerSignupRoute" class="btn btn-accent btn-lg" title="نموذج تسجيل المركز">إنشاء مركز</a>
         <a routerLink="/login" class="btn btn-secondary btn-lg">لديّ حساب / تسجيل الدخول</a>
       </div>
     </section>
@@ -76,5 +76,5 @@ import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
   `,
 })
 export class LandingPageComponent {
-  protected readonly centerSignupUrl = CENTER_SIGNUP_URL;
+  protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
 }
