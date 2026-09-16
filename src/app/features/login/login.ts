@@ -10,6 +10,9 @@ import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers
 import { AuthService } from '../../core/auth/auth.service';
 import { safeRedirectPath } from '../../core/auth/redirect.helpers';
 import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
+import { createEmptyLoginForm } from './dto/login-form.model';
+import { LoginQueryReason } from './enums/login-query-reason.enum';
+import { LoginService } from './login.service';
 
 @Component({
   selector: 'app-login',
@@ -18,15 +21,13 @@ import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
   styleUrl: './login.scss',
 })
 export class LoginComponent {
+  private readonly loginService = inject(LoginService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
   protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
-  protected email = '';
-  protected password = '';
-  protected resetEmail = '';
-  protected rememberMe = false;
+  protected readonly form = createEmptyLoginForm();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly infoMessage = signal<string | null>(null);
@@ -34,9 +35,9 @@ export class LoginComponent {
 
   constructor() {
     const reason = this.route.snapshot.queryParamMap.get('reason');
-    if (reason === 'teacher') {
+    if (reason === LoginQueryReason.Teacher) {
       this.infoMessage.set('استخدم تطبيق المعلم — لا يمكن الدخول إلى لوحة الإدارة من الويب.');
-    } else if (reason === 'denied') {
+    } else if (reason === LoginQueryReason.Denied) {
       this.infoMessage.set('لا تملك صلاحية الوصول إلى لوحة الإدارة.');
     }
 
@@ -51,7 +52,7 @@ export class LoginComponent {
     this.errorMessage.set(null);
     this.submitting.set(true);
 
-    this.auth.login(this.email.trim(), this.password).subscribe({
+    this.loginService.login(this.form).subscribe({
       next: (claims) => {
         this.submitting.set(false);
 

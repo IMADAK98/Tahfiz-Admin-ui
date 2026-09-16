@@ -1,4 +1,10 @@
-/** ponytail: XOR national-id vs passport payload builder (mock 17). */
+/** ponytail: XOR national-id vs passport payload builder (mock 17).
+ *  Keep in sync with center-signup-form.model.ts buildPendingCenterPayload(). */
+
+const IdentityDocumentType = {
+  NationalId: 'national_id',
+  Passport: 'passport',
+};
 
 function buildPendingCenterPayload(form) {
   const payload = {
@@ -12,7 +18,7 @@ function buildPendingCenterPayload(form) {
     centerAddress: form.centerAddress.trim(),
   };
 
-  if (form.usePassport) {
+  if (form.identityDocumentType === IdentityDocumentType.Passport) {
     payload.adminPassportNumber = form.adminPassportNumber.trim();
   } else {
     payload.adminIdentificationNumber = form.adminIdentificationNumber.trim();
@@ -34,12 +40,18 @@ const base = {
   adminPassportNumber: ' AB1 ',
 };
 
-const idPayload = buildPendingCenterPayload({ ...base, usePassport: false });
+const idPayload = buildPendingCenterPayload({
+  ...base,
+  identityDocumentType: IdentityDocumentType.NationalId,
+});
 if (idPayload.adminIdentificationNumber !== '123' || idPayload.adminPassportNumber !== undefined) {
   throw new Error('expected national id only');
 }
 
-const passPayload = buildPendingCenterPayload({ ...base, usePassport: true });
+const passPayload = buildPendingCenterPayload({
+  ...base,
+  identityDocumentType: IdentityDocumentType.Passport,
+});
 if (passPayload.adminPassportNumber !== 'AB1' || passPayload.adminIdentificationNumber !== undefined) {
   throw new Error('expected passport only');
 }

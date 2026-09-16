@@ -32,7 +32,7 @@
                 type="text"
                 id="adminName"
                 name="adminName"
-                [(ngModel)]="adminName"
+                [(ngModel)]="form.adminName"
                 required
                 autocomplete="name"
                 [disabled]="submitting()"
@@ -53,7 +53,7 @@
               </label>
               <p class="hint">اختر رقم الهوية الوطنية أو جواز السفر — أحدهما مطلوب.</p>
 
-              @if (!usePassport) {
+              @if (form.identityDocumentType === IdentityDocumentType.NationalId) {
                 <div class="input-group">
                   <label for="adminIdentificationNumber">
                     رقم الهوية الوطنية <span class="req">*</span>
@@ -63,7 +63,7 @@
                     type="text"
                     id="adminIdentificationNumber"
                     name="adminIdentificationNumber"
-                    [(ngModel)]="adminIdentificationNumber"
+                    [(ngModel)]="form.adminIdentificationNumber"
                     inputmode="numeric"
                     autocomplete="off"
                     required
@@ -78,7 +78,7 @@
                     type="text"
                     id="adminPassportNumber"
                     name="adminPassportNumber"
-                    [(ngModel)]="adminPassportNumber"
+                    [(ngModel)]="form.adminPassportNumber"
                     autocomplete="off"
                     required
                     [disabled]="submitting()"
@@ -94,7 +94,7 @@
                 type="email"
                 id="adminEmail"
                 name="adminEmail"
-                [(ngModel)]="adminEmail"
+                [(ngModel)]="form.adminEmail"
                 required
                 autocomplete="email"
                 [disabled]="submitting()"
@@ -108,7 +108,7 @@
                 type="tel"
                 id="adminPhone"
                 name="adminPhone"
-                [(ngModel)]="adminPhone"
+                [(ngModel)]="form.adminPhone"
                 required
                 autocomplete="tel"
                 [disabled]="submitting()"
@@ -122,7 +122,7 @@
                 type="date"
                 id="adminBirthDate"
                 name="adminBirthDate"
-                [(ngModel)]="adminBirthDate"
+                [(ngModel)]="form.adminBirthDate"
                 required
                 [disabled]="submitting()"
               />
@@ -135,7 +135,7 @@
                 type="text"
                 id="adminAddress"
                 name="adminAddress"
-                [(ngModel)]="adminAddress"
+                [(ngModel)]="form.adminAddress"
                 required
                 autocomplete="street-address"
                 [disabled]="submitting()"
@@ -149,7 +149,7 @@
                 type="text"
                 id="adminNationality"
                 name="adminNationality"
-                [(ngModel)]="adminNationality"
+                [(ngModel)]="form.adminNationality"
                 required
                 [disabled]="submitting()"
               />
@@ -164,7 +164,7 @@
                 type="text"
                 id="centerName"
                 name="centerName"
-                [(ngModel)]="centerName"
+                [(ngModel)]="form.centerName"
                 required
                 [disabled]="submitting()"
               />
@@ -177,7 +177,7 @@
                 type="text"
                 id="centerAddress"
                 name="centerAddress"
-                [(ngModel)]="centerAddress"
+                [(ngModel)]="form.centerAddress"
                 required
                 [disabled]="submitting()"
               />

@@ -25,7 +25,7 @@
             id="email"
             name="email"
             type="email"
-            [(ngModel)]="email"
+            [(ngModel)]="form.email"
             placeholder="admin@center.example"
             autocomplete="username"
             required
@@ -39,7 +39,7 @@
           <p-password
             inputId="password"
             name="password"
-            [(ngModel)]="password"
+            [(ngModel)]="form.password"
             placeholder="••••••••"
             [feedback]="false"
             [toggleMask]="true"
@@ -52,7 +52,7 @@
 
         <div class="row-between">
           <label class="remember-row">
-            <p-checkbox [(ngModel)]="rememberMe" name="remember" [binary]="true" inputId="remember" />
+            <p-checkbox [(ngModel)]="form.rememberMe" name="remember" [binary]="true" inputId="remember" />
             <span>تذكّرني</span>
           </label>
           <button type="button" class="btn btn-ghost btn-sm" (click)="showForgotPanel.set(true)">
@@ -79,7 +79,7 @@
               pInputText
               id="reset-email"
               type="email"
-              [(ngModel)]="resetEmail"
+              [(ngModel)]="form.resetEmail"
               placeholder="admin@center.example"
               fluid
             />
