@@ -1,0 +1,132 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="dawra-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="dawra-title">إنشاء دورة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()" [disabled]="submitting()">×</button>
+      </div>
+
+      <form id="dawra-form" class="modal-body" (ngSubmit)="onSubmit($event)">
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <div class="input-group">
+          <label for="dawra-name">اسم الدورة</label>
+          <input
+            class="input"
+            id="dawra-name"
+            name="name"
+            type="text"
+            [(ngModel)]="form.name"
+            required
+            [disabled]="submitting()"
+          />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <label for="start">تاريخ البداية</label>
+            <input
+              class="input"
+              id="start"
+              name="startDate"
+              type="date"
+              [(ngModel)]="form.startDate"
+              required
+              [disabled]="submitting()"
+            />
+          </div>
+          <div class="input-group">
+            <label for="end">تاريخ النهاية</label>
+            <input
+              class="input"
+              id="end"
+              name="endDate"
+              type="date"
+              [(ngModel)]="form.endDate"
+              required
+              [disabled]="submitting()"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <label for="reg-start">بداية التسجيل</label>
+            <input
+              class="input"
+              id="reg-start"
+              name="registerationStartDate"
+              type="date"
+              [(ngModel)]="form.registerationStartDate"
+              required
+              [disabled]="submitting()"
+            />
+          </div>
+          <div class="input-group">
+            <label for="reg-end">نهاية التسجيل</label>
+            <input
+              class="input"
+              id="reg-end"
+              name="registerationEndDate"
+              type="date"
+              [(ngModel)]="form.registerationEndDate"
+              required
+              [disabled]="submitting()"
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="holidays">أيام الإجازات</label>
+          <span class="hint" id="holidays-hint">
+            @if (holidaysEnabled()) {
+              أضف أيام الإجازة ضمن فترة الدورة.
+            } @else {
+              حدّد تواريخ بداية ونهاية الدورة أولاً، ثم أضف أيام الإجازة.
+            }
+          </span>
+          <div class="holiday-box" [class.enabled]="holidaysEnabled()" id="holidays">
+            @if (holidaysEnabled()) {
+              <div class="holiday-add-row">
+                <input
+                  class="input"
+                  type="date"
+                  name="pendingHolidayDate"
+                  [(ngModel)]="form.pendingHolidayDate"
+                  [min]="form.startDate"
+                  [max]="form.endDate"
+                  aria-label="تاريخ إجازة"
+                  [disabled]="submitting()"
+                />
+                <button type="button" class="btn btn-secondary btn-sm" (click)="addHoliday()" [disabled]="submitting()">
+                  + إضافة
+                </button>
+              </div>
+            }
+            @if (form.holidayDates.length) {
+              <div class="chip-list" aria-label="الإجازات المحددة">
+                @for (holiday of form.holidayDates; track holiday) {
+                  <span class="holiday-chip">
+                    {{ formatHolidayLabel(holiday) }}
+                    <button type="button" aria-label="حذف" (click)="removeHoliday(holiday)" [disabled]="submitting()">
+                      ×
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="submit" form="dawra-form" class="btn btn-primary" [disabled]="submitting()">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ الدورة' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="submitting()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+}

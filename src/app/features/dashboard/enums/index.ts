@@ -1,2 +1,1 @@
-/** Placeholder — add feature enums when needed. */
-export {};
+export { DashboardLoadState } from './dashboard-load-state.enum';

@@ -1,2 +1,1 @@
-/** Placeholder — add feature enums when needed. */
-export {};
+export { TermStatus } from './term-status.enum';

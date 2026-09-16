@@ -1,0 +1,63 @@
+.form-error {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.holiday-box {
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-input);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  min-height: 72px;
+
+  &.enabled {
+    border-style: solid;
+    border-color: var(--color-border);
+    background: var(--color-surface-elevated);
+  }
+}
+
+.holiday-add-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .input {
+    max-width: 180px;
+  }
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.holiday-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-accent-soft);
+  color: var(--color-secondary);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+  }
+}

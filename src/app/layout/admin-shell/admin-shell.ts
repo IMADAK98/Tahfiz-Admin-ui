@@ -26,14 +26,15 @@ export class AdminShellComponent {
   private readonly router = inject(Router);
 
   protected readonly loggingOut = signal(false);
-  protected readonly displayName = signal('مدير المركز');
+  protected readonly displayName = signal('مشرف');
   protected readonly avatarInitial = signal('م');
   protected readonly pageTitle = signal('لوحة التحكم');
+  protected readonly isDashboard = signal(false);
 
   constructor() {
     const claims = this.auth.getClaims();
     if (claims?.role) {
-      this.displayName.set(claims.role === 'SYSTEM_ADMIN' ? 'مدير النظام' : 'مدير المركز');
+      this.displayName.set(claims.role === 'SYSTEM_ADMIN' ? 'مدير النظام' : 'مشرف');
       this.avatarInitial.set(claims.role === 'SYSTEM_ADMIN' ? 'ن' : 'م');
     }
 
@@ -55,6 +56,7 @@ export class AdminShellComponent {
 
   private syncPageTitle(url: string): void {
     const path = url.split('?')[0];
+    this.isDashboard.set(path === '/admin' || path === '/admin/dashboard');
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');
       return;
