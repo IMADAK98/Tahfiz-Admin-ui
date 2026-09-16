@@ -113,9 +113,6 @@
                   <option [ngValue]="teacher.id">{{ teacher.name }}</option>
                 }
               </select>
-              @if (teachersShowingActiveFallback()) {
-              <p class="picker-hint">لا يوجد معلّمون متاحون للتعيين — يُعرض المعلّمون النشطون في المركز.</p>
-            }
               @if (selectedTeacher(); as teacher) {
                 <div class="chips" aria-live="polite">
                   <span class="sel-chip">
@@ -133,9 +130,6 @@
         <div class="input-group">
           <label for="students" class="field-req">الطلاب</label>
           @if (students().length) {
-            @if (studentsShowingActiveFallback()) {
-              <p class="picker-hint">لا يوجد طلاب متاحون للإضافة — يُعرض الطلاب النشطون في المركز.</p>
-            }
             <select
               class="select student-picker"
               id="students"
@@ -168,9 +162,6 @@
             </span>
           } @else {
             <p class="picker-empty">لا يوجد طلاب متاحون للإضافة</p>
-            @if (studentsAvailableEmpty()) {
-              <p class="picker-hint">قد يكون هناك طلاب مسجّلون في المركز لكنهم غير متاحين للإضافة حالياً.</p>
-            }
           }
         </div>
       </form>

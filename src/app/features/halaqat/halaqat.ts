@@ -65,11 +65,12 @@ export class HalaqatComponent {
     return `${count} حلقة`;
   }
 
-  protected studentsCapacityLabel(row: HalqaListItem): string {
-    if (row.studentLimit > 0) {
-      return `${row.studentsCount} / ${row.studentLimit}`;
-    }
-    return String(row.studentsCount);
+  protected formatStudentNames(names: string[]): string {
+    return names.map((name) => this.shortStudentName(name)).join(' · ');
+  }
+
+  protected shortStudentName(name: string): string {
+    return name.replace(/\s*بن\s+\S+\s+/u, ' ').trim();
   }
 
   protected reload(): void {

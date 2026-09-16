@@ -21,21 +21,16 @@
   } @else if (loadState() === HalaqatLoadState.Error) {
     <p class="load-error" role="alert">{{ loadError() }}</p>
     <button type="button" class="btn btn-secondary" (click)="reload()">إعادة المحاولة</button>
-  } @else if (!activeTerm()) {
+  } @else if (!activeTerm() || !halaqat().length) {
     <div class="empty-block">
       <h2>لا توجد حلقات بعد</h2>
       <p>
-        أنشئ حلقة وعيّن معلّماً وأضِف طلاباً. إن لم تكن هناك دورة نشطة، أنشئ دورة أولاً من لوحة التحكم.
+        أنشئ حلقة وعيّن معلّماً وأضِف طلاباً. إن لم تكن هناك دورة نشطة، أنشئ دورة أولاً من
+        <a routerLink="/admin">لوحة التحكم</a>.
       </p>
-      <a routerLink="/admin" class="btn btn-primary">الذهاب إلى لوحة التحكم</a>
-    </div>
-  } @else if (!halaqat().length) {
-    <div class="empty-block">
-      <h2>لا توجد حلقات بعد</h2>
-      <p>
-        أنشئ حلقة وعيّن معلّماً وأضِف طلاباً. إن لم تكن هناك دورة نشطة، أنشئ دورة أولاً من لوحة التحكم.
-      </p>
-      <button type="button" class="btn btn-primary" (click)="openCreateModal()">إنشاء حلقة</button>
+      @if (activeTerm()) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">إنشاء حلقة</button>
+      }
     </div>
   } @else {
     <div class="toolbar">
@@ -78,12 +73,12 @@
           <thead>
             <tr>
               <th>الحلقة</th>
-              <th>الفئة</th>
-              <th>الفترة</th>
+              <th>فئة</th>
+              <th>فترة</th>
               <th>المعلّم</th>
               <th>الطلاب</th>
               <th>الحالة</th>
-              <th><span class="sr-only">إجراءات</span></th>
+              <th>إجراءات</th>
             </tr>
           </thead>
           <tbody>
@@ -99,9 +94,9 @@
                   <div style="font-weight: 600">{{ row.teacherName ?? '—' }}</div>
                 </td>
                 <td class="students-cell">
-                  <strong>{{ studentsCapacityLabel(row) }}</strong>
+                  <strong>{{ row.studentsCount }}</strong>
                   @if (row.studentNames.length) {
-                    <div class="student-names">{{ row.studentNames.join(' · ') }}</div>
+                    <div class="student-names">{{ formatStudentNames(row.studentNames) }}</div>
                   }
                 </td>
                 <td>
@@ -113,7 +108,7 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    <button type="button" class="btn btn-secondary btn-sm" disabled title="قريباً">تعديل</button>
+                    <button type="button" class="btn btn-secondary btn-sm">تعديل</button>
                     <a class="btn btn-ghost btn-sm" [routerLink]="['/admin/halaqat', row.id]">التفاصيل</a>
                   </div>
                 </td>

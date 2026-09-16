@@ -133,6 +133,15 @@
     margin-bottom: var(--space-5);
     max-width: 30em;
     margin-inline: auto;
+
+    a {
+      font-weight: 600;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 }
 
