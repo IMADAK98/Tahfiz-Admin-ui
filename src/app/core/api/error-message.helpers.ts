@@ -66,6 +66,17 @@ export function urlPathWithoutQuery(url: string): string {
   }
 }
 
+/** Nest returns 404 when a term has zero ḥalaqas — treat as empty list until API returns 200 []. */
+export function isNoHalqasForTermError(error: unknown): boolean {
+  const status = resolveErrorStatus(error);
+  if (status !== 404) {
+    return false;
+  }
+
+  const message = extractHttpErrorMessage(error);
+  return message !== null && /no halqas found/i.test(message);
+}
+
 export function isAbortedRequest(error: HttpErrorResponse): boolean {
   if (error.status !== 0) {
     return false;
