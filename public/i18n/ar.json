@@ -5,6 +5,8 @@
       "termCreated": "تم إنشاء الدورة",
       "termEnded": "تم إنهاء الدورة",
       "halaqaCreated": "تم إنشاء الحلقة",
+      "reEnrollmentApproved": "تم قبول طلب إعادة التسجيل",
+      "reEnrollmentRejected": "تم رفض طلب إعادة التسجيل",
       "copied": "تم النسخ"
     },
     "error": {

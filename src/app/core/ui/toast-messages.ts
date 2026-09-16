@@ -5,6 +5,8 @@ export const TOAST_I18N = {
     termCreated: 'toast.success.termCreated',
     termEnded: 'toast.success.termEnded',
     halaqaCreated: 'toast.success.halaqaCreated',
+    reEnrollmentApproved: 'toast.success.reEnrollmentApproved',
+    reEnrollmentRejected: 'toast.success.reEnrollmentRejected',
     copied: 'toast.success.copied',
   },
   warn: {

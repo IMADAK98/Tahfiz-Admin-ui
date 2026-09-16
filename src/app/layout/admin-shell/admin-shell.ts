@@ -12,6 +12,7 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
   '/admin/teacher-requests': 'طلبات المعلمين',
   '/admin/students': 'الطلاب',
   '/admin/student-requests': 'طلبات الطلاب',
+  '/admin/re-enrollment': 'طلبات إعادة التسجيل',
   '/admin/reports/attendance': 'تقرير الحضور',
   '/admin/reports/progress': 'تقرير التقدّم',
 };

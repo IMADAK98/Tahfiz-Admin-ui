@@ -1,0 +1,112 @@
+<section class="re-enrollment-page">
+  <header class="re-enrollment-header">
+    <div>
+      <p class="page-subtitle">
+        طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة
+      </p>
+    </div>
+  </header>
+
+  @if (loadState() === ReEnrollmentLoadState.Loading) {
+    <p style="color: var(--color-muted)">جاري تحميل طلبات إعادة التسجيل…</p>
+  } @else if (loadState() === ReEnrollmentLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <button type="button" class="btn btn-secondary" (click)="reload()">إعادة المحاولة</button>
+  } @else if (!requests().length) {
+    <div class="empty-block">
+      <h2>لا توجد طلبات إعادة تسجيل</h2>
+      <p>
+        عند انتهاء دورة وطلب الطالب أو ولي الأمر الالتحاق مجدداً، تظهر الطلبات هنا للموافقة أو الرفض.
+      </p>
+      <a class="btn btn-secondary" routerLink="/admin/students">الطلاب النشطون</a>
+      <p class="admin-note">
+        لا تخلط «متاح للتعيين» مع «إعادة تسجيل». طالب على قائمة الدورة بلا حلقة ليس مرشّحاً لـ activate-student
+        إن كان already enrolled في الدورة.
+      </p>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <div class="toolbar-badges">
+        <span class="badge badge-warning">{{ pendingCountLabel() }}</span>
+        @if (targetTermLabel(); as termLabel) {
+          <span class="badge badge-neutral">{{ termLabel }}</span>
+        }
+      </div>
+    </div>
+
+    @for (request of requests(); track request.id) {
+      <article class="card req-card" [attr.aria-labelledby]="'re-' + request.id">
+        <div class="req-card-head">
+          <div>
+            <h2 [id]="'re-' + request.id">{{ request.studentName }}</h2>
+            <p class="req-meta">{{ studentMeta(request) }}</p>
+          </div>
+          <span class="badge badge-warning">بانتظار المراجعة</span>
+        </div>
+
+        <dl class="detail-grid">
+          <div>
+            <dt>ولي الأمر</dt>
+            <dd>{{ guardianLabel(request) }}</dd>
+          </div>
+          <div>
+            <dt>الدورة السابقة</dt>
+            <dd>{{ request.previousTermName ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>الدورة المطلوبة</dt>
+            <dd>{{ request.termLabel }}</dd>
+          </div>
+          <div>
+            <dt>الحلقة المطلوبة</dt>
+            <dd>{{ request.halqaLabel ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>حالة الحفظ الحالية</dt>
+            <dd>{{ request.memorizationStatus ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>المعلّم المقترح</dt>
+            <dd>{{ request.suggestedTeacherLabel ?? '—' }}</dd>
+          </div>
+          @if (request.educationStage) {
+            <div>
+              <dt>المرحلة التعليمية</dt>
+              <dd>{{ request.educationStage }}</dd>
+            </div>
+          }
+        </dl>
+
+        <div class="row-actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="confirmApprove(request)"
+            [disabled]="isActingOn(request) || rejectSubmitting()"
+          >
+            {{ isActingOn(request) ? 'جاري القبول…' : 'قبول' }}
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="openRejectDialog(request)"
+            [disabled]="isActingOn(request) || rejectSubmitting()"
+          >
+            رفض
+          </button>
+        </div>
+      </article>
+    }
+  }
+</section>
+
+<p-confirmdialog />
+
+<app-reject-re-enrollment-dialog
+  [visible]="!!rejectTarget()"
+  [studentName]="rejectTarget()?.studentName ?? ''"
+  [submitting]="rejectSubmitting()"
+  [serverError]="rejectServerError()"
+  (confirmed)="onRejectConfirmed($event)"
+  (closed)="closeRejectDialog()"
+/>

@@ -5,6 +5,8 @@
       "termCreated": "TODO: Term created",
       "termEnded": "TODO: Term ended",
       "halaqaCreated": "TODO: Halaqa created",
+      "reEnrollmentApproved": "TODO: Re-enrollment request approved",
+      "reEnrollmentRejected": "TODO: Re-enrollment request rejected",
       "copied": "TODO: Copied"
     },
     "error": {

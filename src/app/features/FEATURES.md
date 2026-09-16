@@ -22,6 +22,7 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 | `teacher-requests/` | `/admin/teacher-requests` | `08` | Placeholder |
 | `students/` | `/admin/students` | `10` | Placeholder |
 | `student-requests/` | `/admin/student-requests` | `11` | Placeholder |
+| `re-enrollment/` | `/admin/re-enrollment` | `15` | Implemented |
 | `reports-attendance/` | `/admin/reports/attendance` | `13` | Placeholder |
 | `reports-progress/` | `/admin/reports/progress` | `14` | Placeholder |
 
@@ -35,7 +36,6 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 
 ## PARK (v1)
 
-- Re-enrollment (`15`) — no folder
 - Teacher mobile unbound plan — Flutter only
 
 ## Layout
