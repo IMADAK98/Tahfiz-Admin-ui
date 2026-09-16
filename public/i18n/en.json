@@ -7,6 +7,10 @@
       "halaqaCreated": "TODO: Halaqa created",
       "reEnrollmentApproved": "TODO: Re-enrollment request approved",
       "reEnrollmentRejected": "TODO: Re-enrollment request rejected",
+      "teacherCreated": "TODO: Teacher added",
+      "teacherUpdated": "TODO: Teacher updated",
+      "teacherRequestApproved": "TODO: Teacher request approved",
+      "teacherRequestRejected": "TODO: Teacher request rejected",
       "copied": "TODO: Copied"
     },
     "error": {

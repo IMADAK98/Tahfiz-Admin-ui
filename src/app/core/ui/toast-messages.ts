@@ -7,6 +7,10 @@ export const TOAST_I18N = {
     halaqaCreated: 'toast.success.halaqaCreated',
     reEnrollmentApproved: 'toast.success.reEnrollmentApproved',
     reEnrollmentRejected: 'toast.success.reEnrollmentRejected',
+    teacherCreated: 'toast.success.teacherCreated',
+    teacherUpdated: 'toast.success.teacherUpdated',
+    teacherRequestApproved: 'toast.success.teacherRequestApproved',
+    teacherRequestRejected: 'toast.success.teacherRequestRejected',
     copied: 'toast.success.copied',
   },
   warn: {
