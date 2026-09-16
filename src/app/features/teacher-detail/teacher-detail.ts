@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { map } from 'rxjs/operators';
 import { ApiError } from '../../core/api/api-error';
+import { AuthService } from '../../core/auth/auth.service';
 import {
   teacherAgeGroupsLabel,
   teacherQualificationLabel,
@@ -27,6 +28,7 @@ export class TeacherDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly detailService = inject(TeacherDetailService);
+  private readonly auth = inject(AuthService);
 
   protected readonly TeacherDetailLoadState = TeacherDetailLoadState;
   protected readonly teacherInitial = teacherInitial;
@@ -59,10 +61,17 @@ export class TeacherDetailComponent {
       return;
     }
 
+    const centerId = this.auth.getClaims()?.centerId;
+    if (!centerId) {
+      this.loadState.set(TeacherDetailLoadState.Error);
+      this.loadError.set('تعذّر تحديد المركز من الجلسة');
+      return;
+    }
+
     this.loadState.set(TeacherDetailLoadState.Loading);
     this.loadError.set(null);
 
-    this.detailService.loadDetail(id).subscribe({
+    this.detailService.loadDetail(id, centerId).subscribe({
       next: ({ detail, halaqat }) => {
         this.detail.set(detail);
         this.halaqat.set(halaqat);

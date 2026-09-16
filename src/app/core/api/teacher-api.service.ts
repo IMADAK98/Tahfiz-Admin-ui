@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { HalqaApiRecord } from './models/halqa.model';
 import {
   CreateManualTeacherPayload,
   TeacherProfileApiRecord,
@@ -55,22 +54,5 @@ export class TeacherApiService {
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
-  }
-
-  /**
-   * ponytail: mock notes this as "admin stub list OK" — the endpoint has no documented role
-   * restriction, but if it 403s/404s for admin-viewed teachers we degrade to an empty list
-   * rather than blocking the whole detail page.
-   */
-  getHalqasByTeacherId(teacherId: number | string): Observable<HalqaApiRecord[]> {
-    return this.http
-      .get<ApiEnvelope<HalqaApiRecord[]>>(
-        `${this.apiBaseUrl}/halqa/by-teacher-id/${teacherId}`,
-        withSkipGlobalErrorToast({ observe: 'response' }),
-      )
-      .pipe(
-        map((res) => unwrapEnvelope(res.body, res.status) ?? []),
-        catchError(() => of([])),
-      );
   }
 }
