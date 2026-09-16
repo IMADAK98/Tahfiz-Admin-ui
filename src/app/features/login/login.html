@@ -17,7 +17,7 @@
         <p class="login-error" role="alert">{{ errorMessage() }}</p>
       }
 
-      <form class="login-form" (submit)="onSubmit($event)" aria-label="نموذج تسجيل الدخول">
+      <form class="login-form" (ngSubmit)="onSubmit($event)" aria-label="نموذج تسجيل الدخول">
         <div class="input-group login-field">
           <label for="email">البريد الإلكتروني</label>
           <input
@@ -60,13 +60,9 @@
           </button>
         </div>
 
-        <p-button
-          type="submit"
-          [label]="submitting() ? 'جاري الدخول…' : 'دخول'"
-          styleClass="w-full"
-          [loading]="submitting()"
-          [disabled]="submitting()"
-        />
+        <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="submitting()">
+          {{ submitting() ? 'جاري الدخول…' : 'دخول' }}
+        </button>
       </form>
 
       @if (showForgotPanel()) {

@@ -387,23 +387,6 @@
   }
 }
 
-.login-form .p-button {
-  width: 100%;
-  justify-content: center;
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 14px 28px;
-  border-radius: 12px;
-
-  &:hover:not(:disabled) {
-    background: var(--color-primary-hover);
-    border-color: var(--color-primary-hover);
-  }
-}
-
 .forgot-panel .p-button {
   font-family: inherit;
   font-weight: 600;
