@@ -1,10 +1,11 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 import { createEmptyRejectForm, RejectReEnrollmentFormModel, validateRejectForm } from '../dto';
 
 @Component({
   selector: 'app-reject-re-enrollment-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './reject-re-enrollment-dialog.html',
 })
 export class RejectReEnrollmentDialogComponent {
@@ -18,6 +19,10 @@ export class RejectReEnrollmentDialogComponent {
 
   protected form: RejectReEnrollmentFormModel = createEmptyRejectForm();
   protected localError: string | null = null;
+
+  protected canSubmit(): boolean {
+    return !this.submitting() && this.form.rejectionReason.trim().length > 0;
+  }
 
   protected close(): void {
     if (this.submitting()) {
@@ -35,7 +40,7 @@ export class RejectReEnrollmentDialogComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
-    if (this.submitting()) {
+    if (!this.canSubmit()) {
       return;
     }
 

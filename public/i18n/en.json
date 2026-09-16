@@ -17,13 +17,80 @@
       "endActiveTermFirst": "TODO: End the active term first"
     },
     "info": {
-      "noStudentsAvailable": "TODO: No students available to add"
+      "noStudentsAvailable": "TODO: No students available to add",
+      "reEnrollmentAddToHalaqa": "TODO: Add the student to a halaqa from the Halaqat page"
     }
   },
   "errors": {
     "unexpected": "TODO: An unexpected error occurred. Please try again.",
     "network": "TODO: Could not reach the server. Check your network and try again.",
     "sessionExpired": "TODO: Your session has expired. Please sign in again."
+  },
+  "reEnrollment": {
+    "subtitle": "TODO: Students requesting enrollment in a new term after a prior term ended",
+    "loading": "TODO: Loading re-enrollment requests…",
+    "retry": "TODO: Retry",
+    "tabsLabel": "TODO: Filter requests",
+    "tabs": {
+      "pending": "TODO: Pending review",
+      "processed": "TODO: Processed"
+    },
+    "requestMeta": "TODO: Re-enrollment request",
+    "countLabel": "TODO: {{count}} request(s)",
+    "targetTerm": "TODO: Target term: {{term}}",
+    "multipleTargetTerms": "TODO: {{count}} target terms",
+    "empty": {
+      "pendingTitle": "TODO: No re-enrollment requests",
+      "pendingBody": "TODO: Returning students appear here after a new term and registration link — not from available-students.",
+      "processedTitle": "TODO: No processed requests",
+      "processedBody": "TODO: Approved or rejected requests appear here.",
+      "studentsLink": "TODO: Active students",
+      "hint": "TODO: Requests are created via public activate-student — this page is admin review only."
+    },
+    "fields": {
+      "parentPhone": "TODO: Parent phone",
+      "phone": "TODO: Student phone",
+      "identity": "TODO: ID / passport",
+      "term": "TODO: Requested term",
+      "educationStage": "TODO: Education stage",
+      "hifz": "TODO: Memorization status",
+      "address": "TODO: Address",
+      "birthDate": "TODO: Birth date",
+      "rejectionReason": "TODO: Rejection reason"
+    },
+    "details": {
+      "show": "TODO: Show additional details",
+      "hide": "TODO: Hide additional details"
+    },
+    "status": {
+      "pending": "TODO: Pending review",
+      "approved": "TODO: Approved",
+      "rejected": "TODO: Rejected"
+    },
+    "actions": {
+      "approve": "TODO: Approve",
+      "approving": "TODO: Approving…",
+      "reject": "TODO: Reject"
+    },
+    "approve": {
+      "header": "TODO: Approve re-enrollment",
+      "message": "TODO: Approve re-enrollment for {{name}} in {{term}}?\n\nTerm enroll only — no halaqa assignment.",
+      "confirm": "TODO: Confirm approval",
+      "cancel": "TODO: Cancel"
+    },
+    "reject": {
+      "title": "TODO: Reject re-enrollment request",
+      "requestLabel": "TODO: Request:",
+      "reasonLabel": "TODO: Rejection reason",
+      "reasonPlaceholder": "TODO: Enter rejection reason…",
+      "reasonHint": "TODO: Required — sent as rejectionReason",
+      "submit": "TODO: Confirm rejection",
+      "submitting": "TODO: Rejecting…",
+      "cancel": "TODO: Cancel"
+    },
+    "errors": {
+      "centerUnknown": "TODO: Could not resolve center from session"
+    }
   },
   "halaqat": {
     "picker": {

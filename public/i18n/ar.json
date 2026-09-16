@@ -17,13 +17,80 @@
       "endActiveTermFirst": "أنهِ الدورة الحالية أولاً"
     },
     "info": {
-      "noStudentsAvailable": "لا يوجد طلاب متاحون للإضافة"
+      "noStudentsAvailable": "لا يوجد طلاب متاحون للإضافة",
+      "reEnrollmentAddToHalaqa": "أضف الطالب إلى حلقة من صفحة الحلقات"
     }
   },
   "errors": {
     "unexpected": "حدث خطأ غير متوقع. حاول مرة أخرى.",
     "network": "تعذّر الاتصال بالخادم. تحقق من الشبكة وحاول مرة أخرى.",
     "sessionExpired": "انتهت الجلسة. سجّل الدخول مرة أخرى."
+  },
+  "reEnrollment": {
+    "subtitle": "طلاب يطلبون الالتحاق بدورة جديدة بعد انتهاء فترة سابقة",
+    "loading": "جاري تحميل طلبات إعادة التسجيل…",
+    "retry": "إعادة المحاولة",
+    "tabsLabel": "تصفية الطلبات",
+    "tabs": {
+      "pending": "بانتظار المراجعة",
+      "processed": "تمت المعالجة"
+    },
+    "requestMeta": "طلب إعادة تسجيل",
+    "countLabel": "{{count}} طلب",
+    "targetTerm": "الدورة المستهدفة: {{term}}",
+    "multipleTargetTerms": "{{count}} دورات مستهدفة",
+    "empty": {
+      "pendingTitle": "لا توجد طلبات إعادة تسجيل",
+      "pendingBody": "يظهر الطلب هنا بعد فتح دورة جديدة واستخدام رابط التسجيل من قبل طالب عائد — وليس من قائمة «متاح للتعيين».",
+      "processedTitle": "لا توجد طلبات معالجة",
+      "processedBody": "الطلبات المقبولة أو المرفوضة تظهر في هذا التبويب.",
+      "studentsLink": "الطلاب النشطون",
+      "hint": "إنشاء الطلبات يتم عبر رابط التسجيل العام (activate-student) — هذه الصفحة للمراجعة فقط."
+    },
+    "fields": {
+      "parentPhone": "هاتف ولي الأمر",
+      "phone": "هاتف الطالب",
+      "identity": "الهوية / الجواز",
+      "term": "الدورة المطلوبة",
+      "educationStage": "المرحلة التعليمية",
+      "hifz": "حالة الحفظ",
+      "address": "العنوان",
+      "birthDate": "تاريخ الميلاد",
+      "rejectionReason": "سبب الرفض"
+    },
+    "details": {
+      "show": "عرض التفاصيل الإضافية",
+      "hide": "إخفاء التفاصيل الإضافية"
+    },
+    "status": {
+      "pending": "بانتظار المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض"
+    },
+    "actions": {
+      "approve": "قبول",
+      "approving": "جاري القبول…",
+      "reject": "رفض"
+    },
+    "approve": {
+      "header": "قبول إعادة التسجيل",
+      "message": "قبول إعادة تسجيل {{name}} في {{term}}؟\n\nسيتم تسجيل الطالب في الدورة فقط دون تعيين حلقة.",
+      "confirm": "تأكيد القبول",
+      "cancel": "إلغاء"
+    },
+    "reject": {
+      "title": "رفض طلب إعادة التسجيل",
+      "requestLabel": "طلب:",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "اكتب سبب الرفض للطالب أو ولي الأمر…",
+      "reasonHint": "الحقل مطلوب — يُرسل كـ rejectionReason",
+      "submit": "تأكيد الرفض",
+      "submitting": "جاري الرفض…",
+      "cancel": "إلغاء"
+    },
+    "errors": {
+      "centerUnknown": "تعذّر تحديد المركز من الجلسة"
+    }
   },
   "halaqat": {
     "picker": {

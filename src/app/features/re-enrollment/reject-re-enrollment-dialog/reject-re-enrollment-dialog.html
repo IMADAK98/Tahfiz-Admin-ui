@@ -8,7 +8,7 @@
       (click)="$event.stopPropagation()"
     >
       <div class="modal-header">
-        <h2 id="reject-re-title">رفض طلب إعادة التسجيل</h2>
+        <h2 id="reject-re-title">{{ 'reEnrollment.reject.title' | translate }}</h2>
         <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()" [disabled]="submitting()">
           ×
         </button>
@@ -16,7 +16,8 @@
 
       <form class="modal-body" (ngSubmit)="onSubmit($event)">
         <p style="margin: 0; font-size: 0.875rem; color: var(--color-muted)">
-          طلب: <strong>{{ studentName() }}</strong>
+          {{ 'reEnrollment.reject.requestLabel' | translate }}
+          <strong>{{ studentName() }}</strong>
         </p>
 
         @if (errorMessage()) {
@@ -24,7 +25,7 @@
         }
 
         <div class="input-group">
-          <label for="reject-reason">سبب الرفض</label>
+          <label for="reject-reason">{{ 'reEnrollment.reject.reasonLabel' | translate }}</label>
           <textarea
             class="input"
             id="reject-reason"
@@ -33,16 +34,22 @@
             required
             [(ngModel)]="form.rejectionReason"
             [disabled]="submitting()"
-            placeholder="اكتب سبب الرفض للطالب أو ولي الأمر…"
+            [placeholder]="'reEnrollment.reject.reasonPlaceholder' | translate"
           ></textarea>
-          <span class="hint">الحقل مطلوب — يُرسل إلى Nest كـ rejectionReason</span>
+          <span class="hint">{{ 'reEnrollment.reject.reasonHint' | translate }}</span>
         </div>
 
         <div class="modal-footer" style="padding: 0; border: 0; background: transparent">
-          <button type="submit" class="btn btn-danger" [disabled]="submitting()">
-            {{ submitting() ? 'جاري الرفض…' : 'تأكيد الرفض' }}
+          <button type="submit" class="btn btn-danger" [disabled]="!canSubmit() || submitting()">
+            {{
+              submitting() ?
+                ('reEnrollment.reject.submitting' | translate)
+              : ('reEnrollment.reject.submit' | translate)
+            }}
           </button>
-          <button type="button" class="btn btn-ghost" (click)="close()" [disabled]="submitting()">إلغاء</button>
+          <button type="button" class="btn btn-ghost" (click)="close()" [disabled]="submitting()">
+            {{ 'reEnrollment.reject.cancel' | translate }}
+          </button>
         </div>
       </form>
     </div>

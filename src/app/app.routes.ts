@@ -66,6 +66,11 @@ export const routes: Routes = [
           import('./features/student-requests/student-requests').then((m) => m.StudentRequestsComponent),
       },
       {
+        path: 're-enrollment-requests',
+        redirectTo: 're-enrollment',
+        pathMatch: 'full',
+      },
+      {
         path: 're-enrollment',
         loadComponent: () =>
           import('./features/re-enrollment/re-enrollment').then((m) => m.ReEnrollmentComponent),

@@ -14,6 +14,7 @@ export const TOAST_I18N = {
   },
   info: {
     noStudentsAvailable: 'toast.info.noStudentsAvailable',
+    reEnrollmentAddToHalaqa: 'toast.info.reEnrollmentAddToHalaqa',
   },
   errors: {
     unexpected: 'errors.unexpected',

@@ -1,28 +1,24 @@
-/** GET /admin/re-enrollment-requests — aligns with GetPendingReEnrollmentRequestDto (OpenAPI). */
+/** GET /admin/re-enrollment-requests — OpenAPI GetPendingReEnrollmentRequestDto. */
 export interface ReEnrollmentRequest {
-  id: number;
-  existingUserId: number;
-  termId: number;
-  appliedToCenterId: number;
+  id: number | string;
+  existingUserId: number | string;
+  termId: number | string;
+  appliedToCenterId: number | string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
   rejectionReason?: string | null;
-  educationStage?: string | null;
-  /** Student display name — API may expose `studentName` or `name`. */
-  studentName?: string | null;
   name?: string | null;
   email?: string | null;
-  phoneNumber?: string | null;
+  phone?: string | null;
+  parentPhone?: string | null;
   identificationNumber?: string | null;
   passportNumber?: string | null;
-  guardianName?: string | null;
-  guardianPhone?: string | null;
-  previousTermName?: string | null;
-  termName?: string | null;
-  halqaId?: number | null;
-  halqaName?: string | null;
-  memorizationStatus?: string | null;
-  suggestedTeacherId?: number | null;
-  suggestedTeacherName?: string | null;
+  educationStage?: string | null;
+  address?: string | null;
+  birthDate?: string | null;
+  surah_from?: string | null;
+  surah_to?: string | null;
+  hifzQuality?: string | null;
+  isHafiz?: boolean | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
