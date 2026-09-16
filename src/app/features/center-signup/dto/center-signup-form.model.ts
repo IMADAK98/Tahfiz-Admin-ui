@@ -1,6 +1,7 @@
-import { PendingCenterRequest } from '../api/models/pending-center.model';
+import { PendingCenterRequest } from './pending-center-request.dto';
+import { IdentityDocumentType } from '../enums/identity-document-type.enum';
 
-export interface CenterSignupFormValues {
+export interface CenterSignupFormModel {
   adminName: string;
   adminEmail: string;
   adminPhone: string;
@@ -9,13 +10,29 @@ export interface CenterSignupFormValues {
   adminNationality: string;
   centerName: string;
   centerAddress: string;
+  identityDocumentType: IdentityDocumentType;
   adminIdentificationNumber: string;
   adminPassportNumber: string;
-  usePassport: boolean;
+}
+
+export function createEmptyCenterSignupForm(): CenterSignupFormModel {
+  return {
+    adminName: '',
+    adminEmail: '',
+    adminPhone: '',
+    adminBirthDate: '',
+    adminAddress: '',
+    adminNationality: '',
+    centerName: '',
+    centerAddress: '',
+    identityDocumentType: IdentityDocumentType.NationalId,
+    adminIdentificationNumber: '',
+    adminPassportNumber: '',
+  };
 }
 
 /** Build API payload — XOR national ID or passport per mock 17. */
-export function buildPendingCenterPayload(form: CenterSignupFormValues): PendingCenterRequest {
+export function buildPendingCenterPayload(form: CenterSignupFormModel): PendingCenterRequest {
   const payload: PendingCenterRequest = {
     adminName: form.adminName.trim(),
     adminEmail: form.adminEmail.trim(),
@@ -27,7 +44,7 @@ export function buildPendingCenterPayload(form: CenterSignupFormValues): Pending
     centerAddress: form.centerAddress.trim(),
   };
 
-  if (form.usePassport) {
+  if (form.identityDocumentType === IdentityDocumentType.Passport) {
     payload.adminPassportNumber = form.adminPassportNumber.trim();
   } else {
     payload.adminIdentificationNumber = form.adminIdentificationNumber.trim();

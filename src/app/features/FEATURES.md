@@ -45,6 +45,10 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 | `layout/public-shell/` | Landing + public chrome |
 | `layout/admin-shell/` | Admin sidebar + topbar |
 
+## DTO / enum convention (per feature)
+
+Each feature folder owns its request/response DTOs and enums under `dto/` and `enums/` (not a global dump). Example: `center-signup/dto/center-signup-form.model.ts`, `login/dto/login-form.model.ts`. MVP stubs include empty `dto/index.ts` + `enums/index.ts` placeholders.
+
 ## Core (shared infra only)
 
-`core/` — auth, interceptors, guards, envelope helpers, shared API clients (`SignupApiService`, etc.), shared contract helpers (`core/signup/pending-center-payload.ts`). Feature services (e.g. `center-signup/center-signup.service.ts`) are thin UI orchestration only — they call core API services, not HttpClient directly.
+`core/` — auth, interceptors, guards, envelope helpers, shared HTTP clients (`SignupApiService`, `AuthApiService`, etc.). Feature services (e.g. `center-signup/center-signup.service.ts`, `login/login.service.ts`) are thin UI orchestration only — they map feature DTOs and call core API services, not HttpClient directly.

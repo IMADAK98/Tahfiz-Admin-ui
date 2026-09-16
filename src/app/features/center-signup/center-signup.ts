@@ -3,6 +3,11 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Checkbox } from 'primeng/checkbox';
 import { ApiError } from '../../core/api/api-error';
+import {
+  CenterSignupFormModel,
+  createEmptyCenterSignupForm,
+} from './dto/center-signup-form.model';
+import { IdentityDocumentType } from './enums/identity-document-type.enum';
 import { CenterSignupService } from './center-signup.service';
 
 @Component({
@@ -13,27 +18,29 @@ import { CenterSignupService } from './center-signup.service';
 export class CenterSignupComponent {
   private readonly signupApi = inject(CenterSignupService);
 
-  protected adminName = '';
-  protected adminEmail = '';
-  protected adminPhone = '';
-  protected adminBirthDate = '';
-  protected adminAddress = '';
-  protected adminNationality = '';
-  protected centerName = '';
-  protected centerAddress = '';
-  protected adminIdentificationNumber = '';
-  protected adminPassportNumber = '';
-  protected usePassport = false;
+  protected readonly IdentityDocumentType = IdentityDocumentType;
+  protected readonly form: CenterSignupFormModel = createEmptyCenterSignupForm();
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showSuccess = signal(false);
 
+  protected get usePassport(): boolean {
+    return this.form.identityDocumentType === IdentityDocumentType.Passport;
+  }
+
+  protected set usePassport(value: boolean) {
+    this.form.identityDocumentType = value
+      ? IdentityDocumentType.Passport
+      : IdentityDocumentType.NationalId;
+    this.onIdModeChange();
+  }
+
   onIdModeChange(): void {
-    if (this.usePassport) {
-      this.adminIdentificationNumber = '';
+    if (this.form.identityDocumentType === IdentityDocumentType.Passport) {
+      this.form.adminIdentificationNumber = '';
     } else {
-      this.adminPassportNumber = '';
+      this.form.adminPassportNumber = '';
     }
   }
 
@@ -46,19 +53,7 @@ export class CenterSignupComponent {
     this.errorMessage.set(null);
     this.submitting.set(true);
 
-    this.signupApi.submitCenterSignup({
-      adminName: this.adminName,
-      adminEmail: this.adminEmail,
-      adminPhone: this.adminPhone,
-      adminBirthDate: this.adminBirthDate,
-      adminAddress: this.adminAddress,
-      adminNationality: this.adminNationality,
-      centerName: this.centerName,
-      centerAddress: this.centerAddress,
-      adminIdentificationNumber: this.adminIdentificationNumber,
-      adminPassportNumber: this.adminPassportNumber,
-      usePassport: this.usePassport,
-    }).subscribe({
+    this.signupApi.submitCenterSignup(this.form).subscribe({
       next: () => {
         this.submitting.set(false);
         this.showSuccess.set(true);
