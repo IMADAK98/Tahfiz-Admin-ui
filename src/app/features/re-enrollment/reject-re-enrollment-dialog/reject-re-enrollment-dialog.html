@@ -1,0 +1,50 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reject-re-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="reject-re-title">رفض طلب إعادة التسجيل</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()" [disabled]="submitting()">
+          ×
+        </button>
+      </div>
+
+      <form class="modal-body" (ngSubmit)="onSubmit($event)">
+        <p style="margin: 0; font-size: 0.875rem; color: var(--color-muted)">
+          طلب: <strong>{{ studentName() }}</strong>
+        </p>
+
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <div class="input-group">
+          <label for="reject-reason">سبب الرفض</label>
+          <textarea
+            class="input"
+            id="reject-reason"
+            name="rejectionReason"
+            rows="4"
+            required
+            [(ngModel)]="form.rejectionReason"
+            [disabled]="submitting()"
+            placeholder="اكتب سبب الرفض للطالب أو ولي الأمر…"
+          ></textarea>
+          <span class="hint">الحقل مطلوب — يُرسل إلى Nest كـ rejectionReason</span>
+        </div>
+
+        <div class="modal-footer" style="padding: 0; border: 0; background: transparent">
+          <button type="submit" class="btn btn-danger" [disabled]="submitting()">
+            {{ submitting() ? 'جاري الرفض…' : 'تأكيد الرفض' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="close()" [disabled]="submitting()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

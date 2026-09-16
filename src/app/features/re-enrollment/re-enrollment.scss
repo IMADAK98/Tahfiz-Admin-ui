@@ -1,0 +1,153 @@
+.re-enrollment-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.re-enrollment-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.toolbar-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.badge-warning {
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+
+  &:hover {
+    filter: brightness(0.95);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.req-card {
+  padding: var(--space-5);
+}
+
+.req-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+
+  h2 {
+    font-size: 1.125rem;
+    margin: 0;
+  }
+}
+
+.req-meta {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3) var(--space-5);
+  font-size: 0.875rem;
+
+  dt {
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  dd {
+    margin: 0 0 var(--space-2);
+    font-weight: 600;
+  }
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}
+
+.empty-block {
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+
+  h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  p {
+    color: var(--color-muted);
+    margin-bottom: var(--space-5);
+    max-width: 30em;
+    margin-inline: auto;
+  }
+}
+
+.admin-note {
+  margin-top: var(--space-4) !important;
+  font-size: 0.8125rem !important;
+  max-width: 40rem !important;
+}
+
+.load-error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.form-error {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 96px;
+}
+
+@media (max-width: 800px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
