@@ -3,6 +3,7 @@
     "success": {
       "saved": "تم الحفظ",
       "termCreated": "تم إنشاء الدورة",
+      "termEnded": "تم إنهاء الدورة",
       "halaqaCreated": "تم إنشاء الحلقة",
       "copied": "تم النسخ"
     },

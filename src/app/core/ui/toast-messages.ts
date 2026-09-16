@@ -3,6 +3,7 @@ export const TOAST_I18N = {
   success: {
     saved: 'toast.success.saved',
     termCreated: 'toast.success.termCreated',
+    termEnded: 'toast.success.termEnded',
     halaqaCreated: 'toast.success.halaqaCreated',
     copied: 'toast.success.copied',
   },

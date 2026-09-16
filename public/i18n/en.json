@@ -3,6 +3,7 @@
     "success": {
       "saved": "TODO: Saved",
       "termCreated": "TODO: Term created",
+      "termEnded": "TODO: Term ended",
       "halaqaCreated": "TODO: Halaqa created",
       "copied": "TODO: Copied"
     },

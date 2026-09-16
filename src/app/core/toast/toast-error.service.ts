@@ -11,11 +11,12 @@ export interface ToastFailureNotifyOptions {
   serverMessage?: string | null;
   isSessionExpired?: boolean;
   isNetworkError?: boolean;
-  bypassDedup?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ToastErrorService {
+  private static readonly SESSION_EXPIRED_FINGERPRINT = 'session-expired|401';
+
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
 
@@ -25,9 +26,11 @@ export class ToastErrorService {
   notifyFailure(options: ToastFailureNotifyOptions): void {
     const copy = this.resolveCopy(options);
     const severity = this.resolveSeverity(options);
-    const fingerprint = `${options.method}|${options.urlPath}|${options.status}|${copy.fingerprint}`;
+    const fingerprint = options.isSessionExpired
+      ? ToastErrorService.SESSION_EXPIRED_FINGERPRINT
+      : `${options.method}|${options.urlPath}|${options.status}|${copy.fingerprint}`;
 
-    if (!options.bypassDedup && this.isDuplicate(fingerprint)) {
+    if (this.isDuplicate(fingerprint)) {
       return;
     }
 
