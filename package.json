@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "check:envelope": "node scripts/envelope-self-check.mjs"
+    "check:envelope": "node scripts/envelope-self-check.mjs",
+    "check:auth": "node scripts/auth-self-check.mjs"
   },
   "private": true,
   "engines": {
