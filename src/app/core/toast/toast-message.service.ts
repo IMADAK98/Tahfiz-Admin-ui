@@ -24,12 +24,27 @@ export class ToastMessageService {
     this.show('info', this.translate.instant(i18nKey, params));
   }
 
+  notifyWarn(i18nKey: string, params?: Record<string, string>): void {
+    this.show('warn', this.translate.instant(i18nKey, params));
+  }
+
   notifyWarnBody(body: string): void {
     this.show('warn', body);
   }
 
   notifyErrorBody(body: string): void {
     this.show('error', body);
+  }
+
+  notifyErrorTitled(summary: string, detail: string): void {
+    this.messageService.add({
+      severity: 'error',
+      summary,
+      detail,
+      life: TOAST_LIFE_MS.error,
+      closable: true,
+      styleClass: 'tahfiz-toast tahfiz-toast--error tahfiz-toast--titled',
+    });
   }
 
   show(severity: TahfizToastSeverity, body: string): void {

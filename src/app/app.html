@@ -8,9 +8,17 @@
       [class.tahfiz-toast__content--error]="message.severity === 'error'"
       [class.tahfiz-toast__content--warn]="message.severity === 'warn'"
       [class.tahfiz-toast__content--info]="message.severity === 'info'"
+      [class.tahfiz-toast__content--titled]="message.summary && message.detail"
     >
       <span class="tahfiz-toast__icon" aria-hidden="true">{{ toastIcon(message.severity) }}</span>
-      <p class="tahfiz-toast__body">{{ message.summary || message.detail }}</p>
+      <div class="tahfiz-toast__text">
+        @if (message.summary && message.detail) {
+          <p class="tahfiz-toast__title">{{ message.summary }}</p>
+          <p class="tahfiz-toast__body">{{ message.detail }}</p>
+        } @else {
+          <p class="tahfiz-toast__body">{{ message.summary || message.detail }}</p>
+        }
+      </div>
     </div>
   </ng-template>
 </p-toast>

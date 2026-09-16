@@ -86,13 +86,35 @@ html[dir='rtl'] .p-toast-top-left {
   color: #fff;
 }
 
+.tahfiz-toast__text {
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.tahfiz-toast__title {
+  margin: 0 0 4px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--color-text);
+}
+
 .tahfiz-toast__body {
   margin: 0;
-  padding-top: 2px;
   font-size: 0.9375rem;
   font-weight: 700;
   line-height: 1.45;
   color: var(--color-text);
+}
+
+.tahfiz-toast__content--titled .tahfiz-toast__body {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.tahfiz-toast__content--error.tahfiz-toast__content--titled .tahfiz-toast__title {
+  color: var(--color-danger);
 }
 
 .tahfiz-toast-stack .p-toast-message-success {

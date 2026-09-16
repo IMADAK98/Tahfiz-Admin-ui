@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { ActiveTerm } from '../../../core/api/models/term.model';
 import { ActiveStudent } from '../../../core/api/models/student.model';
 import { ActiveTeacher } from '../../../core/api/models/teacher.model';
@@ -124,7 +125,7 @@ export class CreateHalaqaModalComponent {
     this.halaqatService.createHalaqa(this.form, term.id).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.toastMessage.notifySuccess('toast.success.halaqaCreated');
+        this.toastMessage.notifySuccess(TOAST_I18N.success.halaqaCreated);
         this.resetForm();
         this.halaqaCreated.emit();
       },

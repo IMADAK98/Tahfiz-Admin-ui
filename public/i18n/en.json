@@ -7,6 +7,7 @@
       "copied": "TODO: Copied"
     },
     "error": {
+      "requestFailedTitle": "TODO: Request failed",
       "requestFailed": "TODO: Request failed: {{message}}"
     },
     "warn": {
@@ -17,7 +18,7 @@
     }
   },
   "errors": {
-    "unexpected": "TODO: Could not complete the request. Please try again.",
+    "unexpected": "TODO: An unexpected error occurred. Please try again.",
     "network": "TODO: Could not reach the server. Check your network and try again.",
     "sessionExpired": "TODO: Your session has expired. Please sign in again."
   },
