@@ -5,7 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
-import { TOAST_I18N, formatServerErrorToastBody } from '../../core/ui/toast-messages';
+import { TOAST_I18N, resolveServerErrorToastDisplay } from '../../core/ui/toast-messages';
 import {
   isAlreadyProcessedError,
   ReEnrollmentRequestView,
@@ -233,12 +233,7 @@ export class ReEnrollmentComponent {
     }
 
     if (isAlreadyProcessedError(error)) {
-      this.toastMessage.notifyErrorBody(
-        formatServerErrorToastBody(
-          error.message,
-          (message) => this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
-        ),
-      );
+      this.notifyServerErrorToast(error.message);
       this.activeConfirm.set(null);
       this.reload();
       return;
@@ -249,12 +244,24 @@ export class ReEnrollmentComponent {
       return;
     }
 
-    this.toastMessage.notifyErrorBody(
-      formatServerErrorToastBody(
-        error.message,
-        (message) => this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
-      ),
+    this.notifyServerErrorToast(error.message);
+  }
+
+  /** Same Nest-body toast skin as the error interceptor (`resolveServerErrorToastDisplay`). */
+  private notifyServerErrorToast(serverMessage: string): void {
+    const display = resolveServerErrorToastDisplay(
+      serverMessage,
+      this.translate.instant(TOAST_I18N.errors.requestFailedTitle),
+      (message: string) =>
+        this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
     );
+
+    if (display.mode === 'titled') {
+      this.toastMessage.notifyErrorTitled(display.summary, display.detail);
+      return;
+    }
+
+    this.toastMessage.notifyErrorBody(display.body);
   }
 
   private formatCountLabel(count: number): string {
