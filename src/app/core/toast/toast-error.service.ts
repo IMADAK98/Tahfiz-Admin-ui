@@ -52,7 +52,9 @@ export class ToastErrorService {
       return this.translate.instant('toast.error.requestFailed', { message: serverMessage });
     }
 
-    return this.translate.instant('errors.unexpected');
+    return this.translate.instant('toast.error.requestFailed', {
+      message: this.translate.instant('errors.unexpected'),
+    });
   }
 
   private resolveSeverity(options: ToastFailureNotifyOptions): 'error' | 'warn' {

@@ -17,7 +17,7 @@
     }
   },
   "errors": {
-    "unexpected": "TODO: An unexpected error occurred. Please try again.",
+    "unexpected": "TODO: Could not complete the request. Please try again.",
     "network": "TODO: Could not reach the server. Check your network and try again.",
     "sessionExpired": "TODO: Your session has expired. Please sign in again."
   },
