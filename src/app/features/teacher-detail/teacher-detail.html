@@ -1,0 +1,94 @@
+@if (loadState() === TeacherDetailLoadState.Loading) {
+  <p style="color: var(--color-muted)">جاري تحميل بيانات المعلّم…</p>
+} @else if (loadState() === TeacherDetailLoadState.Error) {
+  <p class="load-error" role="alert">{{ loadError() }}</p>
+  <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+} @else if (detail(); as teacher) {
+  <div class="teacher-page-head">
+    <div class="teacher-page-head-top">
+      <div class="teacher-head-main">
+        <span class="teacher-detail-avatar" aria-hidden="true">{{ teacherInitial(teacher.name) }}</span>
+        <div>
+          <h1>{{ teacher.name }}</h1>
+          <span class="badge badge-success" style="margin-top: 8px; display: inline-flex">
+            {{ teacher.isActive ? 'نشط' : 'غير نشط' }}
+          </span>
+        </div>
+      </div>
+      <div class="teacher-page-actions">
+        <p-button type="button" label="تعديل" (onClick)="openEditModal()" />
+        <p-button type="button" label="العودة للقائمة" [text]="true" routerLink="/admin/teachers" />
+      </div>
+    </div>
+  </div>
+
+  <section class="card teacher-section-card" aria-labelledby="info-title">
+    <h2 id="info-title">البيانات</h2>
+    <dl class="teacher-fact-grid" aria-label="بيانات المعلّم">
+      <div class="teacher-fact">
+        <dt class="label">الجوال</dt>
+        <dd class="value">{{ teacher.phone || '—' }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">البريد</dt>
+        <dd class="value" dir="ltr" style="text-align: start">{{ teacher.email }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">المؤهل الأكاديمي</dt>
+        <dd class="value">{{ teacherQualificationLabel(teacher.qualification) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">شهادة مكنون</dt>
+        <dd class="value">{{ yesNoLabel(teacher.hasCertificate) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">الأجزاء المحفوظة</dt>
+        <dd class="value">{{ teacher.numberOfMemorizedJuz ?? '—' }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">السند</dt>
+        <dd class="value">{{ yesNoLabel(teacher.hasSanadInHifz) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">الإجازة في الحفظ</dt>
+        <dd class="value">{{ yesNoLabel(teacher.hasIjazahInHifz) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">مستوى التجويد</dt>
+        <dd class="value">{{ teacherTajweedLevelLabel(teacher.tajweedLevel) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">الفئات العمرية</dt>
+        <dd class="value">{{ teacherAgeGroupsLabel(teacher.ageGroups) }}</dd>
+      </div>
+      <div class="teacher-fact">
+        <dt class="label">فترات العمل</dt>
+        <dd class="value">{{ teacherWorkPeriodsLabel(teacher.workPeriods) }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="card teacher-section-card" aria-labelledby="halaqat-title">
+    <h2 id="halaqat-title">الحلقات المعيَّنة</h2>
+    @if (halaqat().length) {
+      <ul class="teacher-halaqa-list">
+        @for (item of halaqat(); track item.id) {
+          <li>
+            <a [routerLink]="['/admin/halaqat', item.id]">{{ item.name }}</a>
+            <span class="badge badge-neutral">{{ item.badgeLabel }}</span>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="teacher-halaqa-empty">لا توجد حلقات معيّنة لهذا المعلّم حالياً.</p>
+    }
+  </section>
+}
+
+<app-teacher-form-modal
+  [visible]="showEditModal()"
+  mode="edit"
+  [teacher]="detail()"
+  (saved)="onTeacherSaved()"
+  (closed)="closeEditModal()"
+/>

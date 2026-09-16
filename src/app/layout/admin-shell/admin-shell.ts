@@ -65,10 +65,19 @@ export class AdminShellComponent {
   private syncPageTitle(url: string): void {
     const path = url.split('?')[0];
     this.isDashboard.set(
-      path === '/admin' || path === '/admin/dashboard' || path === '/admin/halaqat',
+      path === '/admin' ||
+        path === '/admin/dashboard' ||
+        path === '/admin/halaqat' ||
+        path === '/admin/teachers' ||
+        path === '/admin/teacher-requests',
     );
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');
+      this.pageSubtitle.set(null);
+      return;
+    }
+    if (path.startsWith('/admin/teachers/') && path !== '/admin/teachers') {
+      this.pageTitle.set('تفاصيل المعلّم');
       this.pageSubtitle.set(null);
       return;
     }
