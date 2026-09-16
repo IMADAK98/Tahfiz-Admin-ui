@@ -76,13 +76,14 @@ Nest returns HTTP **201** with `{ statusCode: 200, data: … }` on many auth rou
 npm run check:envelope   # assert-based envelope self-check
 ```
 
-Bearer attachment is manual per call until PR3 interceptor.
+Bearer attached via `authInterceptor` (PR3).
 
-## Out of scope (PR2)
+## Auth (PR3)
 
-HTTP interceptor, refresh queue, `adminGuard`, feature pages.
+- `authInterceptor` — Bearer header; 401 → single-flight refresh queue → retry or `/login?redirect=`
+- `adminGuard` — `ADMIN` / `SYSTEM_ADMIN` only; `TEACHER` bounced to login
+- Login page wired to `AuthService.login` → `/admin`
 
 ## Next PRs
 
-3. Auth UI + interceptor + refresh queue + adminGuard  
 4. Shell + dashboard wired to live data  

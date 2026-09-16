@@ -28,6 +28,10 @@ export class AuthService {
     return token ? decodeJwtClaims(token) : null;
   }
 
+  clearSession(): void {
+    this.tokenStorage.clearTokens();
+  }
+
   login(email: string, password: string): Observable<JwtClaims> {
     return this.authApi.login({ email, password }).pipe(
       tap((tokens) => this.tokenStorage.setTokens(tokens)),
@@ -63,14 +67,14 @@ export class AuthService {
     const accessToken = this.getAccessToken();
 
     if (!accessToken && !this.getRefreshToken()) {
-      this.tokenStorage.clearTokens();
+      this.clearSession();
       return of(undefined);
     }
 
     return this.authApi.logout(accessToken).pipe(
-      tap(() => this.tokenStorage.clearTokens()),
+      tap(() => this.clearSession()),
       catchError(() => {
-        this.tokenStorage.clearTokens();
+        this.clearSession();
         return of(undefined);
       }),
     );

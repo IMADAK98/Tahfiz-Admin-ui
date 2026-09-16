@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-admin-shell',
@@ -23,7 +24,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
         <div class="nav-section">الإدارة</div>
         <span class="nav-link opacity-50 cursor-not-allowed" aria-disabled="true">
-          <span class="nav-icon" aria-hidden="true">◻</span>
+          <span class="nav-icon" aria-hidden="true">◫</span>
           <span>الحلقات</span>
         </span>
         <span class="nav-link opacity-50 cursor-not-allowed" aria-disabled="true">
@@ -36,10 +37,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         </span>
 
         <div class="sidebar-footer">
-          <a routerLink="/" class="nav-link">
-            <span class="nav-icon" aria-hidden="true">↩</span>
-            <span>العودة للموقع</span>
-          </a>
+          <button type="button" class="nav-link w-full border-0 bg-transparent cursor-pointer" (click)="logout()" [disabled]="loggingOut()">
+            <span class="nav-icon" aria-hidden="true">⎋</span>
+            <span>{{ loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج' }}</span>
+          </button>
         </div>
       </aside>
 
@@ -48,8 +49,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <h1 class="topbar-title">لوحة التحكم</h1>
           <div class="topbar-actions">
             <div class="user-chip">
-              <span>مدير المركز</span>
-              <span class="user-avatar" aria-hidden="true">م</span>
+              <span>{{ displayName() }}</span>
+              <span class="user-avatar" aria-hidden="true">{{ avatarInitial() }}</span>
             </div>
           </div>
         </header>
@@ -60,4 +61,29 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     </div>
   `,
 })
-export class AdminShellComponent {}
+export class AdminShellComponent {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  protected readonly loggingOut = signal(false);
+  protected readonly displayName = signal('مدير المركز');
+  protected readonly avatarInitial = signal('م');
+
+  constructor() {
+    const claims = this.auth.getClaims();
+    if (claims?.role) {
+      this.displayName.set(claims.role === 'SYSTEM_ADMIN' ? 'مدير النظام' : 'مدير المركز');
+      this.avatarInitial.set(claims.role === 'SYSTEM_ADMIN' ? 'ن' : 'م');
+    }
+  }
+
+  logout(): void {
+    this.loggingOut.set(true);
+    this.auth.logout().subscribe({
+      complete: () => {
+        this.loggingOut.set(false);
+        void this.router.navigate(['/login']);
+      },
+    });
+  }
+}
