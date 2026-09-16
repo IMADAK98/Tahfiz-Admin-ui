@@ -1,15 +1,8 @@
-:root {
-  --toast-max-w: 380px;
-  --toast-radius: 14px;
-  --toast-shadow: 0 12px 32px rgba(21, 36, 28, 0.16);
-  --toast-duration-success: 3500ms;
-  --toast-duration-info: 4000ms;
-  --toast-duration-warning: 5000ms;
-  --toast-duration-error: 7000ms;
-}
+/* PrimeNG p-toast skin — matches thafiz/design 20-toasts.html reference */
 
-html[dir='rtl'] .p-toast.p-toast-top-left,
-html[dir='rtl'] .p-toast-top-left {
+html[dir='rtl'] .tahfiz-toast-stack.p-toast,
+html[dir='rtl'] .tahfiz-toast-stack.p-toast-top-left,
+.tahfiz-toast-stack.is-admin-rtl.p-toast {
   inset-inline-start: auto;
   inset-inline-end: auto;
   left: var(--space-5);
@@ -20,22 +13,22 @@ html[dir='rtl'] .p-toast-top-left {
 .tahfiz-toast-stack.p-toast {
   width: min(var(--toast-max-w), calc(100vw - 32px));
   z-index: 1200;
+  pointer-events: none;
 }
 
 .tahfiz-toast-stack .p-toast-message {
   margin: 0 0 var(--space-3);
+  pointer-events: auto;
   border-radius: var(--toast-radius);
   box-shadow: var(--toast-shadow);
   border: 1px solid var(--color-border);
   background: var(--color-surface-elevated);
   overflow: hidden;
+  backdrop-filter: none;
 }
 
 .tahfiz-toast-stack .p-toast-message-content {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0;
-  align-items: start;
+  display: block;
   padding: 0;
   border: 0;
   background: transparent;
@@ -43,34 +36,21 @@ html[dir='rtl'] .p-toast-top-left {
 
 .tahfiz-toast-stack .p-toast-message-text,
 .tahfiz-toast-stack .p-toast-summary,
-.tahfiz-toast-stack .p-toast-detail {
-  display: none;
-}
-
+.tahfiz-toast-stack .p-toast-detail,
+.tahfiz-toast-stack .p-toast-message-icon,
 .tahfiz-toast-stack .p-toast-close-button {
-  width: 28px;
-  height: 28px;
-  margin: 10px 10px 0 0;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  color: var(--color-muted);
-  font-size: 1.125rem;
-  line-height: 1;
+  display: none !important;
 }
 
-.tahfiz-toast-stack .p-toast-close-button:hover {
-  background: color-mix(in srgb, var(--color-text) 6%, transparent);
-  color: var(--color-text);
-}
-
-.tahfiz-toast__content {
+.tahfiz-toast {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 12px;
   align-items: start;
-  padding: 14px 12px 14px 14px;
+  padding: 14px 14px 14px 12px;
   min-width: 0;
+  color: var(--color-text);
+  font-family: var(--font);
 }
 
 .tahfiz-toast__icon {
@@ -107,14 +87,31 @@ html[dir='rtl'] .p-toast-top-left {
   color: var(--color-text);
 }
 
-.tahfiz-toast__content--titled .tahfiz-toast__body {
+.tahfiz-toast--titled .tahfiz-toast__body {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-muted);
 }
 
-.tahfiz-toast__content--error.tahfiz-toast__content--titled .tahfiz-toast__title {
-  color: var(--color-danger);
+.tahfiz-toast__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+  padding: 0;
+}
+
+.tahfiz-toast__close:hover {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text);
 }
 
 .tahfiz-toast-stack .p-toast-message-success {
@@ -122,8 +119,12 @@ html[dir='rtl'] .p-toast-top-left {
   background: color-mix(in srgb, var(--color-success-soft) 55%, var(--color-surface-elevated));
 }
 
-.tahfiz-toast__content--success .tahfiz-toast__icon {
+.tahfiz-toast--success .tahfiz-toast__icon {
   background: var(--color-success);
+}
+
+.tahfiz-toast--success.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-success);
 }
 
 .tahfiz-toast-stack .p-toast-message-error {
@@ -131,8 +132,12 @@ html[dir='rtl'] .p-toast-top-left {
   background: color-mix(in srgb, var(--color-danger-soft) 70%, var(--color-surface-elevated));
 }
 
-.tahfiz-toast__content--error .tahfiz-toast__icon {
+.tahfiz-toast--error .tahfiz-toast__icon {
   background: var(--color-danger);
+}
+
+.tahfiz-toast--error.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-danger);
 }
 
 .tahfiz-toast-stack .p-toast-message-warn {
@@ -140,8 +145,12 @@ html[dir='rtl'] .p-toast-top-left {
   background: color-mix(in srgb, var(--color-warning-soft) 75%, var(--color-surface-elevated));
 }
 
-.tahfiz-toast__content--warn .tahfiz-toast__icon {
+.tahfiz-toast--warn .tahfiz-toast__icon {
   background: var(--color-warning);
+}
+
+.tahfiz-toast--warn.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-warning);
 }
 
 .tahfiz-toast-stack .p-toast-message-info {
@@ -149,6 +158,10 @@ html[dir='rtl'] .p-toast-top-left {
   background: color-mix(in srgb, var(--color-primary-soft) 65%, var(--color-surface-elevated));
 }
 
-.tahfiz-toast__content--info .tahfiz-toast__icon {
+.tahfiz-toast--info .tahfiz-toast__icon {
   background: var(--color-primary);
+}
+
+.tahfiz-toast--info.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-primary);
 }
