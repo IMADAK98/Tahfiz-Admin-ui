@@ -1,0 +1,137 @@
+<p-dialog
+  [visible]="visible()"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="!submitting()"
+  [closeOnEscape]="!submitting()"
+  [dismissableMask]="!submitting()"
+  styleClass="tahfiz-term-dialog"
+  [style]="{ width: 'min(560px, 96vw)' }"
+  header="إنشاء دورة"
+>
+  <form class="flex flex-col gap-4" (ngSubmit)="onSubmit($event)" #termForm="ngForm">
+    @if (errorMessage()) {
+      <p class="form-error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="input-group">
+      <label for="dawra-name">اسم الدورة</label>
+      <input
+        class="input"
+        id="dawra-name"
+        name="name"
+        type="text"
+        [(ngModel)]="form.name"
+        placeholder="مثال: TEST-CoS-2026-09 أو دورة الفصل الأول 1447"
+        required
+        [disabled]="submitting()"
+      />
+    </div>
+
+    <div class="form-grid-2">
+      <div class="input-group">
+        <label for="start">تاريخ البداية</label>
+        <input
+          class="input"
+          id="start"
+          name="startDate"
+          type="date"
+          [(ngModel)]="form.startDate"
+          required
+          [disabled]="submitting()"
+        />
+      </div>
+      <div class="input-group">
+        <label for="end">تاريخ النهاية</label>
+        <input
+          class="input"
+          id="end"
+          name="endDate"
+          type="date"
+          [(ngModel)]="form.endDate"
+          required
+          [disabled]="submitting()"
+        />
+      </div>
+    </div>
+
+    <div class="form-grid-2">
+      <div class="input-group">
+        <label for="reg-start">بداية التسجيل</label>
+        <input
+          class="input"
+          id="reg-start"
+          name="registerationStartDate"
+          type="date"
+          [(ngModel)]="form.registerationStartDate"
+          required
+          [disabled]="submitting()"
+        />
+      </div>
+      <div class="input-group">
+        <label for="reg-end">نهاية التسجيل</label>
+        <input
+          class="input"
+          id="reg-end"
+          name="registerationEndDate"
+          type="date"
+          [(ngModel)]="form.registerationEndDate"
+          required
+          [disabled]="submitting()"
+        />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="holidays">أيام الإجازات</label>
+      <span class="hint" id="holidays-hint">
+        @if (holidaysEnabled()) {
+          أضف أيام الإجازة ضمن فترة الدورة.
+        } @else {
+          حدّد تواريخ بداية ونهاية الدورة أولاً، ثم أضف أيام الإجازة.
+        }
+      </span>
+      <div class="holiday-box" [class.enabled]="holidaysEnabled()">
+        @if (holidaysEnabled()) {
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+            <input
+              class="input"
+              type="date"
+              name="pendingHolidayDate"
+              [(ngModel)]="form.pendingHolidayDate"
+              [min]="form.startDate"
+              [max]="form.endDate"
+              aria-label="تاريخ إجازة"
+              style="max-width: 180px"
+              [disabled]="submitting()"
+            />
+            <button type="button" class="btn btn-secondary btn-sm" (click)="addHoliday()" [disabled]="submitting()">
+              + إضافة
+            </button>
+          </div>
+        }
+        @if (form.holidayDates.length) {
+          <div class="chip-list" aria-label="الإجازات المحددة">
+            @for (holiday of form.holidayDates; track holiday) {
+              <span class="holiday-chip">
+                {{ formatHolidayLabel(holiday) }}
+                <button type="button" aria-label="حذف" (click)="removeHoliday(holiday)" [disabled]="submitting()">
+                  ×
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <button type="button" class="btn btn-primary" (click)="onSubmit($event)" [disabled]="submitting()">
+      {{ submitting() ? 'جاري الحفظ…' : 'حفظ الدورة' }}
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="submitting()">إلغاء</button>
+  </ng-template>
+</p-dialog>

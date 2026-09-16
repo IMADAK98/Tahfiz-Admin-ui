@@ -29,6 +29,7 @@ export class AdminShellComponent {
   protected readonly displayName = signal('مدير المركز');
   protected readonly avatarInitial = signal('م');
   protected readonly pageTitle = signal('لوحة التحكم');
+  protected readonly isDashboard = signal(false);
 
   constructor() {
     const claims = this.auth.getClaims();
@@ -55,6 +56,7 @@ export class AdminShellComponent {
 
   private syncPageTitle(url: string): void {
     const path = url.split('?')[0];
+    this.isDashboard.set(path === '/admin' || path === '/admin/dashboard');
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');
       return;

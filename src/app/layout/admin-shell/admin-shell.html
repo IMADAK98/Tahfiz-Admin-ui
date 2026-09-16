@@ -60,7 +60,11 @@
 
   <div class="main">
     <header class="topbar">
-      <h1 class="topbar-title">{{ pageTitle() }}</h1>
+      @if (!isDashboard()) {
+        <h1 class="topbar-title">{{ pageTitle() }}</h1>
+      } @else {
+        <div aria-hidden="true"></div>
+      }
       <div class="topbar-actions">
         <div class="user-chip">
           <span>{{ displayName() }}</span>
