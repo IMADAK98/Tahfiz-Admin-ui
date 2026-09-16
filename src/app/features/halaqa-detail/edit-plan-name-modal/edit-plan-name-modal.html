@@ -1,0 +1,35 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plan-name-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="plan-name-title">تعديل اسم الخطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <div class="input-group">
+          <label for="plan-name-input">اسم الخطة</label>
+          <input
+            class="input"
+            id="plan-name-input"
+            type="text"
+            [ngModel]="name()"
+            (ngModelChange)="name.set($event)"
+            name="planName"
+            required
+          />
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="onSubmit($event)">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+}

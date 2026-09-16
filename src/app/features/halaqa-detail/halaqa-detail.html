@@ -1,13 +1,368 @@
-<section class="flex flex-col gap-4">
-  <header>
-    <p class="badge badge-neutral mb-3">قريباً — PR5</p>
-    <h2 class="text-xl font-bold mb-2">تفاصيل الحلقة</h2>
-    <p style="color: var(--color-muted)">
-      @if (halaqaId()) {
-        معرّف الحلقة: {{ halaqaId() }} — تبويب الخطط والتفاصيل سيُربط هنا.
+@if (loadState() === HalaqaDetailLoadState.Loading) {
+  <p style="color: var(--color-muted)">جاري تحميل تفاصيل الحلقة…</p>
+} @else if (loadState() === HalaqaDetailLoadState.Error) {
+  <p class="load-error" role="alert">{{ loadError() }}</p>
+  <button type="button" class="btn btn-secondary" (click)="reload()">إعادة المحاولة</button>
+} @else if (detail(); as halqa) {
+  <div class="page-head">
+    <div class="page-head-top">
+      <div>
+        <h1>{{ halqa.name }}</h1>
+      </div>
+      <div class="page-actions">
+        <button type="button" class="btn btn-primary" (click)="openEditModal()">تعديل</button>
+        <button type="button" class="btn btn-ghost btn-danger-outline" (click)="openDeleteHalqa()">
+          حذف الحلقة
+        </button>
+        <a class="btn btn-ghost" routerLink="/admin/halaqat">العودة للحلقات</a>
+      </div>
+    </div>
+
+    <dl class="fact-grid" aria-label="بيانات الحلقة">
+      <div class="fact">
+        <dt class="label">الفئة</dt>
+        <dd class="value">{{ halqaCategoryLabel(halqa.category) }}</dd>
+      </div>
+      <div class="fact">
+        <dt class="label">الفترة</dt>
+        <dd class="value">{{ halqaPeriodsLabel(halqa.periods) }}</dd>
+      </div>
+      <div class="fact">
+        <dt class="label">الحالة</dt>
+        <dd class="value">
+          <span class="badge" [class.badge-success]="halqa.isActive" [class.badge-neutral]="!halqa.isActive">
+            {{ halqa.isActive ? 'نشطة' : 'متوقفة' }}
+          </span>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt class="label">المعلّم</dt>
+        <dd class="value">
+          @if (halqa.teacherName) {
+            <span class="teacher-chip">
+              <span class="avatar-initial" aria-hidden="true">{{ personInitial(halqa.teacherName) }}</span>
+              <span>{{ halqa.teacherName }}</span>
+            </span>
+          } @else {
+            <span>—</span>
+          }
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="أقسام تفاصيل الحلقة">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === HalaqaDetailTab.Students"
+      [attr.aria-selected]="activeTab() === HalaqaDetailTab.Students"
+      (click)="setTab(HalaqaDetailTab.Students)"
+    >
+      الطلاب
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === HalaqaDetailTab.Plans"
+      [attr.aria-selected]="activeTab() === HalaqaDetailTab.Plans"
+      (click)="setTab(HalaqaDetailTab.Plans)"
+    >
+      الخطط
+    </button>
+  </div>
+
+  @if (activeTab() === HalaqaDetailTab.Students) {
+    <section class="card card-pad students-panel" aria-labelledby="students-title">
+      <div class="students-head">
+        <h2 class="panel-title" id="students-title">الطلاب في الحلقة</h2>
+        <div class="students-head-actions">
+          <span class="students-count-pill" [attr.aria-label]="'عدد المسجّلين ' + studentsCountLabel()">
+            {{ studentsCountLabel() }}
+          </span>
+          <button type="button" class="btn btn-primary btn-sm" (click)="openEnrollModal()">إضافة طلاب</button>
+        </div>
+      </div>
+
+      @if (students().length) {
+        <ul class="student-list">
+          @for (student of students(); track student.id) {
+            <li>
+              <div class="student-main">
+                <span class="avatar-initial" aria-hidden="true">{{ personInitial(student.name) }}</span>
+                <span>{{ student.name }}</span>
+              </div>
+              <div class="student-row-actions">
+                <span class="badge badge-neutral">مسجّل</span>
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm chip-remove-btn"
+                  (click)="openUnenroll(student)"
+                >
+                  إزالة
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
       } @else {
-        تفاصيل الحلقة وتبويب الخطط.
+        <p class="hint">لا يوجد طلاب مسجّلون في هذه الحلقة.</p>
       }
-    </p>
-  </header>
-</section>
+    </section>
+  } @else {
+    @if (plans().length) {
+      <div class="plans-toolbar">
+        <h2 class="panel-title" style="margin: 0">خطط الدراسة</h2>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openCreatePlanModal()">إضافة خطة</button>
+      </div>
+
+      <ul class="plan-list">
+        @for (plan of plans(); track plan.id) {
+          <li>
+            <article class="plan-card" [attr.aria-labelledby]="'plan-' + plan.id">
+              <header class="plan-card-head">
+                <h3 [id]="'plan-' + plan.id">{{ plan.name }}</h3>
+                <div class="plan-card-actions" role="group" [attr.aria-label]="'إجراءات ' + plan.name">
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="openEditPlanName(plan)">
+                    تعديل
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="openAssignStudents(plan)">
+                    إضافة طلاب إلى الخطة
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm plan-card-delete" (click)="openDeletePlan(plan)">
+                    حذف
+                  </button>
+                </div>
+              </header>
+
+              <section class="plan-students">
+                <h4 class="plan-section-label">الطلاب المعيَّنون</h4>
+                @if (plan.students.length) {
+                  <ul class="plan-student-chips">
+                    @for (student of plan.students; track student.id) {
+                      <li>
+                        <span class="avatar-initial" aria-hidden="true">{{ personInitial(student.name) }}</span>
+                        <span>{{ student.name }}</span>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-sm chip-remove-btn"
+                          (click)="openUnassignPlanStudent(plan, student)"
+                        >
+                          إزالة
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="plan-students-empty">لا طلاب على هذه الخطة بعد</p>
+                }
+              </section>
+
+              <section class="plan-items">
+                <div class="plan-items-head">
+                  <h4 class="plan-section-label">عناصر الخطة</h4>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm plan-items-toggle"
+                    [attr.aria-expanded]="isPlanExpanded(plan.id)"
+                    (click)="togglePlanItems(plan.id)"
+                  >
+                    <span aria-hidden="true">{{ isPlanExpanded(plan.id) ? '▾' : '▸' }}</span>
+                    <span>{{ isPlanExpanded(plan.id) ? 'طيّ العناصر' : 'توسيع العناصر' }}</span>
+                  </button>
+                </div>
+
+                @if (isPlanExpanded(plan.id)) {
+                  <ul class="plan-item-list">
+                    @for (item of plan.items; track item.id) {
+                      <li class="plan-item">
+                        <span class="badge plan-item-type" [ngClass]="studyPlanItemTypeBadgeClass(item.type)">
+                          {{ item.type === 'HIFZ' ? 'حفظ' : item.type === 'TATHBEET' ? 'تثبيت' : 'مراجعة' }}
+                        </span>
+                        <div class="plan-item-body">
+                          <span class="plan-item-range">{{ item.rangeLabel }}</span>
+                          <span class="plan-item-meta">
+                            <span class="plan-item-direction" title="اتجاه التلاوة">{{ item.directionLabel }}</span>
+                            <span class="plan-item-amount">{{ item.amountLabel }}</span>
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm plan-item-edit"
+                          (click)="openEditPlanItem(plan, item)"
+                        >
+                          تعديل
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </section>
+            </article>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="empty-plans">
+        <h3>لا توجد خطة مرتبطة</h3>
+        <p>
+          أضِف خطة دراسة لهذه الحلقة قبل متابعة تقدّم الحفظ والتثبيت والمراجعة من تطبيق المعلّم.
+        </p>
+        <button type="button" class="btn btn-primary" (click)="openCreatePlanModal()">إضافة خطة</button>
+      </div>
+    }
+  }
+}
+
+<app-edit-halaqa-modal
+  [visible]="showEditModal()"
+  [detail]="detail()"
+  (saved)="onHalqaSaved($event)"
+  (closed)="closeEditModal()"
+/>
+
+<app-enroll-students-modal
+  [visible]="showEnrollModal()"
+  [halqaId]="halaqaId()"
+  [rosterStudents]="students()"
+  (enrolled)="onStudentsEnrolled()"
+  (closed)="closeEnrollModal()"
+/>
+
+<app-create-plan-modal
+  [visible]="showCreatePlanModal()"
+  [halqaId]="halaqaId()"
+  [rosterStudents]="students()"
+  (created)="onPlanCreated()"
+  (closed)="closeCreatePlanModal()"
+/>
+
+<app-edit-plan-name-modal
+  [visible]="showEditPlanNameModal()"
+  [planId]="selectedPlan()?.id ?? null"
+  [planName]="selectedPlan()?.name ?? ''"
+  (saved)="onPlanNameSaved()"
+  (closed)="closeEditPlanNameModal()"
+/>
+
+<app-edit-plan-item-modal
+  [visible]="showEditPlanItemModal()"
+  [planName]="selectedPlan()?.name ?? ''"
+  [item]="selectedPlanItem()"
+  (saved)="onPlanItemSaved()"
+  (closed)="closeEditPlanItemModal()"
+/>
+
+<app-assign-plan-students-modal
+  [visible]="showAssignStudentsModal()"
+  [plan]="selectedPlan()"
+  [rosterStudents]="students()"
+  (assigned)="onStudentsAssigned()"
+  (closed)="closeAssignStudentsModal()"
+/>
+
+@if (showUnenrollModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeUnenrollModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unenroll-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="unenroll-title">إزالة من الحلقة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeUnenrollModal()">×</button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <p class="unassign-copy">
+          هل أنت متأكد من إزالة <strong>{{ selectedStudent()?.name }}</strong> من الحلقة؟
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" [disabled]="unenrolling()" (click)="confirmUnenroll()">
+          {{ unenrolling() ? 'جاري الإزالة…' : 'تأكيد إزالة' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="unenrolling()" (click)="closeUnenrollModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeleteHalqaModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeDeleteHalqaModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-halqa-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="delete-halqa-title">حذف الحلقة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeDeleteHalqaModal()">×</button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <p class="unassign-copy">هل أنت متأكد من حذف هذه الحلقة؟</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" [disabled]="deletingHalqa()" (click)="confirmDeleteHalqa()">
+          {{ deletingHalqa() ? 'جاري الحذف…' : 'تأكيد حذف' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="deletingHalqa()" (click)="closeDeleteHalqaModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showUnassignPlanModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeUnassignPlanModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="unassign-plan-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="unassign-plan-title">إزالة من الخطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeUnassignPlanModal()">×</button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <p class="unassign-copy">
+          هل أنت متأكد من إزالة <strong>{{ selectedStudent()?.name }}</strong> من الخطة؟
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" [disabled]="unassigning()" (click)="confirmUnassignFromPlan()">
+          {{ unassigning() ? 'جاري الإزالة…' : 'تأكيد إزالة' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="unassigning()" (click)="closeUnassignPlanModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeletePlanModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeDeletePlanModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-plan-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="delete-plan-title">حذف الخطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeDeletePlanModal()">×</button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <p class="unassign-copy">
+          هل أنت متأكد من حذف الخطة <strong>{{ selectedPlan()?.name }}</strong>؟
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" [disabled]="deletingPlan()" (click)="confirmDeletePlan()">
+          {{ deletingPlan() ? 'جاري الحذف…' : 'تأكيد حذف' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="deletingPlan()" (click)="closeDeletePlanModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

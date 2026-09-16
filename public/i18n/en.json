@@ -28,5 +28,23 @@
       "noTeachers": "TODO: No teachers available to assign",
       "noStudents": "TODO: No students available to add"
     }
+  },
+  "halaqaDetail": {
+    "validation": {
+      "pickCategory": "TODO: Select a category",
+      "pickPeriod": "TODO: Select a period",
+      "pickTeacher": "TODO: Select a teacher",
+      "studentLimit": "TODO: Enter student limit (at least 1)",
+      "planName": "TODO: Enter plan name",
+      "fromSurah": "TODO: Select start surah",
+      "fromAyah": "TODO: Enter start ayah",
+      "amount": "TODO: Enter amount value",
+      "pickStudent": "TODO: Select at least one student",
+      "centerUnknown": "TODO: Could not resolve center from session"
+    },
+    "success": {
+      "planCreated": "TODO: Plan created",
+      "studentsEnrolled": "TODO: Students enrolled in halaqa"
+    }
   }
 }

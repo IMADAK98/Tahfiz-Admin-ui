@@ -1,0 +1,50 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="enroll-students-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="enroll-students-title">إضافة طلاب إلى الحلقة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        @if (pickersLoading()) {
+          <p class="hint">جاري تحميل الطلاب…</p>
+        } @else if (availableCandidates().length) {
+          <ul class="student-check-list">
+            @for (student of availableCandidates(); track student.id) {
+              <li>
+                <label class="student-check">
+                  <input
+                    type="checkbox"
+                    [checked]="isStudentSelected(student.id)"
+                    (change)="toggleStudent(student.id, $any($event.target).checked)"
+                  />
+                  <span class="avatar-initial" aria-hidden="true">{{ student.name.charAt(0) }}</span>
+                  <span>{{ student.name }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="hint">{{ 'halaqat.picker.noStudents' | translate }}</p>
+        }
+      </form>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="submitting() || pickersLoading() || !availableCandidates().length"
+          (click)="onSubmit($event)"
+        >
+          {{ submitting() ? 'جاري الإضافة…' : 'إضافة' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+}

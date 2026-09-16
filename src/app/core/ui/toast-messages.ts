@@ -22,16 +22,39 @@ export const TOAST_I18N = {
   },
 } as const;
 
-const REQUEST_FAILED_PREFIX = 'فشل الطلب';
+export type ServerErrorToastDisplay =
+  | { mode: 'single'; body: string }
+  | { mode: 'titled'; summary: string; detail: string };
 
-/** Always «فشل الطلب: {msg}» unless Nest message already carries the prefix. */
-export function formatServerErrorToastBody(
+const ARABIC_RE = /[\u0600-\u06FF]/;
+const SHORT_LATIN_MAX_LEN = 120;
+
+export function containsArabic(text: string): boolean {
+  return ARABIC_RE.test(text);
+}
+
+/** Interceptor: Arabic Nest body alone; short Latin gets «فشل الطلب» title + body or prefixed single line. */
+export function resolveServerErrorToastDisplay(
   serverMessage: string,
+  requestFailedTitle: string,
   requestFailedWithMessage: (message: string) => string,
-): string {
+): ServerErrorToastDisplay {
   const message = serverMessage.trim();
-  if (message.startsWith(REQUEST_FAILED_PREFIX)) {
-    return message;
+
+  if (containsArabic(message)) {
+    return { mode: 'single', body: message };
   }
-  return requestFailedWithMessage(message);
+
+  if (message.length <= SHORT_LATIN_MAX_LEN) {
+    return {
+      mode: 'single',
+      body: requestFailedWithMessage(message),
+    };
+  }
+
+  return {
+    mode: 'titled',
+    summary: requestFailedTitle,
+    detail: message,
+  };
 }
