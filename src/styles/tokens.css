@@ -14,7 +14,7 @@
   --color-border-strong: #C9C0B0;
   --color-text: #15241C;
   --color-muted: #5A6B62;
-  --color-danger: #B42318;
+  --color-danger: #C62828;
   --color-danger-soft: #FEF3F2;
   --color-success: #1B6B45;
   --color-success-soft: #E8F6EE;
@@ -43,6 +43,14 @@
   --font: "Cairo", "Segoe UI", Tahoma, sans-serif;
   --sidebar-w: 260px;
   --content-max: 1440px;
+
+  --toast-max-w: 380px;
+  --toast-radius: 14px;
+  --toast-shadow: 0 12px 32px rgba(21, 36, 28, 0.16);
+  --toast-duration-success: 3500ms;
+  --toast-duration-info: 4000ms;
+  --toast-duration-warning: 5000ms;
+  --toast-duration-error: 7000ms;
 }
 
 *,

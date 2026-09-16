@@ -1,9 +1,24 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Toast } from 'primeng/toast';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Toast],
   selector: 'app-root',
-  template: '<router-outlet />',
+  templateUrl: './app.html',
 })
-export class App {}
+export class App {
+  protected toastIcon(severity?: string | null): string {
+    switch (severity) {
+      case 'success':
+        return '✓';
+      case 'info':
+        return 'i';
+      case 'warn':
+      case 'error':
+        return '!';
+      default:
+        return 'i';
+    }
+  }
+}

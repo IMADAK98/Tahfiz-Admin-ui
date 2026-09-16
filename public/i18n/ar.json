@@ -1,0 +1,32 @@
+{
+  "toast": {
+    "success": {
+      "saved": "تم الحفظ",
+      "termCreated": "تم إنشاء الدورة",
+      "termEnded": "تم إنهاء الدورة",
+      "halaqaCreated": "تم إنشاء الحلقة",
+      "copied": "تم النسخ"
+    },
+    "error": {
+      "requestFailedTitle": "فشل الطلب",
+      "requestFailed": "فشل الطلب: {{message}}"
+    },
+    "warn": {
+      "endActiveTermFirst": "أنهِ الدورة الحالية أولاً"
+    },
+    "info": {
+      "noStudentsAvailable": "لا يوجد طلاب متاحون للإضافة"
+    }
+  },
+  "errors": {
+    "unexpected": "حدث خطأ غير متوقع. حاول مرة أخرى.",
+    "network": "تعذّر الاتصال بالخادم. تحقق من الشبكة وحاول مرة أخرى.",
+    "sessionExpired": "انتهت الجلسة. سجّل الدخول مرة أخرى."
+  },
+  "halaqat": {
+    "picker": {
+      "noTeachers": "لا يوجد معلّمون متاحون للتعيين",
+      "noStudents": "لا يوجد طلاب متاحون للإضافة"
+    }
+  }
+}

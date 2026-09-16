@@ -12,8 +12,12 @@ const AUTH_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'] as const;
 
 let refreshInFlight$: Observable<string> | null = null;
 
-function isAuthEndpoint(url: string): boolean {
+export function isAuthEndpoint(url: string): boolean {
   return AUTH_PATHS.some((path) => url.includes(path));
+}
+
+export function isAuthRefreshInProgress(): boolean {
+  return refreshInFlight$ !== null;
 }
 
 function withBearer(url: string, req: Parameters<HttpInterceptorFn>[0], token: string | null) {

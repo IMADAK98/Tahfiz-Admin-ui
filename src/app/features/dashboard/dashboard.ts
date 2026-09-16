@@ -1,11 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { Toast } from 'primeng/toast';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
+import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { CreateTermModalComponent } from '../terms/create-term-modal/create-term-modal';
 import { TermsService } from '../terms/terms.service';
 import { DashboardLoadState } from './enums/dashboard-load-state.enum';
@@ -14,8 +15,8 @@ import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CreateTermModalComponent, Toast, ConfirmDialog],
-  providers: [MessageService, ConfirmationService],
+  imports: [RouterLink, CreateTermModalComponent, ConfirmDialog],
+  providers: [ConfirmationService],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -24,7 +25,7 @@ export class DashboardComponent {
   private readonly termsService = inject(TermsService);
   private readonly auth = inject(AuthService);
   private readonly confirmation = inject(ConfirmationService);
-  private readonly messageService = inject(MessageService);
+  private readonly toastMessage = inject(ToastMessageService);
 
   protected readonly DashboardLoadState = DashboardLoadState;
   protected readonly mockKpis = MOCK_DASHBOARD_KPIS;
@@ -150,25 +151,11 @@ export class DashboardComponent {
     this.termsService.endActiveTerm(term.id).subscribe({
       next: () => {
         this.endingTerm.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'تم إنهاء الدورة',
-          detail: 'تم إنهاء الدورة الحالية',
-          life: 4000,
-        });
+        this.toastMessage.notifySuccess(TOAST_I18N.success.termEnded);
         this.reload();
       },
-      error: (error: unknown) => {
+      error: () => {
         this.endingTerm.set(false);
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'إنهاء الدورة',
-          detail:
-            error instanceof ApiError
-              ? error.message
-              : 'مسار إنهاء الدورة غير متوفر — UpdateTermDto لا يتضمن status',
-          life: 6000,
-        });
       },
     });
   }

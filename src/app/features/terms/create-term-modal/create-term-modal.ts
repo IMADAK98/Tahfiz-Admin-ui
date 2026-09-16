@@ -1,7 +1,8 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
 import { ApiError } from '../../../core/api/api-error';
+import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
   CreateTermFormModel,
@@ -19,7 +20,7 @@ import { TermsService } from '../terms.service';
 export class CreateTermModalComponent {
   private readonly termsService = inject(TermsService);
   private readonly auth = inject(AuthService);
-  private readonly messageService = inject(MessageService);
+  private readonly toastMessage = inject(ToastMessageService);
 
   readonly visible = input.required<boolean>();
   readonly termCreated = output<void>();
@@ -101,12 +102,7 @@ export class CreateTermModalComponent {
     this.termsService.createTerm(this.form, centerId).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'تم إنشاء الدورة',
-          detail: 'تم حفظ الدورة بنجاح',
-          life: 4000,
-        });
+        this.toastMessage.notifySuccess(TOAST_I18N.success.termCreated);
         this.resetForm();
         this.termCreated.emit();
       },

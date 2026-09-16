@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
+import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { CreateHalqaPayload, HalqaApiRecord } from './models/halqa.model';
@@ -33,9 +34,11 @@ export class HalqaApiService {
 
   createHalqa(payload: CreateHalqaPayload): Observable<HalqaApiRecord> {
     return this.http
-      .post<ApiEnvelope<HalqaApiRecord>>(`${this.apiBaseUrl}/halqa`, payload, {
-        observe: 'response',
-      })
+      .post<ApiEnvelope<HalqaApiRecord>>(
+        `${this.apiBaseUrl}/halqa`,
+        payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 }

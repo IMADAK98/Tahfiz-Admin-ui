@@ -1,0 +1,32 @@
+{
+  "toast": {
+    "success": {
+      "saved": "TODO: Saved",
+      "termCreated": "TODO: Term created",
+      "termEnded": "TODO: Term ended",
+      "halaqaCreated": "TODO: Halaqa created",
+      "copied": "TODO: Copied"
+    },
+    "error": {
+      "requestFailedTitle": "TODO: Request failed",
+      "requestFailed": "TODO: Request failed: {{message}}"
+    },
+    "warn": {
+      "endActiveTermFirst": "TODO: End the active term first"
+    },
+    "info": {
+      "noStudentsAvailable": "TODO: No students available to add"
+    }
+  },
+  "errors": {
+    "unexpected": "TODO: An unexpected error occurred. Please try again.",
+    "network": "TODO: Could not reach the server. Check your network and try again.",
+    "sessionExpired": "TODO: Your session has expired. Please sign in again."
+  },
+  "halaqat": {
+    "picker": {
+      "noTeachers": "TODO: No teachers available to assign",
+      "noStudents": "TODO: No students available to add"
+    }
+  }
+}

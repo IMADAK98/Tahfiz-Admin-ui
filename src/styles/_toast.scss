@@ -1,0 +1,167 @@
+/* PrimeNG p-toast skin — matches thafiz/design 20-toasts.html reference */
+
+html[dir='rtl'] .tahfiz-toast-stack.p-toast,
+html[dir='rtl'] .tahfiz-toast-stack.p-toast-top-left,
+.tahfiz-toast-stack.is-admin-rtl.p-toast {
+  inset-inline-start: auto;
+  inset-inline-end: auto;
+  left: var(--space-5);
+  right: auto;
+  top: var(--space-5);
+}
+
+.tahfiz-toast-stack.p-toast {
+  width: min(var(--toast-max-w), calc(100vw - 32px));
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.tahfiz-toast-stack .p-toast-message {
+  margin: 0 0 var(--space-3);
+  pointer-events: auto;
+  border-radius: var(--toast-radius);
+  box-shadow: var(--toast-shadow);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+  overflow: hidden;
+  backdrop-filter: none;
+}
+
+.tahfiz-toast-stack .p-toast-message-content {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.tahfiz-toast-stack .p-toast-message-text,
+.tahfiz-toast-stack .p-toast-summary,
+.tahfiz-toast-stack .p-toast-detail,
+.tahfiz-toast-stack .p-toast-message-icon,
+.tahfiz-toast-stack .p-toast-close-button {
+  display: none !important;
+}
+
+.tahfiz-toast {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 14px 14px 12px;
+  min-width: 0;
+  color: var(--color-text);
+  font-family: var(--font);
+}
+
+.tahfiz-toast__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.tahfiz-toast__text {
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.tahfiz-toast__title {
+  margin: 0 0 4px;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--color-text);
+}
+
+.tahfiz-toast__body {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.tahfiz-toast--titled .tahfiz-toast__body {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.tahfiz-toast__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  font-family: inherit;
+  padding: 0;
+}
+
+.tahfiz-toast__close:hover {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text);
+}
+
+.tahfiz-toast-stack .p-toast-message-success {
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-success-soft) 55%, var(--color-surface-elevated));
+}
+
+.tahfiz-toast--success .tahfiz-toast__icon {
+  background: var(--color-success);
+}
+
+.tahfiz-toast--success.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-success);
+}
+
+.tahfiz-toast-stack .p-toast-message-error {
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger-soft) 70%, var(--color-surface-elevated));
+}
+
+.tahfiz-toast--error .tahfiz-toast__icon {
+  background: var(--color-danger);
+}
+
+.tahfiz-toast--error.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-danger);
+}
+
+.tahfiz-toast-stack .p-toast-message-warn {
+  border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning-soft) 75%, var(--color-surface-elevated));
+}
+
+.tahfiz-toast--warn .tahfiz-toast__icon {
+  background: var(--color-warning);
+}
+
+.tahfiz-toast--warn.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-warning);
+}
+
+.tahfiz-toast-stack .p-toast-message-info {
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary-soft) 65%, var(--color-surface-elevated));
+}
+
+.tahfiz-toast--info .tahfiz-toast__icon {
+  background: var(--color-primary);
+}
+
+.tahfiz-toast--info.tahfiz-toast--titled .tahfiz-toast__title {
+  color: var(--color-primary);
+}

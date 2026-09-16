@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
+import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { bearerHeaders } from './http-auth.helpers';
 import { mapEnvelopeResponse } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
@@ -15,7 +16,11 @@ export class AuthApiService {
 
   login(request: LoginRequest): Observable<AuthTokens> {
     return this.http
-      .post<ApiEnvelope<AuthTokens>>(`${this.apiBaseUrl}/auth/login`, request, { observe: 'response' })
+      .post<ApiEnvelope<AuthTokens>>(
+        `${this.apiBaseUrl}/auth/login`,
+        request,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
       .pipe(map(mapEnvelopeResponse));
   }
 

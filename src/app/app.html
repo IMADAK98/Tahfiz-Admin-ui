@@ -1,0 +1,28 @@
+<router-outlet />
+
+<p-toast position="top-left" styleClass="tahfiz-toast-stack is-admin-rtl">
+  <ng-template #message let-message let-closeFn="closeFn">
+    <div
+      class="tahfiz-toast"
+      [class.tahfiz-toast--success]="message.severity === 'success'"
+      [class.tahfiz-toast--error]="message.severity === 'error'"
+      [class.tahfiz-toast--warn]="message.severity === 'warn'"
+      [class.tahfiz-toast--info]="message.severity === 'info'"
+      [class.tahfiz-toast--titled]="message.summary && message.detail"
+      [attr.role]="message.severity === 'error' ? 'alert' : 'status'"
+    >
+      <span class="tahfiz-toast__icon" aria-hidden="true">{{ toastIcon(message.severity) }}</span>
+      <div class="tahfiz-toast__text">
+        @if (message.summary && message.detail) {
+          <p class="tahfiz-toast__title">{{ message.summary }}</p>
+          <p class="tahfiz-toast__body">{{ message.detail }}</p>
+        } @else {
+          <p class="tahfiz-toast__body">{{ message.summary || message.detail }}</p>
+        }
+      </div>
+      <button type="button" class="tahfiz-toast__close" aria-label="إغلاق" (click)="closeFn($event)">
+        ×
+      </button>
+    </div>
+  </ng-template>
+</p-toast>

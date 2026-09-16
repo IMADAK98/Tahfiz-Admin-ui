@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
+import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { ActiveTerm, CreateTermPayload, UpdateTermPayload } from './models/term.model';
@@ -14,7 +15,11 @@ export class TermApiService {
 
   createTerm(payload: CreateTermPayload): Observable<ActiveTerm> {
     return this.http
-      .post<ApiEnvelope<ActiveTerm>>(`${this.apiBaseUrl}/term`, payload, { observe: 'response' })
+      .post<ApiEnvelope<ActiveTerm>>(
+        `${this.apiBaseUrl}/term`,
+        payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 

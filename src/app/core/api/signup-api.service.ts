@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { apiErrorFromBody } from './api-error';
 import { API_BASE_URL } from '../config/api-config';
+import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { envelopeOk } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { PendingCenterRequest } from './models/pending-center.model';
@@ -15,9 +16,11 @@ export class SignupApiService {
 
   submitPendingCenterRequest(request: PendingCenterRequest): Observable<void> {
     return this.http
-      .post<ApiEnvelope<null>>(`${this.apiBaseUrl}/pending-center-request`, request, {
-        observe: 'response',
-      })
+      .post<ApiEnvelope<null>>(
+        `${this.apiBaseUrl}/pending-center-request`,
+        request,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
       .pipe(
         map((res) => {
           if (!envelopeOk(res.body, res.status)) {

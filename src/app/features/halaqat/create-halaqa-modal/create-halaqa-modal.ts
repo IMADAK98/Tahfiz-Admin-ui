@@ -1,7 +1,9 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
+import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { ActiveTerm } from '../../../core/api/models/term.model';
 import { ActiveStudent } from '../../../core/api/models/student.model';
 import { ActiveTeacher } from '../../../core/api/models/teacher.model';
@@ -12,14 +14,14 @@ import { HalaqatService } from '../halaqat.service';
 
 @Component({
   selector: 'app-create-halaqa-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   templateUrl: './create-halaqa-modal.html',
   styleUrl: './create-halaqa-modal.scss',
 })
 export class CreateHalaqaModalComponent {
   private readonly halaqatService = inject(HalaqatService);
   private readonly auth = inject(AuthService);
-  private readonly messageService = inject(MessageService);
+  private readonly toastMessage = inject(ToastMessageService);
 
   readonly visible = input.required<boolean>();
   readonly activeTerm = input.required<ActiveTerm | null>();
@@ -123,12 +125,7 @@ export class CreateHalaqaModalComponent {
     this.halaqatService.createHalaqa(this.form, term.id).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'تم إنشاء الحلقة',
-          detail: 'تم حفظ الحلقة بنجاح',
-          life: 4000,
-        });
+        this.toastMessage.notifySuccess(TOAST_I18N.success.halaqaCreated);
         this.resetForm();
         this.halaqaCreated.emit();
       },
