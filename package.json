@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "check:envelope": "node scripts/envelope-self-check.mjs"
   },
   "private": true,
   "engines": {
