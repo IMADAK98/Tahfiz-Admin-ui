@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { Injector, inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import {
   extractHttpErrorMessage,
@@ -17,7 +17,9 @@ import { ToastErrorService } from '../toast/toast-error.service';
 import { SKIP_GLOBAL_ERROR_TOAST } from './skip-global-error-toast.token';
 
 export const errorToastInterceptor: HttpInterceptorFn = (req, next) => {
-  const toastError = inject(ToastErrorService);
+  // ponytail: resolve toast lazily. Constructing ToastErrorService on every
+  // request cycles TranslateService → HttpClient (NG0200) and login POST never fires.
+  const injector = inject(Injector);
   const auth = inject(AuthService);
 
   return next(req).pipe(
@@ -50,7 +52,7 @@ export const errorToastInterceptor: HttpInterceptorFn = (req, next) => {
           return throwError(() => error);
         }
 
-        toastError.notifyFailure({
+        injector.get(ToastErrorService).notifyFailure({
           method: req.method,
           urlPath,
           httpStatus,
@@ -60,7 +62,7 @@ export const errorToastInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      toastError.notifyFailure({
+      injector.get(ToastErrorService).notifyFailure({
         method: req.method,
         urlPath,
         httpStatus,
