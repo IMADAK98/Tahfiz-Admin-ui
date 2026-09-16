@@ -1,0 +1,52 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="assign-students-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="assign-students-title">إضافة طلاب إلى الخطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        @if (plan(); as currentPlan) {
+          <p class="plan-item-context">خطة: <strong>{{ currentPlan.name }}</strong></p>
+        }
+
+        @if (availableStudents().length) {
+          <ul class="student-check-list">
+            @for (student of availableStudents(); track student.id) {
+              <li>
+                <label class="student-check">
+                  <input
+                    type="checkbox"
+                    [checked]="isStudentSelected(student.id)"
+                    (change)="toggleStudent(student.id, $any($event.target).checked)"
+                  />
+                  <span class="avatar-initial" aria-hidden="true">{{ student.name.charAt(0) }}</span>
+                  <span>{{ student.name }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="hint">جميع طلاب الحلقة مُعيَّنون على هذه الخطة.</p>
+        }
+      </form>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="submitting() || !availableStudents().length"
+          (click)="onSubmit($event)"
+        >
+          {{ submitting() ? 'جاري الإضافة…' : 'إضافة' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+}

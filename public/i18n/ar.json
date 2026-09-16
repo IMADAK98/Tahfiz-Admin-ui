@@ -28,5 +28,23 @@
       "noTeachers": "لا يوجد معلّمون متاحون للتعيين",
       "noStudents": "لا يوجد طلاب متاحون للإضافة"
     }
+  },
+  "halaqaDetail": {
+    "validation": {
+      "pickCategory": "اختر الفئة",
+      "pickPeriod": "اختر الفترة",
+      "pickTeacher": "اختر المعلّم",
+      "studentLimit": "أدخل حدّ الطلاب (1 على الأقل)",
+      "planName": "أدخل اسم الخطة",
+      "fromSurah": "اختر سورة البداية",
+      "fromAyah": "أدخل آية البداية",
+      "amount": "أدخل قيمة المقدار",
+      "pickStudent": "اختر طالباً واحداً على الأقل",
+      "centerUnknown": "تعذّر تحديد المركز من الجلسة"
+    },
+    "success": {
+      "planCreated": "تم إنشاء الخطة",
+      "studentsEnrolled": "تم تسجيل الطلاب في الحلقة"
+    }
   }
 }

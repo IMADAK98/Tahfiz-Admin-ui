@@ -1,0 +1,112 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-halaqa-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="edit-halaqa-title">تعديل الحلقة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <label for="edit-category">الفئة</label>
+            <select
+              class="select"
+              id="edit-category"
+              [ngModel]="form().category"
+              (ngModelChange)="form.update((current) => ({ ...current, category: $event }))"
+              name="category"
+              required
+            >
+              <option value="" disabled>اختر الفئة</option>
+              @for (option of categoryOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="edit-period">الفترة</label>
+            <select
+              class="select"
+              id="edit-period"
+              [ngModel]="form().period"
+              (ngModelChange)="form.update((current) => ({ ...current, period: $event }))"
+              name="period"
+              required
+            >
+              <option value="" disabled>اختر الفترة</option>
+              @for (option of periodOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <label for="edit-status">الحالة <span class="hint-inline">(عرض فقط)</span></label>
+            <div class="field-readonly" id="edit-status">
+              <span
+                class="badge"
+                [class.badge-success]="form().isActive"
+                [class.badge-neutral]="!form().isActive"
+              >
+                {{ form().isActive ? 'نشطة' : 'متوقفة' }}
+              </span>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="edit-teacher">المعلّم</label>
+            <select
+              class="select"
+              id="edit-teacher"
+              [ngModel]="form().teacherId"
+              (ngModelChange)="form.update((current) => ({ ...current, teacherId: $event }))"
+              name="teacherId"
+              required
+              [disabled]="pickersLoading()"
+            >
+              <option [ngValue]="null" disabled>اختر المعلّم</option>
+              @for (teacher of teachers(); track teacher.id) {
+                <option [ngValue]="teacher.id">{{ teacher.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="edit-student-limit">عدد الطلاب</label>
+          <input
+            class="input"
+            id="edit-student-limit"
+            type="number"
+            min="1"
+            [ngModel]="form().studentLimit"
+            (ngModelChange)="form.update((current) => ({ ...current, studentLimit: $event }))"
+            name="studentLimit"
+            required
+          />
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="onSubmit($event)">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,78 @@
+import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
+import { ApiError } from '../../../core/api/api-error';
+import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { TOAST_I18N } from '../../../core/ui/toast-messages';
+import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
+import { HalaqaDetailService } from '../halaqa-detail.service';
+
+@Component({
+  selector: 'app-edit-plan-name-modal',
+  imports: [FormsModule],
+  templateUrl: './edit-plan-name-modal.html',
+})
+export class EditPlanNameModalComponent {
+  private readonly detailService = inject(HalaqaDetailService);
+  private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
+
+  readonly visible = input.required<boolean>();
+  readonly planId = input.required<number | null>();
+  readonly planName = input.required<string>();
+  readonly saved = output<void>();
+  readonly closed = output<void>();
+
+  protected readonly name = signal('');
+  protected readonly submitting = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      if (!this.visible()) {
+        return;
+      }
+      this.name.set(this.planName());
+      this.errorMessage.set(null);
+    });
+  }
+
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.close();
+    }
+  }
+
+  protected close(): void {
+    if (this.submitting()) {
+      return;
+    }
+    this.closed.emit();
+  }
+
+  protected onSubmit(event: Event): void {
+    event.preventDefault();
+    const planId = this.planId();
+    const trimmed = this.name().trim();
+    if (!planId) {
+      return;
+    }
+    if (!trimmed) {
+      this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.planName));
+      return;
+    }
+
+    this.submitting.set(true);
+    this.detailService.updatePlanName(planId, trimmed).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
+        this.saved.emit();
+      },
+      error: (error: unknown) => {
+        this.submitting.set(false);
+        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+      },
+    });
+  }
+}

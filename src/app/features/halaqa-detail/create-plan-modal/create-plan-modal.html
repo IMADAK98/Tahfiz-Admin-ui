@@ -1,0 +1,200 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-plan-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="create-plan-title">إضافة خطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body plan-item-form" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <div class="input-group">
+          <label for="create-plan-name">اسم الخطة</label>
+          <input
+            class="input"
+            id="create-plan-name"
+            type="text"
+            placeholder="مثال: خطة الحفظ الأسبوعية"
+            [ngModel]="planName()"
+            (ngModelChange)="planName.set($event)"
+            name="planName"
+            required
+          />
+        </div>
+
+        <div>
+          <h3 class="plan-edit-section-title">اختر الطلاب</h3>
+          @if (rosterStudents().length) {
+            <ul class="student-check-list">
+              @for (student of rosterStudents(); track student.id) {
+                <li>
+                  <label class="student-check">
+                    <input
+                      type="checkbox"
+                      [checked]="isStudentSelected(student.id)"
+                      (change)="toggleStudent(student.id, $any($event.target).checked)"
+                    />
+                    <span class="avatar-initial" aria-hidden="true">{{ student.name.charAt(0) }}</span>
+                    <span>{{ student.name }}</span>
+                  </label>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hint">لا يوجد طلاب مسجّلون في الحلقة بعد.</p>
+          }
+        </div>
+
+        <div class="plan-edit-items-head">
+          <h3 class="plan-edit-section-title">عناصر الخطة</h3>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addItem()">+ إضافة عنصر</button>
+        </div>
+
+        <ul class="plan-edit-items">
+          @for (item of items(); track $index; let index = $index) {
+            <li class="plan-edit-item">
+              <div class="plan-edit-item-top">
+                <div class="input-group">
+                  <label>النوع</label>
+                  <select
+                    class="select"
+                    [ngModel]="item.type"
+                    (ngModelChange)="updateItem(index, { type: $event })"
+                    [name]="'type-' + index"
+                  >
+                    @for (option of itemTypeOptions; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+                <fieldset class="dir-fieldset brand-dir">
+                  <legend>الاتجاه</legend>
+                  @for (option of directionOptions; track option.value) {
+                    <label class="dir-opt">
+                      <input
+                        type="radio"
+                        [name]="'direction-' + index"
+                        [value]="option.value"
+                        [checked]="item.direction === option.value"
+                        (change)="updateItem(index, { direction: option.value })"
+                      />
+                      {{ option.label }}
+                    </label>
+                  }
+                </fieldset>
+                @if (items().length > 1) {
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm plan-edit-remove"
+                    (click)="removeItem(index)"
+                  >
+                    إزالة العنصر
+                  </button>
+                }
+              </div>
+
+              <div class="plan-item-range-grid">
+                <div class="input-group">
+                  <label>من سورة</label>
+                  <select
+                    class="select"
+                    [ngModel]="item.fromSurah"
+                    (ngModelChange)="updateItem(index, { fromSurah: +$event })"
+                    [name]="'fromSurah-' + index"
+                    [disabled]="surahsLoading()"
+                  >
+                    @for (surah of surahOptions(); track surah.number) {
+                      <option [ngValue]="surah.number">{{ surah.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>من آية</label>
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    [ngModel]="item.fromAyah"
+                    (ngModelChange)="updateItem(index, { fromAyah: +$event })"
+                    [name]="'fromAyah-' + index"
+                  />
+                </div>
+                <div class="input-group">
+                  <label>إلى سورة <span class="hint">(اختياري)</span></label>
+                  <select
+                    class="select"
+                    [ngModel]="item.toSurah"
+                    (ngModelChange)="updateItem(index, { toSurah: $event ? +$event : null })"
+                    [name]="'toSurah-' + index"
+                    [disabled]="surahsLoading()"
+                  >
+                    <option [ngValue]="null">—</option>
+                    @for (surah of surahOptions(); track surah.number) {
+                      <option [ngValue]="surah.number">{{ surah.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>إلى آية <span class="hint">(اختياري)</span></label>
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    [ngModel]="item.toAyah"
+                    (ngModelChange)="updateItem(index, { toAyah: $event ? +$event : null })"
+                    [name]="'toAyah-' + index"
+                  />
+                </div>
+              </div>
+
+              <div class="plan-item-amount-grid">
+                <div class="input-group">
+                  <label>نوع المقدار</label>
+                  <select
+                    class="select"
+                    [ngModel]="item.amountType"
+                    (ngModelChange)="updateItem(index, { amountType: $event })"
+                    [name]="'amountType-' + index"
+                  >
+                    @for (option of amountTypeOptions; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>القيمة</label>
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    [ngModel]="item.amountValue"
+                    (ngModelChange)="updateItem(index, { amountValue: +$event })"
+                    [name]="'amountValue-' + index"
+                  />
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="onSubmit($event)">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

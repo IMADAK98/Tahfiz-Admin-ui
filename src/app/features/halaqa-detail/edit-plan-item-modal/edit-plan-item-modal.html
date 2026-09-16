@@ -1,0 +1,147 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="plan-item-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="plan-item-title">تعديل العنصر</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+
+      <form class="modal-body plan-item-form" (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <p class="plan-item-context">خطة: <strong>{{ planName() }}</strong></p>
+
+        <div class="plan-item-form-grid">
+          <div class="input-group">
+            <label for="edit-item-type">النوع</label>
+            <select
+              class="select"
+              id="edit-item-type"
+              [ngModel]="form().type"
+              (ngModelChange)="patchForm({ type: $event })"
+              name="type"
+            >
+              @for (option of itemTypeOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <fieldset class="dir-fieldset brand-dir">
+            <legend>الاتجاه</legend>
+            @for (option of directionOptions; track option.value) {
+              <label class="dir-opt">
+                <input
+                  type="radio"
+                  name="item-direction"
+                  [value]="option.value"
+                  [checked]="form().direction === option.value"
+                  (change)="patchForm({ direction: option.value })"
+                />
+                {{ option.label }}
+              </label>
+            }
+          </fieldset>
+        </div>
+
+        <div class="plan-item-range-grid">
+          <div class="input-group">
+            <label for="edit-from-surah">من سورة</label>
+            <select
+              class="select"
+              id="edit-from-surah"
+              [ngModel]="form().fromSurah"
+              (ngModelChange)="patchForm({ fromSurah: +$event })"
+              name="fromSurah"
+            >
+              @for (surah of surahOptions(); track surah.number) {
+                <option [ngValue]="surah.number">{{ surah.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="edit-from-ayah">من آية</label>
+            <input
+              class="input"
+              id="edit-from-ayah"
+              type="number"
+              min="1"
+              [ngModel]="form().fromAyah"
+              (ngModelChange)="patchForm({ fromAyah: +$event })"
+              name="fromAyah"
+            />
+          </div>
+          <div class="input-group">
+            <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
+            <select class="select" id="edit-to-surah" [ngModel]="form().toSurah" name="toSurah" disabled>
+              @if (form().toSurah; as toSurah) {
+                @for (surah of surahOptions(); track surah.number) {
+                  @if (surah.number === toSurah) {
+                    <option [ngValue]="surah.number">{{ surah.label }}</option>
+                  }
+                }
+              } @else {
+                <option [ngValue]="null">—</option>
+              }
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="edit-to-ayah">إلى آية <span class="hint-inline">(عرض فقط)</span></label>
+            <input
+              class="input"
+              id="edit-to-ayah"
+              type="text"
+              [ngModel]="form().toAyah ?? '—'"
+              name="toAyah"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="plan-item-amount-grid">
+          <div class="input-group">
+            <label for="edit-amount-type">نوع المقدار</label>
+            <select
+              class="select"
+              id="edit-amount-type"
+              [ngModel]="form().amountType"
+              (ngModelChange)="patchForm({ amountType: $event })"
+              name="amountType"
+            >
+              @for (option of amountTypeOptions; track option.value) {
+                <option [ngValue]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="edit-amount-value">القيمة</label>
+            <input
+              class="input"
+              id="edit-amount-value"
+              type="number"
+              min="1"
+              [ngModel]="form().amountValue"
+              (ngModelChange)="patchForm({ amountValue: +$event })"
+              name="amountValue"
+            />
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="onSubmit($event)">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="submitting()" (click)="close()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+}

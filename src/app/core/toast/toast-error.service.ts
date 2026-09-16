@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { TOAST_I18N, formatServerErrorToastBody } from '../ui/toast-messages';
+import { TOAST_I18N, resolveServerErrorToastDisplay } from '../ui/toast-messages';
 import { ToastMessageService } from './toast-message.service';
 
 export interface ToastFailureNotifyOptions {
@@ -24,41 +24,76 @@ export class ToastErrorService {
   private readonly recentFingerprints = new Map<string, number>();
 
   notifyFailure(options: ToastFailureNotifyOptions): void {
-    const body = this.resolveBody(options);
+    const copy = this.resolveCopy(options);
     const severity = this.resolveSeverity(options);
     const fingerprint = options.isSessionExpired
       ? ToastErrorService.SESSION_EXPIRED_FINGERPRINT
-      : `${options.method}|${options.urlPath}|${options.status}|${body}`;
+      : `${options.method}|${options.urlPath}|${options.status}|${copy.fingerprint}`;
 
     if (this.isDuplicate(fingerprint)) {
       return;
     }
 
     if (severity === 'warn') {
-      this.toastMessage.notifyWarnBody(body);
+      this.toastMessage.notifyWarnBody(copy.body);
       return;
     }
 
-    this.toastMessage.notifyErrorBody(body);
+    if (copy.mode === 'titled') {
+      this.toastMessage.notifyErrorTitled(copy.summary, copy.detail);
+      return;
+    }
+
+    this.toastMessage.notifyErrorBody(copy.body);
   }
 
-  private resolveBody(options: ToastFailureNotifyOptions): string {
+  private resolveCopy(options: ToastFailureNotifyOptions): {
+    mode: 'single' | 'titled';
+    body: string;
+    summary: string;
+    detail: string;
+    fingerprint: string;
+  } {
     if (options.isSessionExpired) {
-      return this.translate.instant(TOAST_I18N.errors.sessionExpired);
+      const body = this.translate.instant(TOAST_I18N.errors.sessionExpired);
+      return { mode: 'single', body, summary: '', detail: '', fingerprint: body };
     }
 
     if (options.isNetworkError) {
-      return this.translate.instant(TOAST_I18N.errors.network);
+      const body = this.translate.instant(TOAST_I18N.errors.network);
+      return { mode: 'single', body, summary: '', detail: '', fingerprint: body };
     }
 
     const serverMessage = options.serverMessage?.trim();
     if (serverMessage) {
-      return formatServerErrorToastBody(serverMessage, (message) =>
-        this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
+      const requestFailedTitle = this.translate.instant(TOAST_I18N.errors.requestFailedTitle);
+      const display = resolveServerErrorToastDisplay(
+        serverMessage,
+        requestFailedTitle,
+        (message) => this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
       );
+
+      if (display.mode === 'titled') {
+        return {
+          mode: 'titled',
+          body: '',
+          summary: display.summary,
+          detail: display.detail,
+          fingerprint: `${display.summary}|${display.detail}`,
+        };
+      }
+
+      return {
+        mode: 'single',
+        body: display.body,
+        summary: '',
+        detail: '',
+        fingerprint: display.body,
+      };
     }
 
-    return this.translate.instant(TOAST_I18N.errors.unexpected);
+    const body = this.translate.instant(TOAST_I18N.errors.unexpected);
+    return { mode: 'single', body, summary: '', detail: '', fingerprint: body };
   }
 
   private resolveSeverity(options: ToastFailureNotifyOptions): 'error' | 'warn' {

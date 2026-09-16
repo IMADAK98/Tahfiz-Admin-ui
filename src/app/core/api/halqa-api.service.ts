@@ -7,6 +7,19 @@ import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token'
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { CreateHalqaPayload, HalqaApiRecord } from './models/halqa.model';
+import {
+  EnrollStudentsPayload,
+  HalqaStudentApiRecord,
+  StudyPlanSummaryApiRecord,
+} from './models/study-plan.model';
+
+export interface UpdateHalqaPayload {
+  name: string;
+  category: CreateHalqaPayload['category'];
+  periods: CreateHalqaPayload['periods'];
+  studentLimit: number;
+  teacherId?: number;
+}
 
 /** Center-admin halqa HTTP — list by term/center; create/update. No by-teacher-id (TEACHER/mobile). */
 @Injectable({ providedIn: 'root' })
@@ -37,6 +50,71 @@ export class HalqaApiService {
       .post<ApiEnvelope<HalqaApiRecord>>(
         `${this.apiBaseUrl}/halqa`,
         payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  getById(id: number): Observable<HalqaApiRecord> {
+    return this.http
+      .get<ApiEnvelope<HalqaApiRecord>>(`${this.apiBaseUrl}/halqa/${id}`, {
+        observe: 'response',
+      })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  updateHalqa(id: number, payload: UpdateHalqaPayload): Observable<HalqaApiRecord> {
+    return this.http
+      .put<ApiEnvelope<HalqaApiRecord>>(
+        `${this.apiBaseUrl}/halqa/${id}`,
+        payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  deleteHalqa(id: number): Observable<unknown> {
+    return this.http
+      .delete<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/halqa/${id}`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  getStudentsByHalqaId(halqaId: number, date: string): Observable<HalqaStudentApiRecord[]> {
+    const params = new HttpParams().set('date', date);
+    return this.http
+      .get<ApiEnvelope<HalqaStudentApiRecord[]>>(
+        `${this.apiBaseUrl}/halqa/students/by-halqa-id/${halqaId}`,
+        { observe: 'response', params },
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  getStudyPlans(halqaId: number): Observable<StudyPlanSummaryApiRecord[]> {
+    return this.http
+      .get<ApiEnvelope<StudyPlanSummaryApiRecord[]>>(
+        `${this.apiBaseUrl}/halqa/study-plans/${halqaId}`,
+        { observe: 'response' },
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  enrollStudents(halqaId: number, payload: EnrollStudentsPayload): Observable<unknown> {
+    return this.http
+      .post<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/halqa/enroll-students/${halqaId}`,
+        payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  unenrollStudent(halqaId: number, studentId: number): Observable<unknown> {
+    return this.http
+      .delete<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/halqa/${halqaId}/students/${studentId}`,
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
