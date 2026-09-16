@@ -1,7 +1,11 @@
-.form-grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+.form-error {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .holiday-box {
@@ -15,6 +19,17 @@
     border-style: solid;
     border-color: var(--color-border);
     background: var(--color-surface-elevated);
+  }
+}
+
+.holiday-add-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .input {
+    max-width: 180px;
   }
 }
 
@@ -44,66 +59,5 @@
     font-size: 1rem;
     line-height: 1;
     padding: 0;
-  }
-}
-
-.hint {
-  font-size: 0.8125rem;
-  color: var(--color-muted);
-}
-
-.form-error {
-  margin: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 0.8125rem;
-}
-
-@media (max-width: 640px) {
-  .form-grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-:host ::ng-deep .tahfiz-term-dialog {
-  .p-dialog {
-    border-radius: var(--radius-modal);
-    box-shadow: var(--shadow-modal);
-    border: 1px solid var(--color-border);
-    overflow: hidden;
-  }
-
-  .p-dialog-header {
-    padding: var(--space-5);
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface-elevated);
-
-    .p-dialog-title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--color-primary);
-    }
-  }
-
-  .p-dialog-content {
-    padding: var(--space-5);
-    background: var(--color-surface-elevated);
-  }
-
-  .p-dialog-footer {
-    padding: var(--space-4) var(--space-5);
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface-elevated);
-    display: flex;
-    gap: var(--space-3);
-    justify-content: flex-start;
   }
 }

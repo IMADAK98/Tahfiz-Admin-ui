@@ -26,7 +26,7 @@ export class AdminShellComponent {
   private readonly router = inject(Router);
 
   protected readonly loggingOut = signal(false);
-  protected readonly displayName = signal('مدير المركز');
+  protected readonly displayName = signal('مشرف');
   protected readonly avatarInitial = signal('م');
   protected readonly pageTitle = signal('لوحة التحكم');
   protected readonly isDashboard = signal(false);
@@ -34,7 +34,7 @@ export class AdminShellComponent {
   constructor() {
     const claims = this.auth.getClaims();
     if (claims?.role) {
-      this.displayName.set(claims.role === 'SYSTEM_ADMIN' ? 'مدير النظام' : 'مدير المركز');
+      this.displayName.set(claims.role === 'SYSTEM_ADMIN' ? 'مدير النظام' : 'مشرف');
       this.avatarInitial.set(claims.role === 'SYSTEM_ADMIN' ? 'ن' : 'م');
     }
 

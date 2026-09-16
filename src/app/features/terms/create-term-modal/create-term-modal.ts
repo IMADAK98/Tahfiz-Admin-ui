@@ -1,6 +1,5 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Dialog } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { ApiError } from '../../../core/api/api-error';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -13,7 +12,7 @@ import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-create-term-modal',
-  imports: [FormsModule, Dialog],
+  imports: [FormsModule],
   templateUrl: './create-term-modal.html',
   styleUrl: './create-term-modal.scss',
 })
@@ -34,8 +33,8 @@ export class CreateTermModalComponent {
     return canPickHolidayDates(this.form);
   }
 
-  protected onVisibleChange(next: boolean): void {
-    if (!next) {
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
       this.close();
     }
   }

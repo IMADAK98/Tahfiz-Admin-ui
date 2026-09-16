@@ -5,27 +5,30 @@ export interface DashboardKpiCard {
   metaTone?: 'default' | 'success';
 }
 
-/** Mock KPI data until dashboard stats APIs land. */
+/** Mock KPI data — preview-aligned demo values until dashboard stats APIs land. */
 export const MOCK_DASHBOARD_KPIS: DashboardKpiCard[] = [
   {
     label: 'الحلقات النشطة',
-    value: '—',
-    meta: 'بيانات تجريبية — سيتم الربط لاحقاً',
+    value: '1',
+    meta: 'TEST Halqa CoS · تجريبي',
   },
   {
     label: 'المعلمون',
-    value: '—',
-    meta: 'بيانات تجريبية — سيتم الربط لاحقاً',
+    value: '1',
+    meta: 'userId 25 · تجريبي',
   },
   {
     label: 'الطلاب المسجّلون',
-    value: '—',
-    meta: 'بيانات تجريبية — سيتم الربط لاحقاً',
+    value: '1',
+    meta: 'userId 26 · تجريبي',
   },
   {
     label: 'طلبات معلّقة',
-    value: '—',
-    meta: 'بيانات تجريبية — سيتم الربط لاحقاً',
+    value: '0',
+    meta: 'لا طلبات بانتظار المراجعة',
     metaTone: 'success',
   },
 ];
+
+/** Mock study-plan banner suffix until term plan API is wired. */
+export const MOCK_TERM_PLAN_SUMMARY = 'خطة الدراسة #9 (حفظ / تثبيت / مراجعة) · تجريبي';

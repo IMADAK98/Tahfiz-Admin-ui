@@ -11,9 +11,7 @@
           + إنشاء دورة
         </button>
         <p class="create-hint">أنهِ الدورة الحالية أولاً</p>
-        <button type="button" class="btn btn-secondary" disabled title="سيتم تفعيل إنهاء الدورة في تحديث لاحق">
-          إنهاء الدورة
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">إنهاء الدورة</button>
       } @else {
         <button type="button" class="btn btn-primary" (click)="openCreateModal()">+ إنشاء دورة</button>
       }
@@ -40,14 +38,11 @@
           <div class="term-banner-label">الدورة النشطة</div>
           <strong>{{ term.name }}</strong>
           <span class="badge badge-primary" style="margin-inline-start: 8px">termId {{ term.id }}</span>
-          <div class="term-banner-sub">{{ registrationSummary(term) }}</div>
+          <div class="term-banner-sub">{{ termBannerSummary(term) }}</div>
         </div>
-        <button type="button" class="btn btn-secondary" disabled title="سيتم تفعيل إنهاء الدورة في تحديث لاحق">
-          إنهاء الدورة
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">إنهاء الدورة</button>
       </div>
 
-      <p class="kpi-grid-label">مؤشرات تجريبية — غير مرتبطة بالخادم بعد</p>
       <div class="kpi-grid">
         @for (kpi of mockKpis; track kpi.label) {
           <article class="card kpi">
@@ -124,3 +119,4 @@
 />
 
 <p-toast position="top-left" />
+<p-confirmdialog />

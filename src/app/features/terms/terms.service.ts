@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { ApiError } from '../../core/api/api-error';
 import { CenterApiService } from '../../core/api/center-api.service';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { TermApiService } from '../../core/api/term-api.service';
@@ -32,5 +34,27 @@ export class TermsService {
       throw new Error(validationError);
     }
     return this.termApi.createTerm(buildCreateTermPayload(form, centerId));
+  }
+
+  /**
+   * ponytail: best documented path is PUT /term/{id} (dates/holidays only).
+   * OpenAPI UpdateTermDto omits status — COMPLETED transition TBD; try endDate=today then surface API message.
+   */
+  endActiveTerm(termId: number): Observable<ActiveTerm> {
+    const today = new Date().toISOString().slice(0, 10);
+    return this.termApi.updateTerm(termId, { endDate: today }).pipe(
+      catchError((error: unknown) => {
+        if (error instanceof ApiError) {
+          return throwError(() => error);
+        }
+        return throwError(
+          () =>
+            new ApiError(
+              'مسار إنهاء الدورة غير متوفر — UpdateTermDto لا يتضمن status',
+              501,
+            ),
+        );
+      }),
+    );
   }
 }

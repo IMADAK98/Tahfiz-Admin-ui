@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { ActiveTerm, CreateTermPayload } from './models/term.model';
+import { ActiveTerm, CreateTermPayload, UpdateTermPayload } from './models/term.model';
 
 @Injectable({ providedIn: 'root' })
 export class TermApiService {
@@ -21,6 +21,14 @@ export class TermApiService {
   getTermsByCenterId(centerId: number): Observable<ActiveTerm[]> {
     return this.http
       .get<ApiEnvelope<ActiveTerm[]>>(`${this.apiBaseUrl}/term/by-center-id/${centerId}`, {
+        observe: 'response',
+      })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  updateTerm(termId: number, payload: UpdateTermPayload): Observable<ActiveTerm> {
+    return this.http
+      .put<ApiEnvelope<ActiveTerm>>(`${this.apiBaseUrl}/term/${termId}`, payload, {
         observe: 'response',
       })
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
