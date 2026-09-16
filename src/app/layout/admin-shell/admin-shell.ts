@@ -56,7 +56,9 @@ export class AdminShellComponent {
 
   private syncPageTitle(url: string): void {
     const path = url.split('?')[0];
-    this.isDashboard.set(path === '/admin' || path === '/admin/dashboard');
+    this.isDashboard.set(
+      path === '/admin' || path === '/admin/dashboard' || path === '/admin/halaqat',
+    );
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');
       return;

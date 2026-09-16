@@ -1,7 +1,133 @@
-<section class="flex flex-col gap-4">
-  <header>
-    <p class="badge badge-neutral mb-3">قريباً — PR5</p>
-    <h2 class="text-xl font-bold mb-2">الحلقات</h2>
-    <p style="color: var(--color-muted)">قائمة حلقات الدورة النشطة وإنشاء حلقة جديدة.</p>
+<section class="halaqat-page">
+  <header class="halaqat-header">
+    <div>
+      <h1>الحلقات</h1>
+      @if (activeTerm(); as term) {
+        <p>ضمن الدورة {{ term.name }}</p>
+      } @else if (loadState() === HalaqatLoadState.Ready) {
+        <p>لا توجد دورة نشطة</p>
+      }
+    </div>
+
+    <div class="halaqat-actions">
+      @if (activeTerm()) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">+ إنشاء حلقة</button>
+      }
+    </div>
   </header>
+
+  @if (loadState() === HalaqatLoadState.Loading) {
+    <p style="color: var(--color-muted)">جاري تحميل الحلقات…</p>
+  } @else if (loadState() === HalaqatLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <button type="button" class="btn btn-secondary" (click)="reload()">إعادة المحاولة</button>
+  } @else if (!activeTerm() || !halaqat().length) {
+    <div class="empty-block">
+      <h2>لا توجد حلقات بعد</h2>
+      <p>
+        أنشئ حلقة وعيّن معلّماً وأضِف طلاباً. إن لم تكن هناك دورة نشطة، أنشئ دورة أولاً من
+        <a routerLink="/admin">لوحة التحكم</a>.
+      </p>
+      @if (activeTerm()) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">إنشاء حلقة</button>
+      }
+    </div>
+  } @else {
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <div class="filter-field">
+          <label for="halaqa-search">بحث</label>
+          <input
+            class="input search"
+            id="halaqa-search"
+            type="search"
+            placeholder="ابحث باسم الحلقة أو المعلّم…"
+            [(ngModel)]="filters.search"
+          />
+        </div>
+        <div class="filter-field">
+          <label for="filter-category">الفئة</label>
+          <select class="select" id="filter-category" [(ngModel)]="filters.category" style="width: auto">
+            <option value="">كل الفئات</option>
+            @for (option of categoryOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="filter-period">الفترة</label>
+          <select class="select" id="filter-period" [(ngModel)]="filters.period" style="width: auto">
+            <option value="">كل الفترات</option>
+            @for (option of periodOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <span class="badge badge-primary">{{ filteredCountLabel() }}</span>
+    </div>
+
+    <div class="card table-wrap">
+      @if (filteredHalaqat().length) {
+        <table class="halaqa-table">
+          <thead>
+            <tr>
+              <th>الحلقة</th>
+              <th>فئة</th>
+              <th>فترة</th>
+              <th>المعلّم</th>
+              <th>الطلاب</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of filteredHalaqat(); track row.id) {
+              <tr>
+                <td class="name-cell">
+                  <strong>{{ row.name }}</strong>
+                  <span>ضمن الدورة النشطة</span>
+                </td>
+                <td>{{ categoryLabel(row.category) }}</td>
+                <td>{{ periodsLabel(row.periods) }}</td>
+                <td>
+                  <div style="font-weight: 600">{{ row.teacherName ?? '—' }}</div>
+                </td>
+                <td class="students-cell">
+                  <strong>{{ row.studentsCount }}</strong>
+                  @if (row.studentNames.length) {
+                    <div class="student-names">{{ formatStudentNames(row.studentNames) }}</div>
+                  }
+                </td>
+                <td>
+                  @if (row.isActive) {
+                    <span class="badge badge-success">نشطة</span>
+                  } @else {
+                    <span class="badge badge-neutral">غير نشطة</span>
+                  }
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="btn btn-secondary btn-sm">تعديل</button>
+                    <a class="btn btn-ghost btn-sm" [routerLink]="['/admin/halaqat', row.id]">التفاصيل</a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="no-results">لا توجد حلقات مطابقة للبحث أو الفلاتر.</p>
+      }
+    </div>
+  }
 </section>
+
+<app-create-halaqa-modal
+  [visible]="showCreateModal()"
+  [activeTerm]="activeTerm()"
+  (halaqaCreated)="onHalaqaCreated()"
+  (closed)="closeCreateModal()"
+/>
+
+<p-toast position="top-left" />

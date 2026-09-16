@@ -10,7 +10,8 @@
     "check:envelope": "node scripts/envelope-self-check.mjs",
     "check:auth": "node scripts/auth-self-check.mjs",
     "check:center-signup": "node scripts/center-signup-self-check.mjs",
-    "check:term-validation": "node scripts/term-validation-self-check.mjs"
+    "check:term-validation": "node scripts/term-validation-self-check.mjs",
+    "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs"
   },
   "private": true,
   "engines": {
