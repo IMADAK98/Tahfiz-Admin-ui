@@ -55,6 +55,16 @@
   }
 }
 
+.btn-accent {
+  background: var(--color-accent);
+  color: #15241c;
+
+  &:hover {
+    filter: brightness(0.95);
+    color: #15241c;
+  }
+}
+
 .btn-lg {
   padding: 14px 28px;
   font-size: 1rem;
