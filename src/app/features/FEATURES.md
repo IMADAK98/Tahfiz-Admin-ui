@@ -47,4 +47,4 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 
 ## Core (shared infra only)
 
-`core/` — auth, interceptors, guards, envelope helpers, shared API models. Feature-specific services live next to their feature (e.g. `center-signup/center-signup.service.ts`).
+`core/` — auth, interceptors, guards, envelope helpers, shared API clients (`SignupApiService`, etc.), shared contract helpers (`core/signup/pending-center-payload.ts`). Feature services (e.g. `center-signup/center-signup.service.ts`) are thin UI orchestration only — they call core API services, not HttpClient directly.

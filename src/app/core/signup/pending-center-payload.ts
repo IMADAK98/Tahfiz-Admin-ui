@@ -1,4 +1,4 @@
-import { PendingCenterRequest } from '../../core/api/models/pending-center.model';
+import { PendingCenterRequest } from '../api/models/pending-center.model';
 
 export interface CenterSignupFormValues {
   adminName: string;

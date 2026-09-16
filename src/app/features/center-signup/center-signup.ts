@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { Checkbox } from 'primeng/checkbox';
 import { ApiError } from '../../core/api/api-error';
 import { CenterSignupService } from './center-signup.service';
-import { buildPendingCenterPayload } from './pending-center-payload';
 
 @Component({
   selector: 'app-center-signup',
@@ -47,7 +46,7 @@ export class CenterSignupComponent {
     this.errorMessage.set(null);
     this.submitting.set(true);
 
-    const payload = buildPendingCenterPayload({
+    this.signupApi.submitCenterSignup({
       adminName: this.adminName,
       adminEmail: this.adminEmail,
       adminPhone: this.adminPhone,
@@ -59,9 +58,7 @@ export class CenterSignupComponent {
       adminIdentificationNumber: this.adminIdentificationNumber,
       adminPassportNumber: this.adminPassportNumber,
       usePassport: this.usePassport,
-    });
-
-    this.signupApi.submitPendingCenterRequest(payload).subscribe({
+    }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.showSuccess.set(true);
