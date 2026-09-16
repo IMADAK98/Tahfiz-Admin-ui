@@ -1,0 +1,13 @@
+<section class="flex flex-col gap-4">
+  <header>
+    <p class="badge badge-neutral mb-3">قريباً — PR5</p>
+    <h2 class="text-xl font-bold mb-2">تفاصيل الحلقة</h2>
+    <p style="color: var(--color-muted)">
+      @if (halaqaId()) {
+        معرّف الحلقة: {{ halaqaId() }} — تبويب الخطط والتفاصيل سيُربط هنا.
+      } @else {
+        تفاصيل الحلقة وتبويب الخطط.
+      }
+    </p>
+  </header>
+</section>

@@ -1,0 +1,108 @@
+<div class="login-page">
+  <div class="login-wrap">
+    <a class="brand-row" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">ت</span>
+      تحفيظ
+    </a>
+
+    <div class="login-card">
+      <h1>تسجيل الدخول</h1>
+      <p class="login-sub">لوحة إدارة المركز</p>
+
+      @if (infoMessage()) {
+        <p class="login-info" role="status">{{ infoMessage() }}</p>
+      }
+
+      @if (errorMessage()) {
+        <p class="login-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <form class="login-form" (submit)="onSubmit($event)" aria-label="نموذج تسجيل الدخول">
+        <div class="input-group login-field">
+          <label for="email">البريد الإلكتروني</label>
+          <input
+            pInputText
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="admin@center.example"
+            autocomplete="username"
+            required
+            fluid
+            [disabled]="submitting()"
+          />
+        </div>
+
+        <div class="input-group login-field">
+          <label for="password">كلمة المرور</label>
+          <p-password
+            inputId="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            [feedback]="false"
+            [toggleMask]="true"
+            autocomplete="current-password"
+            required
+            fluid
+            [disabled]="submitting()"
+          />
+        </div>
+
+        <div class="row-between">
+          <label class="remember-row">
+            <p-checkbox [(ngModel)]="rememberMe" name="remember" [binary]="true" inputId="remember" />
+            <span>تذكّرني</span>
+          </label>
+          <button type="button" class="btn btn-ghost btn-sm" (click)="showForgotPanel.set(true)">
+            نسيت كلمة المرور؟
+          </button>
+        </div>
+
+        <p-button
+          type="submit"
+          [label]="submitting() ? 'جاري الدخول…' : 'دخول'"
+          styleClass="w-full"
+          [loading]="submitting()"
+          [disabled]="submitting()"
+        />
+      </form>
+
+      @if (showForgotPanel()) {
+        <section class="forgot-panel" aria-labelledby="forgot-title">
+          <h2 id="forgot-title">استعادة كلمة المرور</h2>
+          <p>أدخل بريدك وسنرسل رابط إعادة التعيين.</p>
+          <div class="input-group login-field">
+            <label for="reset-email">البريد الإلكتروني</label>
+            <input
+              pInputText
+              id="reset-email"
+              type="email"
+              [(ngModel)]="resetEmail"
+              placeholder="admin@center.example"
+              fluid
+            />
+          </div>
+          <p-button
+            type="button"
+            label="إرسال رابط الاستعادة"
+            severity="secondary"
+            styleClass="w-full mt-3"
+            (onClick)="onForgotSubmit()"
+          />
+        </section>
+      }
+
+      <div class="login-divider">أو</div>
+      <p style="text-align: center; font-size: 0.9375rem; color: var(--color-muted)">
+        ليس لديك حساب مركز؟
+        <a [routerLink]="centerSignupRoute" style="font-weight: 700" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
+      </p>
+    </div>
+
+    <p class="login-footer-links">
+      <a routerLink="/">العودة للرئيسية</a>
+    </p>
+  </div>
+</div>

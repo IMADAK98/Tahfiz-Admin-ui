@@ -1,0 +1,16 @@
+<div class="public-shell">
+  <header class="site-header">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">ت</span>
+      تحفيظ
+    </a>
+    <nav class="header-nav" aria-label="التنقل الرئيسي">
+      <a class="nav-text" routerLink="/" fragment="features">المميزات</a>
+      <a class="nav-text" routerLink="/login">تسجيل الدخول</a>
+      <a class="btn btn-primary" [routerLink]="centerSignupRoute" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
+    </nav>
+  </header>
+  <main class="public-main landing-main">
+    <router-outlet />
+  </main>
+</div>

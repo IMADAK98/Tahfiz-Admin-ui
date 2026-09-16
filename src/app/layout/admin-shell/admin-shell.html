@@ -1,0 +1,75 @@
+<div class="app-shell">
+  <aside class="sidebar" aria-label="القائمة الجانبية">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo" aria-hidden="true">ث</div>
+      <div class="sidebar-brand-text">
+        <strong>ثفيز</strong>
+        <span>لوحة الإدارة</span>
+      </div>
+    </div>
+
+    <div class="nav-section">الرئيسية</div>
+    <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">⌂</span>
+      <span>لوحة التحكم</span>
+    </a>
+
+    <div class="nav-section">الإدارة</div>
+    <a routerLink="/admin/terms" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">◷</span>
+      <span>الدورات</span>
+    </a>
+    <a routerLink="/admin/halaqat" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">◫</span>
+      <span>الحلقات</span>
+    </a>
+    <a routerLink="/admin/teachers" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">👤</span>
+      <span>المعلمون</span>
+    </a>
+    <a routerLink="/admin/teacher-requests" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">📋</span>
+      <span>طلبات المعلمين</span>
+    </a>
+    <a routerLink="/admin/students" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">🎓</span>
+      <span>الطلاب</span>
+    </a>
+    <a routerLink="/admin/student-requests" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">📥</span>
+      <span>طلبات الطلاب</span>
+    </a>
+
+    <div class="nav-section">التقارير</div>
+    <a routerLink="/admin/reports/attendance" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">📊</span>
+      <span>تقرير الحضور</span>
+    </a>
+    <a routerLink="/admin/reports/progress" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon" aria-hidden="true">📈</span>
+      <span>تقرير التقدّم</span>
+    </a>
+
+    <div class="sidebar-footer">
+      <button type="button" class="nav-link w-full border-0 bg-transparent cursor-pointer" (click)="logout()" [disabled]="loggingOut()">
+        <span class="nav-icon" aria-hidden="true">⎋</span>
+        <span>{{ loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج' }}</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1 class="topbar-title">{{ pageTitle() }}</h1>
+      <div class="topbar-actions">
+        <div class="user-chip">
+          <span>{{ displayName() }}</span>
+          <span class="user-avatar" aria-hidden="true">{{ avatarInitial() }}</span>
+        </div>
+      </div>
+    </header>
+    <div class="content">
+      <router-outlet />
+    </div>
+  </div>
+</div>
