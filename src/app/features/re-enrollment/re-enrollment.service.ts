@@ -8,6 +8,7 @@ import {
   mapReEnrollmentRequest,
   ReEnrollmentRequestView,
   RejectReEnrollmentFormModel,
+  sortRequestsPendingFirst,
   validateRejectForm,
 } from './dto';
 
@@ -23,19 +24,17 @@ export class ReEnrollmentService {
     }).pipe(
       map(({ requests, terms }) => {
         const termNames = new Map(terms.map((term) => [term.id, term.name]));
-        return requests
-          .map((request) => mapReEnrollmentRequest(request, termNames))
-          .filter((request) => request.status === ReEnrollmentStatus.Pending);
+        return sortRequestsPendingFirst(
+          requests
+            .map((request) => mapReEnrollmentRequest(request, termNames))
+            .filter((request) => request.status === ReEnrollmentStatus.Pending),
+        );
       }),
     );
   }
 
   approveRequest(id: number): Observable<void> {
     return this.reEnrollmentApi.approveRequest(id);
-  }
-
-  validateRejectForm(form: RejectReEnrollmentFormModel): string | null {
-    return validateRejectForm(form);
   }
 
   rejectRequest(id: number, form: RejectReEnrollmentFormModel): Observable<void> {

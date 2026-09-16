@@ -1,48 +1,59 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ConfirmationService } from 'primeng/api';
-import { ConfirmDialog } from 'primeng/confirmdialog';
+import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
-import { TOAST_I18N } from '../../core/ui/toast-messages';
-import { ReEnrollmentRequestView, RejectReEnrollmentFormModel } from './dto';
+import { TOAST_I18N, formatServerErrorToastBody } from '../../core/ui/toast-messages';
+import {
+  isAlreadyProcessedError,
+  ReEnrollmentRequestView,
+  RejectReEnrollmentFormModel,
+  validateRejectForm,
+} from './dto';
 import { ReEnrollmentLoadState } from './enums';
-import { RejectReEnrollmentDialogComponent } from './reject-re-enrollment-dialog/reject-re-enrollment-dialog';
 import { ReEnrollmentService } from './re-enrollment.service';
+
+type ConfirmKind = 'approve' | 'reject';
 
 @Component({
   selector: 'app-re-enrollment',
-  imports: [RouterLink, ConfirmDialog, RejectReEnrollmentDialogComponent],
-  providers: [ConfirmationService],
+  imports: [RouterLink, FormsModule, TranslatePipe],
   templateUrl: './re-enrollment.html',
   styleUrl: './re-enrollment.scss',
 })
 export class ReEnrollmentComponent {
   private readonly reEnrollmentService = inject(ReEnrollmentService);
   private readonly auth = inject(AuthService);
-  private readonly confirmation = inject(ConfirmationService);
   private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly ReEnrollmentLoadState = ReEnrollmentLoadState;
 
   protected readonly loadState = signal(ReEnrollmentLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
   protected readonly requests = signal<ReEnrollmentRequestView[]>([]);
+  protected readonly expandedCards = signal<Record<number, boolean>>({});
+  protected readonly activeConfirm = signal<{ requestId: number; kind: ConfirmKind } | null>(null);
+  protected readonly rejectReasons = signal<Record<number, string>>({});
+  protected readonly rejectErrors = signal<Record<number, string | null>>({});
   protected readonly actingRequestId = signal<number | null>(null);
-  protected readonly rejectTarget = signal<ReEnrollmentRequestView | null>(null);
-  protected readonly rejectSubmitting = signal(false);
-  protected readonly rejectServerError = signal<string | null>(null);
 
-  protected readonly pendingCountLabel = computed(() => this.formatCountLabel(this.requests().length));
+  protected readonly pendingCountLabel = computed(() =>
+    this.formatCountLabel(this.requests().length),
+  );
+
   protected readonly targetTermLabel = computed(() => {
     const termIds = [...new Set(this.requests().map((request) => request.termId))];
     if (termIds.length === 1) {
       const request = this.requests()[0];
-      return request ? `الدورة المستهدفة: ${request.termLabel}` : null;
+      return request ?
+          this.translate.instant('reEnrollment.targetTerm', { term: request.termLabel })
+        : null;
     }
     if (termIds.length > 1) {
-      return `${termIds.length} دورات مستهدفة`;
+      return this.translate.instant('reEnrollment.multipleTargetTerms', { count: termIds.length });
     }
     return null;
   });
@@ -55,131 +66,198 @@ export class ReEnrollmentComponent {
     const centerId = this.auth.getClaims()?.centerId;
     if (!centerId) {
       this.loadState.set(ReEnrollmentLoadState.Error);
-      this.loadError.set('تعذّر تحديد المركز من الجلسة');
+      this.loadError.set(this.translate.instant('reEnrollment.errors.centerUnknown'));
       return;
     }
 
     this.loadState.set(ReEnrollmentLoadState.Loading);
     this.loadError.set(null);
+    this.activeConfirm.set(null);
 
     this.reEnrollmentService.loadPendingQueue(centerId).subscribe({
       next: (requests) => {
         this.requests.set(requests);
+        this.expandedCards.set(Object.fromEntries(requests.map((request) => [request.id, true])));
         this.loadState.set(ReEnrollmentLoadState.Ready);
       },
       error: (error: unknown) => {
         this.loadState.set(ReEnrollmentLoadState.Error);
         this.loadError.set(
-          error instanceof ApiError ? error.message : 'تعذّر تحميل طلبات إعادة التسجيل',
+          error instanceof ApiError ?
+            error.message
+          : this.translate.instant(TOAST_I18N.errors.unexpected),
         );
       },
     });
   }
 
-  protected confirmApprove(request: ReEnrollmentRequestView): void {
+  protected cardExpanded(requestId: number): boolean {
+    return this.expandedCards()[requestId] ?? true;
+  }
+
+  protected toggleCard(requestId: number): void {
+    this.expandedCards.update((current) => ({
+      ...current,
+      [requestId]: !this.cardExpanded(requestId),
+    }));
+  }
+
+  protected showApproveConfirm(request: ReEnrollmentRequestView, event: Event): void {
+    event.stopPropagation();
+    if (this.actingRequestId() != null) {
+      return;
+    }
+    this.activeConfirm.set({ requestId: request.id, kind: 'approve' });
+    this.rejectErrors.update((current) => ({ ...current, [request.id]: null }));
+  }
+
+  protected showRejectConfirm(request: ReEnrollmentRequestView, event: Event): void {
+    event.stopPropagation();
+    if (this.actingRequestId() != null) {
+      return;
+    }
+    this.activeConfirm.set({ requestId: request.id, kind: 'reject' });
+    this.rejectErrors.update((current) => ({ ...current, [request.id]: null }));
+  }
+
+  protected cancelConfirm(requestId: number, event?: Event): void {
+    event?.stopPropagation();
+    if (this.actingRequestId() === requestId) {
+      return;
+    }
+    this.activeConfirm.set(null);
+    this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
+  }
+
+  protected isConfirmOpen(requestId: number, kind: ConfirmKind): boolean {
+    const confirm = this.activeConfirm();
+    return confirm?.requestId === requestId && confirm.kind === kind;
+  }
+
+  protected rejectReason(requestId: number): string {
+    return this.rejectReasons()[requestId] ?? '';
+  }
+
+  protected setRejectReason(requestId: number, value: string): void {
+    this.rejectReasons.update((current) => ({ ...current, [requestId]: value }));
+    this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
+  }
+
+  protected canSubmitReject(requestId: number): boolean {
+    return this.rejectReason(requestId).trim().length > 0 && this.actingRequestId() !== requestId;
+  }
+
+  protected rejectError(requestId: number): string | null {
+    return this.rejectErrors()[requestId] ?? null;
+  }
+
+  protected confirmApprove(request: ReEnrollmentRequestView, event: Event): void {
+    event.stopPropagation();
     if (this.actingRequestId() != null) {
       return;
     }
 
-    this.confirmation.confirm({
-      header: 'قبول إعادة التسجيل',
-      message: `قبول إعادة تسجيل ${request.studentName} في ${request.termLabel}؟\n\nسيتم تسجيل الطالب في الدورة فقط دون تعيين حلقة.`,
-      acceptLabel: 'تأكيد القبول',
-      rejectLabel: 'إلغاء',
-      accept: () => this.approveRequest(request),
+    this.actingRequestId.set(request.id);
+    this.reEnrollmentService.approveRequest(request.id).subscribe({
+      next: () => {
+        this.actingRequestId.set(null);
+        this.activeConfirm.set(null);
+        this.toastMessage.notifySuccess(TOAST_I18N.success.reEnrollmentApproved);
+        this.toastMessage.notifyInfo(TOAST_I18N.info.reEnrollmentAddToHalaqa);
+        this.reload();
+      },
+      error: (error: unknown) => this.handleMutationError(error, request.id, 'approve'),
     });
   }
 
-  protected openRejectDialog(request: ReEnrollmentRequestView): void {
-    if (this.actingRequestId() != null || this.rejectSubmitting()) {
-      return;
-    }
-    this.rejectServerError.set(null);
-    this.rejectTarget.set(request);
-  }
-
-  protected closeRejectDialog(): void {
-    if (this.rejectSubmitting()) {
-      return;
-    }
-    this.rejectTarget.set(null);
-    this.rejectServerError.set(null);
-  }
-
-  protected onRejectConfirmed(form: RejectReEnrollmentFormModel): void {
-    const request = this.rejectTarget();
-    if (!request || this.rejectSubmitting()) {
+  protected confirmReject(request: ReEnrollmentRequestView, event: Event): void {
+    event.stopPropagation();
+    if (this.actingRequestId() != null) {
       return;
     }
 
-    this.rejectSubmitting.set(true);
-    this.rejectServerError.set(null);
+    const form: RejectReEnrollmentFormModel = {
+      rejectionReason: this.rejectReason(request.id),
+    };
+    const validationError = validateRejectForm(form);
+    if (validationError) {
+      this.rejectErrors.update((current) => ({ ...current, [request.id]: validationError }));
+      return;
+    }
+
+    this.actingRequestId.set(request.id);
     this.reEnrollmentService.rejectRequest(request.id, form).subscribe({
       next: () => {
-        this.rejectSubmitting.set(false);
-        this.rejectTarget.set(null);
+        this.actingRequestId.set(null);
+        this.activeConfirm.set(null);
+        this.rejectReasons.update((current) => ({ ...current, [request.id]: '' }));
         this.toastMessage.notifySuccess(TOAST_I18N.success.reEnrollmentRejected);
         this.reload();
       },
-      error: (error: unknown) => {
-        this.rejectSubmitting.set(false);
-        this.rejectServerError.set(
-          error instanceof ApiError ? error.message : 'تعذّر رفض الطلب. حاول مرة أخرى.',
-        );
-      },
+      error: (error: unknown) => this.handleMutationError(error, request.id, 'reject'),
     });
   }
 
   protected studentMeta(request: ReEnrollmentRequestView): string {
-    const parts = [
+    return [
       request.email,
       `userId ${request.existingUserId}`,
-      'طلب إعادة تسجيل',
-    ].filter(Boolean);
-    return parts.join(' · ');
+      this.translate.instant('reEnrollment.requestMeta'),
+    ]
+      .filter(Boolean)
+      .join(' · ');
   }
 
-  protected guardianLabel(request: ReEnrollmentRequestView): string {
-    if (request.guardianName && request.guardianPhone) {
-      return `${request.guardianName} · ${request.guardianPhone}`;
-    }
-    return request.guardianName ?? request.guardianPhone ?? '—';
+  protected approveMessage(request: ReEnrollmentRequestView): string {
+    return this.translate.instant('reEnrollment.approve.message', {
+      name: request.name,
+      term: request.termLabel,
+    });
   }
 
   protected isActingOn(request: ReEnrollmentRequestView): boolean {
     return this.actingRequestId() === request.id;
   }
 
-  private approveRequest(request: ReEnrollmentRequestView): void {
-    this.actingRequestId.set(request.id);
-    this.reEnrollmentService.approveRequest(request.id).subscribe({
-      next: () => {
-        this.actingRequestId.set(null);
-        this.toastMessage.notifySuccess(TOAST_I18N.success.reEnrollmentApproved);
-        this.reload();
-      },
-      error: (error: unknown) => {
-        this.actingRequestId.set(null);
-        if (error instanceof ApiError) {
-          this.toastMessage.notifyErrorBody(error.message);
-        }
-      },
-    });
+  private handleMutationError(error: unknown, requestId: number, action: 'approve' | 'reject'): void {
+    this.actingRequestId.set(null);
+
+    if (!(error instanceof ApiError)) {
+      if (action === 'reject') {
+        this.rejectErrors.update((current) => ({
+          ...current,
+          [requestId]: this.translate.instant(TOAST_I18N.errors.unexpected),
+        }));
+      }
+      return;
+    }
+
+    if (isAlreadyProcessedError(error)) {
+      this.toastMessage.notifyErrorBody(
+        formatServerErrorToastBody(
+          error.message,
+          (message) => this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
+        ),
+      );
+      this.activeConfirm.set(null);
+      this.reload();
+      return;
+    }
+
+    if (action === 'reject') {
+      this.rejectErrors.update((current) => ({ ...current, [requestId]: error.message }));
+      return;
+    }
+
+    this.toastMessage.notifyErrorBody(
+      formatServerErrorToastBody(
+        error.message,
+        (message) => this.translate.instant(TOAST_I18N.errors.requestFailedWithMessage, { message }),
+      ),
+    );
   }
 
   private formatCountLabel(count: number): string {
-    if (count === 0) {
-      return 'لا طلبات';
-    }
-    if (count === 1) {
-      return '1 طلب';
-    }
-    if (count === 2) {
-      return '2 طلب';
-    }
-    if (count >= 3 && count <= 10) {
-      return `${count} طلبات`;
-    }
-    return `${count} طلب`;
+    return this.translate.instant('reEnrollment.countLabel', { count });
   }
 }

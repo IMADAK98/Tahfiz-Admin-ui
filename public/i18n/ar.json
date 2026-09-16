@@ -17,13 +17,61 @@
       "endActiveTermFirst": "أنهِ الدورة الحالية أولاً"
     },
     "info": {
-      "noStudentsAvailable": "لا يوجد طلاب متاحون للإضافة"
+      "noStudentsAvailable": "لا يوجد طلاب متاحون للإضافة",
+      "reEnrollmentAddToHalaqa": "أضف الطالب إلى حلقة من صفحة الحلقات"
     }
   },
   "errors": {
     "unexpected": "حدث خطأ غير متوقع. حاول مرة أخرى.",
     "network": "تعذّر الاتصال بالخادم. تحقق من الشبكة وحاول مرة أخرى.",
     "sessionExpired": "انتهت الجلسة. سجّل الدخول مرة أخرى."
+  },
+  "reEnrollment": {
+    "loading": "جاري تحميل طلبات إعادة التسجيل…",
+    "retry": "إعادة المحاولة",
+    "requestMeta": "طلب إعادة تسجيل",
+    "countLabel": "{{count}} طلب",
+    "targetTerm": "الدورة المستهدفة: {{term}}",
+    "multipleTargetTerms": "{{count}} دورات مستهدفة",
+    "empty": {
+      "title": "لا توجد طلبات إعادة تسجيل",
+      "body": "عند انتهاء دورة وطلب الطالب أو ولي الأمر الالتحاق مجدداً، تظهر الطلبات هنا للموافقة أو الرفض.",
+      "studentsLink": "الطلاب النشطون",
+      "hint": "ملاحظة تصميم: لا تخلط «متاح للتعيين» مع «إعادة تسجيل». طالب على قائمة الدورة بلا حلقة ليس مرشّحاً لـ activate-student إن كان already enrolled في الدورة."
+    },
+    "fields": {
+      "guardian": "ولي الأمر",
+      "previousTerm": "الدورة السابقة",
+      "term": "الدورة المطلوبة",
+      "halqa": "الحلقة المطلوبة",
+      "hifz": "حالة الحفظ الحالية",
+      "suggestedTeacher": "المعلّم المقترح"
+    },
+    "status": {
+      "pending": "بانتظار المراجعة"
+    },
+    "actions": {
+      "approve": "قبول",
+      "approving": "جاري القبول…",
+      "reject": "رفض"
+    },
+    "approve": {
+      "message": "قبول إعادة تسجيل {{name}} في {{term}}؟",
+      "h1Note": "سيتم تسجيل الطالب في الدورة فقط دون تعيين حلقة.",
+      "confirm": "تأكيد القبول",
+      "cancel": "إلغاء"
+    },
+    "reject": {
+      "prompt": "تأكيد رفض طلب إعادة التسجيل؟",
+      "reasonLabel": "سبب الرفض",
+      "reasonPlaceholder": "اكتب سبب الرفض للطالب أو ولي الأمر…",
+      "submit": "تأكيد الرفض",
+      "submitting": "جاري الرفض…",
+      "cancel": "إلغاء"
+    },
+    "errors": {
+      "centerUnknown": "تعذّر تحديد المركز من الجلسة"
+    }
   },
   "halaqat": {
     "picker": {

@@ -17,13 +17,61 @@
       "endActiveTermFirst": "TODO: End the active term first"
     },
     "info": {
-      "noStudentsAvailable": "TODO: No students available to add"
+      "noStudentsAvailable": "TODO: No students available to add",
+      "reEnrollmentAddToHalaqa": "TODO: Add the student to a halaqa from the Halaqat page"
     }
   },
   "errors": {
     "unexpected": "TODO: An unexpected error occurred. Please try again.",
     "network": "TODO: Could not reach the server. Check your network and try again.",
     "sessionExpired": "TODO: Your session has expired. Please sign in again."
+  },
+  "reEnrollment": {
+    "loading": "TODO: Loading re-enrollment requests…",
+    "retry": "TODO: Retry",
+    "requestMeta": "TODO: Re-enrollment request",
+    "countLabel": "TODO: {{count}} request(s)",
+    "targetTerm": "TODO: Target term: {{term}}",
+    "multipleTargetTerms": "TODO: {{count}} target terms",
+    "empty": {
+      "title": "TODO: No re-enrollment requests",
+      "body": "TODO: When a term ends and a student requests re-enrollment, requests appear here.",
+      "studentsLink": "TODO: Active students",
+      "hint": "TODO: Do not mix available-students with re-enrollment."
+    },
+    "fields": {
+      "guardian": "TODO: Guardian",
+      "previousTerm": "TODO: Previous term",
+      "term": "TODO: Requested term",
+      "halqa": "TODO: Requested halaqa",
+      "hifz": "TODO: Current memorization status",
+      "suggestedTeacher": "TODO: Suggested teacher"
+    },
+    "status": {
+      "pending": "TODO: Pending review"
+    },
+    "actions": {
+      "approve": "TODO: Approve",
+      "approving": "TODO: Approving…",
+      "reject": "TODO: Reject"
+    },
+    "approve": {
+      "message": "TODO: Approve re-enrollment for {{name}} in {{term}}?",
+      "h1Note": "TODO: Term enroll only — no halaqa assignment.",
+      "confirm": "TODO: Confirm approval",
+      "cancel": "TODO: Cancel"
+    },
+    "reject": {
+      "prompt": "TODO: Confirm rejection of this re-enrollment request?",
+      "reasonLabel": "TODO: Rejection reason",
+      "reasonPlaceholder": "TODO: Enter rejection reason…",
+      "submit": "TODO: Confirm rejection",
+      "submitting": "TODO: Rejecting…",
+      "cancel": "TODO: Cancel"
+    },
+    "errors": {
+      "centerUnknown": "TODO: Could not resolve center from session"
+    }
   },
   "halaqat": {
     "picker": {
