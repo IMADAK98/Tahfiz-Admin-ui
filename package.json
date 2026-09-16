@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "check:envelope": "node scripts/envelope-self-check.mjs",
-    "check:auth": "node scripts/auth-self-check.mjs"
+    "check:auth": "node scripts/auth-self-check.mjs",
+    "check:center-signup": "node scripts/center-signup-self-check.mjs"
   },
   "private": true,
   "engines": {
