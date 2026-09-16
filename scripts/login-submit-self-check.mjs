@@ -1,5 +1,5 @@
-/** ponytail: login must use a native submit button so Enter + click both POST /auth/login.
- *  PrimeNG 22 <p-button> defaults inner <button type="button">, which never fires form submit. */
+/** ponytail: دخول stays PrimeNG p-button; inner type must be bound to submit.
+ *  PrimeNG 22 defaults type to 'button'; a static type="submit" attr can stay on the host. */
 
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -8,22 +8,19 @@ const html = readFileSync(new URL('../src/app/features/login/login.html', import
 const ts = readFileSync(new URL('../src/app/features/login/login.ts', import.meta.url), 'utf8');
 
 assert.match(html, /\(ngSubmit\)="onSubmit\(\$event\)"/);
-assert.match(html, /<button\s+type="submit"/);
+assert.match(html, /<p-button\s/);
+assert.match(
+  html,
+  /\[type\]="'submit'"/,
+  'p-button type must be a property binding so the inner <button> is type=submit',
+);
+assert.match(html, /\(onClick\)="onSubmit\(\$event\)"/);
 assert.doesNotMatch(
   html,
-  /<p-button[\s\S]*type="submit"/,
-  'login submit must not be PrimeNG p-button (type stays button; form never submits)',
+  /<button[^>]*type="submit"/,
+  'دخول must remain p-button, not a native submit button',
 );
 assert.match(ts, /this\.loginService\.login\(this\.form\)/);
-
-function isNativeSubmitControl(tag, type) {
-  if (tag === 'button') return type === 'submit' || type === '' || type == null;
-  if (tag === 'input') return type === 'submit' || type === 'image';
-  return false;
-}
-
-assert.equal(isNativeSubmitControl('p-button', 'submit'), false);
-assert.equal(isNativeSubmitControl('button', 'button'), false);
-assert.equal(isNativeSubmitControl('button', 'submit'), true);
+assert.match(ts, /if \(this\.submitting\(\)\)/);
 
 console.log('login-submit-self-check: ok');

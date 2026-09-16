@@ -49,6 +49,9 @@ export class LoginComponent {
 
   onSubmit(event: Event): void {
     event.preventDefault();
+    if (this.submitting()) {
+      return;
+    }
     this.errorMessage.set(null);
     this.submitting.set(true);
 
