@@ -1,9 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
+import { isNoHalqasForTermError } from './error-message.helpers';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { CreateHalqaPayload, HalqaApiRecord } from './models/halqa.model';
@@ -32,7 +33,12 @@ export class HalqaApiService {
       .get<ApiEnvelope<HalqaApiRecord[]>>(`${this.apiBaseUrl}/halqa/by-term/${termId}`, {
         observe: 'response',
       })
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .pipe(
+        map((res) => unwrapEnvelope(res.body, res.status)),
+        catchError((error: unknown) =>
+          isNoHalqasForTermError(error) ? of([]) : throwError(() => error),
+        ),
+      );
   }
 
   getByCenterId(centerId: number): Observable<HalqaApiRecord[]> {
