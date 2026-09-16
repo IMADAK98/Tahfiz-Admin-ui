@@ -3,6 +3,11 @@ import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login-page.component').then((m) => m.LoginPageComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layout/public-shell/public-shell.component').then((m) => m.PublicShellComponent),
@@ -11,11 +16,6 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
           import('./features/landing/landing-page.component').then((m) => m.LandingPageComponent),
-      },
-      {
-        path: 'login',
-        loadComponent: () =>
-          import('./features/auth/login-page.component').then((m) => m.LoginPageComponent),
       },
     ],
   },

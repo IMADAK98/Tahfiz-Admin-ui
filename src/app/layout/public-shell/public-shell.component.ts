@@ -1,25 +1,29 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { CENTER_SIGNUP_URL } from '../../core/config/public-links';
 
 @Component({
   selector: 'app-public-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink],
   template: `
     <div class="public-shell">
-      <header class="public-header">
-        <div class="sidebar-brand-text">
-          <strong>ثفيز</strong>
-          <span>نظام التحفيظ</span>
-        </div>
-        <nav class="flex items-center gap-4">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="btn btn-ghost">الرئيسية</a>
-          <a routerLink="/login" routerLinkActive="active" class="btn btn-primary">دخول</a>
+      <header class="site-header">
+        <a class="brand" routerLink="/">
+          <span class="brand-mark" aria-hidden="true">ت</span>
+          تحفيظ
+        </a>
+        <nav class="header-nav" aria-label="التنقل الرئيسي">
+          <a class="nav-text" routerLink="/" fragment="features">المميزات</a>
+          <a class="nav-text" routerLink="/login">تسجيل الدخول</a>
+          <a class="btn btn-primary" [href]="centerSignupUrl" title="نموذج تسجيل المركز">تسجيل مركز جديد</a>
         </nav>
       </header>
-      <main class="public-main">
+      <main class="public-main landing-main">
         <router-outlet />
       </main>
     </div>
   `,
 })
-export class PublicShellComponent {}
+export class PublicShellComponent {
+  protected readonly centerSignupUrl = CENTER_SIGNUP_URL;
+}
