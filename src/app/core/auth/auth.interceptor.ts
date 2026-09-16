@@ -1,7 +1,7 @@
 import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
+import { Observable, catchError, finalize, map, shareReplay, switchMap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { safeRedirectPath } from './redirect.helpers';
 import { TokenStorageService } from './token-storage.service';
@@ -10,8 +10,7 @@ export const AUTH_RETRY = new HttpContextToken<boolean>(() => false);
 
 const AUTH_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'] as const;
 
-let refreshInFlight = false;
-const refreshedAccessToken$ = new BehaviorSubject<string | null>(null);
+let refreshInFlight$: Observable<string> | null = null;
 
 function isAuthEndpoint(url: string): boolean {
   return AUTH_PATHS.some((path) => url.includes(path));
@@ -34,6 +33,31 @@ function redirectToLogin(router: Router, redirectUrl?: string): void {
   });
 }
 
+function refreshAccessToken(auth: AuthService, tokenStorage: TokenStorageService, router: Router): Observable<string> {
+  if (!refreshInFlight$) {
+    refreshInFlight$ = auth.refresh().pipe(
+      map(() => {
+        const token = auth.getAccessToken();
+        if (!token) {
+          throw new Error('No access token after refresh');
+        }
+        return token;
+      }),
+      catchError((refreshError) => {
+        tokenStorage.clearTokens();
+        redirectToLogin(router, router.url);
+        return throwError(() => refreshError);
+      }),
+      finalize(() => {
+        refreshInFlight$ = null;
+      }),
+      shareReplay(1),
+    );
+  }
+
+  return refreshInFlight$;
+}
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const tokenStorage = inject(TokenStorageService);
@@ -53,44 +77,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      const refreshToken = auth.getRefreshToken();
-      if (!refreshToken) {
+      if (!auth.getRefreshToken()) {
         tokenStorage.clearTokens();
         redirectToLogin(router, router.url);
         return throwError(() => error);
       }
 
-      if (!refreshInFlight) {
-        refreshInFlight = true;
-        refreshedAccessToken$.next(null);
-
-        return auth.refresh().pipe(
-          switchMap(() => {
-            const token = auth.getAccessToken();
-            if (!token) {
-              return throwError(() => error);
-            }
-
-            refreshInFlight = false;
-            refreshedAccessToken$.next(token);
-            const retryReq = req.clone({
-              context: req.context.set(AUTH_RETRY, true),
-            });
-            return next(withBearer(req.url, retryReq, token));
-          }),
-          catchError((refreshError) => {
-            refreshInFlight = false;
-            refreshedAccessToken$.next(null);
-            tokenStorage.clearTokens();
-            redirectToLogin(router, router.url);
-            return throwError(() => refreshError);
-          }),
-        );
-      }
-
-      return refreshedAccessToken$.pipe(
-        filter((token): token is string => token !== null),
-        take(1),
+      return refreshAccessToken(auth, tokenStorage, router).pipe(
         switchMap((token) => {
           const retryReq = req.clone({
             context: req.context.set(AUTH_RETRY, true),
