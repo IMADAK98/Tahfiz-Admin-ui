@@ -34,6 +34,7 @@ Dev server: `http://localhost:4200` (use `--port` to override).
 | `/` | Public | Landing placeholder |
 | `/login` | Public | Login placeholder (full auth in PR3) |
 | `/admin` | Admin | RTL sidebar (visual right) + empty dashboard |
+| `/system-admin/center-requests` | System admin | Center registration requests (SYSTEM_ADMIN) |
 
 ## Project layout
 
@@ -50,7 +51,7 @@ src/
     core/
       api/               # envelope helpers, AuthApiService, CenterApiService
       auth/              # AuthService, JWT decode, sessionStorage tokens
-    layout/              # public-shell, admin-shell
+    layout/              # public-shell, admin-shell, system-admin-shell
     features/            # landing, login, dashboard
 ```
 
@@ -81,8 +82,9 @@ Bearer attached via `authInterceptor` (PR3).
 ## Auth (PR3)
 
 - `authInterceptor` — Bearer header; 401 → single-flight refresh queue → retry or `/login?redirect=`
-- `adminGuard` — `ADMIN` / `SYSTEM_ADMIN` only; `TEACHER` bounced to login
-- Login page wired to `AuthService.login` → `/admin`
+- `adminGuard` — `ADMIN` only; `SYSTEM_ADMIN` redirected to `/system-admin/center-requests`; `TEACHER` bounced to login
+- `systemAdminGuard` — `SYSTEM_ADMIN` only; center `ADMIN` redirected to `/admin`
+- Login page wired to `AuthService.login` → `/admin` (ADMIN) or `/system-admin/center-requests` (SYSTEM_ADMIN)
 
 ## Next PRs
 

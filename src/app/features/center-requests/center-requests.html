@@ -1,0 +1,245 @@
+<section class="requests-page">
+  <header class="sa-top">
+    <div>
+      <h1>طلبات المراكز</h1>
+      <p class="sub">
+        مراجعة طلبات تسجيل المراكز. القبول ينشئ المركز والمشرف ويرسل بريد التفعيل. الرفض يتطلب سبباً.
+      </p>
+    </div>
+    <nav class="pill-nav" aria-label="عرض">
+      <span class="active">المراكز</span>
+      <span class="muted" aria-disabled="true">لوحة المؤشرات</span>
+    </nav>
+  </header>
+
+  @if (loadState() === CenterRequestsLoadState.Loading) {
+    <p class="load-copy">جاري تحميل الطلبات…</p>
+  } @else if (loadState() === CenterRequestsLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+  } @else if (!requests().length) {
+    <div class="empty-block">
+      <h2>لا توجد طلبات مراكز</h2>
+      <p>عندما يُرسل مدير مركز طلب تسجيل من الصفحة العامة، سيظهر هنا.</p>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <span class="badge badge-warning">{{ countLabel() }}</span>
+      <span class="badge badge-neutral">PENDING · APPROVED · REJECTED</span>
+    </div>
+
+    <ul class="req-list">
+      @for (request of requests(); track request.id) {
+        <li>
+          <article class="card req-card" [attr.aria-labelledby]="'cr-' + request.id">
+            <div class="req-grid">
+              <div class="req-col">
+                <h2>بيانات المشرف</h2>
+                <div class="fact-stack">
+                  <div>
+                    <span class="label">الاسم</span>
+                    <span class="value">{{ request.adminName }}</span>
+                  </div>
+                  <div>
+                    <span class="label">البريد</span>
+                    <span class="value" dir="ltr">{{ request.adminEmail }}</span>
+                  </div>
+                  <div>
+                    <span class="label">الجوال</span>
+                    <span class="value">{{ request.adminPhone }}</span>
+                  </div>
+                  <div>
+                    <span class="label">رقم الهوية</span>
+                    <span class="value">{{ request.adminIdentificationNumber }}</span>
+                  </div>
+                  <div>
+                    <span class="label">جواز السفر</span>
+                    <span class="value">{{ request.adminPassportNumber }}</span>
+                  </div>
+                  <div>
+                    <span class="label">تاريخ الميلاد</span>
+                    <span class="value">{{ request.adminBirthDate }}</span>
+                  </div>
+                  <div>
+                    <span class="label">الجنسية</span>
+                    <span class="value">{{ request.adminNationality }}</span>
+                  </div>
+                  <div>
+                    <span class="label">عنوان المشرف</span>
+                    <span class="value">{{ request.adminAddress }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="req-col">
+                <h2>بيانات المركز</h2>
+                <h3 class="center-title" [id]="'cr-' + request.id">{{ request.centerName }}</h3>
+                <div class="status-row">
+                  <span class="label">الحالة:</span>
+                  <span [class]="'badge ' + centerRequestStatusBadgeClass(request.status)">
+                    {{ centerRequestStatusLabel(request.status) }}
+                  </span>
+                </div>
+                <div class="fact-stack">
+                  <div>
+                    <span class="label">عنوان المركز</span>
+                    <span class="value">{{ request.centerAddress }}</span>
+                  </div>
+                  <div>
+                    <span class="label">معرّف المركز</span>
+                    <span class="value">{{ request.centerIdLabel }}</span>
+                  </div>
+                </div>
+                @if (request.rejectionReason) {
+                  <div class="reject-reason-box" role="note">
+                    <strong>سبب الرفض</strong>
+                    {{ request.rejectionReason }}
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="card-foot">
+              <span class="hint">{{ centerRequestFootHint(request.status) }}</span>
+              <div class="row-actions">
+                @if (isPendingCenterRequest(request.status)) {
+                  <p-button
+                    type="button"
+                    label="قبول"
+                    size="small"
+                    [disabled]="actingId() !== null"
+                    (onClick)="openApprove(request)"
+                  />
+                  <p-button
+                    type="button"
+                    label="رفض"
+                    severity="danger"
+                    size="small"
+                    [disabled]="actingId() !== null"
+                    (onClick)="openReject(request)"
+                  />
+                } @else {
+                  <span [class]="'badge ' + centerRequestStatusBadgeClass(request.status)">
+                    {{ request.status }}
+                  </span>
+                }
+              </div>
+            </div>
+          </article>
+        </li>
+      }
+    </ul>
+  }
+</section>
+
+@if (activeApproveRequest(); as request) {
+  <div class="modal-backdrop" role="presentation" (click)="closeApprove()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="approve-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="approve-title">قبول المركز</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="actingId() !== null"
+          (onClick)="closeApprove()"
+        >
+          ×
+        </p-button>
+      </div>
+      <div class="modal-body">
+        <p class="approve-copy">
+          هل أنت متأكد من قبول مركز <strong>{{ request.centerName }}</strong>؟
+        </p>
+        <p class="approve-note">سيتم إنشاء المركز والمشرف وإرسال بريد تفعيل الدخول.</p>
+      </div>
+      <div class="modal-footer">
+        <p-button
+          type="button"
+          label="تأكيد القبول"
+          [loading]="actingId() === request.id"
+          [disabled]="actingId() !== null"
+          (onClick)="confirmApprove(request)"
+        />
+        <p-button
+          type="button"
+          label="إلغاء"
+          severity="secondary"
+          [disabled]="actingId() !== null"
+          (onClick)="closeApprove()"
+        />
+      </div>
+    </div>
+  </div>
+}
+
+@if (activeRejectRequest(); as request) {
+  <div class="modal-backdrop" role="presentation" (click)="closeReject()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reject-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="reject-title">رفض المركز</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="actingId() !== null"
+          (onClick)="closeReject()"
+        >
+          ×
+        </p-button>
+      </div>
+      <form (ngSubmit)="confirmReject(request)">
+        <div class="modal-body">
+          <p class="reject-hint">رفض طلب مركز <strong>{{ request.centerName }}</strong>.</p>
+          <div class="input-group">
+            <label for="f-rejection-reason">سبب الرفض</label>
+            <textarea
+              class="input"
+              id="f-rejection-reason"
+              name="rejectionReason"
+              rows="3"
+              required
+              [(ngModel)]="rejectionReason"
+              placeholder="مثال: بيانات المركز غير مكتملة"
+              [disabled]="actingId() !== null"
+            ></textarea>
+          </div>
+          @if (rejectError(); as error) {
+            <p class="form-error" role="alert">{{ error }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <p-button
+            [type]="'submit'"
+            label="تأكيد الرفض"
+            severity="danger"
+            [loading]="actingId() === request.id"
+            [disabled]="actingId() !== null"
+            (onClick)="confirmReject(request)"
+          />
+          <p-button
+            type="button"
+            label="إلغاء"
+            severity="secondary"
+            [disabled]="actingId() !== null"
+            (onClick)="closeReject()"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+}

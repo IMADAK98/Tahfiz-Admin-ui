@@ -15,7 +15,8 @@
     "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs",
     "check:teacher-validation": "node scripts/teacher-validation-self-check.mjs",
     "check:surah-mapper": "node scripts/surah-mapper-self-check.mjs",
-    "check:student-validation": "node scripts/student-validation-self-check.mjs"
+    "check:student-validation": "node scripts/student-validation-self-check.mjs",
+    "check:center-requests": "node scripts/center-request-self-check.mjs"
   },
   "private": true,
   "engines": {

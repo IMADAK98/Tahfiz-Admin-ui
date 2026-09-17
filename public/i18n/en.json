@@ -14,6 +14,8 @@
       "studentCreated": "TODO: Student registered",
       "studentRequestApproved": "TODO: Student request approved",
       "studentRequestRejected": "TODO: Student request rejected",
+      "centerRequestApproved": "TODO: Center request approved",
+      "centerRequestRejected": "TODO: Center request rejected",
       "registrationLinkGenerated": "TODO: Registration link generated",
       "registrationLinkCopied": "TODO: Registration link copied",
       "copied": "TODO: Copied"
