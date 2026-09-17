@@ -1,0 +1,151 @@
+<div class="identify-page" dir="rtl" lang="ar">
+  <div class="identify-wrap">
+    <a class="brand-row" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">ت</span>
+      تحفيظ
+    </a>
+
+    <div class="identify-card">
+      <h1>التحقق من الهوية</h1>
+      <p class="identify-sub">لدي حساب بالفعل — أدخل رقم الهوية للتحقق والالتحاق بالدورة.</p>
+
+      @if (tokenStatus() === IdentifyTokenStatus.Loading) {
+        <p class="login-info" role="status">جاري التحقق من رابط الدعوة…</p>
+      }
+
+      @if (tokenStatus() === IdentifyTokenStatus.Missing) {
+        <p class="signup-error" role="alert">
+          رابط الدعوة ناقص. استخدم الرابط الكامل من المركز.
+        </p>
+      }
+
+      @if (tokenStatus() === IdentifyTokenStatus.Invalid) {
+        <p class="signup-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      @if (tokenStatus() === IdentifyTokenStatus.Valid && tokenContext(); as ctx) {
+        <div class="badge-ok">رابط دعوة صالح</div>
+        <div class="context-banner" aria-label="سياق الدعوة">
+          <dl>
+            <dt>المركز</dt>
+            <dd>{{ ctx.centerName }}</dd>
+            <dt>الدورة</dt>
+            <dd>{{ ctx.termName }}</dd>
+            <dt>ينتهي الرابط</dt>
+            <dd>{{ formatExpires(ctx.expiresAt) }}</dd>
+          </dl>
+        </div>
+      }
+
+      @if (activateDone()) {
+        <div class="success-panel show" role="status">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <h2>تم استلام طلبك</h2>
+          <p>سيراجع المركز طلب الالتحاق. يمكنك إغلاق هذه الصفحة.</p>
+          <p-button [type]="'button'" label="الرئيسية" styleClass="w-full" (onClick)="goHome()" />
+        </div>
+      } @else if (tokenStatus() === IdentifyTokenStatus.Valid) {
+        @if (errorMessage()) {
+          <p class="signup-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        @if (foundStudent(); as student) {
+          <div class="found-banner" role="status">
+            <strong>تم العثور على:</strong> {{ student.name || ('#' + student.id) }}
+          </div>
+        }
+
+        <form
+          class="identify-form"
+          #htmlForm
+          #identifyForm="ngForm"
+          (ngSubmit)="onSubmit(htmlForm, identifyForm)"
+          novalidate
+          aria-label="نموذج التحقق من الهوية"
+        >
+          @if (!usePassport) {
+            <div class="input-group">
+              <label for="nid">رقم الهوية الوطنية <span class="req">*</span></label>
+              <input
+                pInputText
+                class="input"
+                id="nid"
+                name="identification"
+                [(ngModel)]="identification"
+                inputmode="numeric"
+                maxlength="10"
+                required
+                autocomplete="off"
+                placeholder="أدخل رقم الهوية"
+                dir="ltr"
+                fluid
+                [disabled]="submitting()"
+              />
+            </div>
+          } @else {
+            <div class="input-group">
+              <label for="passport">رقم جواز السفر <span class="req">*</span></label>
+              <input
+                pInputText
+                class="input"
+                id="passport"
+                name="passportNumber"
+                [(ngModel)]="passportNumber"
+                maxlength="10"
+                required
+                autocomplete="off"
+                placeholder="أدخل رقم الجواز"
+                dir="ltr"
+                fluid
+                [disabled]="submitting()"
+              />
+            </div>
+          }
+
+          <label class="check-row">
+            <p-checkbox
+              [(ngModel)]="usePassport"
+              name="usePassport"
+              [binary]="true"
+              inputId="passportToggle"
+              (onChange)="onIdModeChange()"
+              [disabled]="submitting()"
+            />
+            <span>استخدام جواز السفر بدل الهوية</span>
+          </label>
+
+          <p class="hint">
+            لن نُنشئ حساباً جديداً هنا — هذه الصفحة للتحقق من طالب مسجّل مسبقاً عبر رابط الدعوة.
+          </p>
+
+          <p-button
+            [type]="'submit'"
+            [label]="submitting() ? 'جاري التحقق…' : 'تحقق ومتابعة'"
+            styleClass="w-full"
+            [loading]="submitting()"
+            [disabled]="submitting()"
+          />
+        </form>
+
+        <div class="identify-new-student">
+          <p>طالب جديد؟</p>
+          <p-button
+            [type]="'button'"
+            label="التسجيل كطالب جديد"
+            severity="secondary"
+            [outlined]="true"
+            styleClass="w-full"
+            (onClick)="goToSignup()"
+            [disabled]="submitting()"
+          />
+        </div>
+      }
+    </div>
+
+    <p class="identify-footer">
+      <a routerLink="/login">دخول المشرف</a>
+      ·
+      <a routerLink="/">الرئيسية</a>
+    </p>
+  </div>
+</div>

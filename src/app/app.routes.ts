@@ -24,6 +24,18 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'signup/student',
+    loadComponent: () =>
+      import('./features/student-signup/student-signup').then((m) => m.StudentSignupComponent),
+  },
+  { path: 'user/student/signup', redirectTo: 'signup/student', pathMatch: 'full' },
+  {
+    path: 'identify',
+    loadComponent: () => import('./features/identify/identify').then((m) => m.IdentifyComponent),
+  },
+  { path: 'user/student/identification', redirectTo: 'identify', pathMatch: 'full' },
+  { path: 'join/identify', redirectTo: 'identify', pathMatch: 'full' },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () =>

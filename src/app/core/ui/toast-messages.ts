@@ -1,4 +1,3 @@
-/** i18n keys for locked Tahfiz toast copy — resolve via TranslateService at runtime. */
 export const TOAST_I18N = {
   success: {
     saved: 'toast.success.saved',
@@ -16,6 +15,8 @@ export const TOAST_I18N = {
     studentRequestRejected: 'toast.success.studentRequestRejected',
     centerRequestApproved: 'toast.success.centerRequestApproved',
     centerRequestRejected: 'toast.success.centerRequestRejected',
+    studentSignupSubmitted: 'toast.success.studentSignupSubmitted',
+    identifyActivated: 'toast.success.identifyActivated',
     registrationLinkGenerated: 'toast.success.registrationLinkGenerated',
     registrationLinkCopied: 'toast.success.registrationLinkCopied',
     copied: 'toast.success.copied',
@@ -26,6 +27,7 @@ export const TOAST_I18N = {
   info: {
     noStudentsAvailable: 'toast.info.noStudentsAvailable',
     reEnrollmentAddToHalaqa: 'toast.info.reEnrollmentAddToHalaqa',
+    identifyAlreadyEnrolled: 'toast.success.identifyAlreadyEnrolled',
   },
   errors: {
     unexpected: 'errors.unexpected',
