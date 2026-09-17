@@ -10,7 +10,7 @@ export class LoginService {
 
   login(form: LoginFormModel): Observable<JwtClaims> {
     const request = toLoginRequest(form);
-    return this.auth.login(request.email, request.password);
+    return this.auth.login(request.email, request.password, form.rememberMe);
   }
 
   requestPasswordReset(email: string): Observable<void> {

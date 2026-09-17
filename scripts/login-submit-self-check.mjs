@@ -6,6 +6,11 @@ import { readFileSync } from 'node:fs';
 
 const html = readFileSync(new URL('../src/app/features/login/login.html', import.meta.url), 'utf8');
 const ts = readFileSync(new URL('../src/app/features/login/login.ts', import.meta.url), 'utf8');
+const loginService = readFileSync(new URL('../src/app/features/login/login.service.ts', import.meta.url), 'utf8');
+const tokenStorage = readFileSync(
+  new URL('../src/app/core/auth/token-storage.service.ts', import.meta.url),
+  'utf8',
+);
 const interceptor = readFileSync(
   new URL('../src/app/core/http/error-toast.interceptor.ts', import.meta.url),
   'utf8',
@@ -26,6 +31,8 @@ assert.doesNotMatch(
 );
 assert.match(ts, /this\.loginService\.login\(this\.form\)/);
 assert.match(ts, /if \(this\.submitting\(\)\)/);
+assert.match(loginService, /form\.rememberMe/);
+assert.match(tokenStorage, /persist \? localStorage : sessionStorage/);
 
 const interceptorFn = interceptor.slice(interceptor.indexOf('export const errorToastInterceptor'));
 assert.doesNotMatch(

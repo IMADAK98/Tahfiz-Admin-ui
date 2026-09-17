@@ -36,9 +36,9 @@ export class AuthService {
     this.tokenStorage.clearTokens();
   }
 
-  login(email: string, password: string): Observable<JwtClaims> {
+  login(email: string, password: string, rememberMe = false): Observable<JwtClaims> {
     return this.authApi.login({ email, password }).pipe(
-      tap((tokens) => this.tokenStorage.setTokens(tokens)),
+      tap((tokens) => this.tokenStorage.setTokens(tokens, rememberMe)),
       map(() => {
         const claims = this.getClaims();
         if (!claims) {

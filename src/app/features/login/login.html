@@ -51,10 +51,10 @@
         </div>
 
         <div class="row-between">
-          <label class="remember-row">
+          <div class="remember-row">
             <p-checkbox [(ngModel)]="form.rememberMe" name="remember" [binary]="true" inputId="remember" />
-            <span>تذكّرني</span>
-          </label>
+            <label for="remember">تذكّرني</label>
+          </div>
           <a href="#forgot-panel" class="forgot-link" (click)="onForgotLinkClick($event)">نسيت كلمة المرور؟</a>
         </div>
 
