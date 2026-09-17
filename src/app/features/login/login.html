@@ -55,9 +55,15 @@
             <p-checkbox [(ngModel)]="form.rememberMe" name="remember" [binary]="true" inputId="remember" />
             <span>تذكّرني</span>
           </label>
-          <button type="button" class="btn btn-ghost btn-sm" (click)="showForgotPanel.set(true)">
-            نسيت كلمة المرور؟
-          </button>
+          <p-button
+            type="button"
+            label="نسيت كلمة المرور؟"
+            [text]="true"
+            size="small"
+            styleClass="btn-ghost-link"
+            [disabled]="submitting() || forgotSubmitting()"
+            (onClick)="showForgotPanel.set(true)"
+          />
         </div>
 
         <p-button
@@ -79,10 +85,13 @@
             <input
               pInputText
               id="reset-email"
+              name="resetEmail"
               type="email"
               [(ngModel)]="form.resetEmail"
               placeholder="admin@center.example"
+              autocomplete="email"
               fluid
+              [disabled]="forgotSubmitting()"
             />
           </div>
           <p-button
@@ -90,6 +99,8 @@
             label="إرسال رابط الاستعادة"
             severity="secondary"
             styleClass="w-full mt-3"
+            [loading]="forgotSubmitting()"
+            [disabled]="forgotSubmitting()"
             (onClick)="onForgotSubmit()"
           />
         </section>

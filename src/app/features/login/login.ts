@@ -29,6 +29,7 @@ export class LoginComponent {
   protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
   protected readonly form = createEmptyLoginForm();
   protected readonly submitting = signal(false);
+  protected readonly forgotSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly infoMessage = signal<string | null>(null);
   protected readonly showForgotPanel = signal(false);
@@ -39,6 +40,8 @@ export class LoginComponent {
       this.infoMessage.set('استخدم تطبيق المعلم — لا يمكن الدخول إلى لوحة الإدارة من الويب.');
     } else if (reason === LoginQueryReason.Denied) {
       this.infoMessage.set('لا تملك صلاحية الوصول إلى لوحة الإدارة.');
+    } else if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
+      this.infoMessage.set('تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن.');
     }
 
     const hash = typeof window !== 'undefined' ? window.location.hash : '';
@@ -84,8 +87,34 @@ export class LoginComponent {
   }
 
   onForgotSubmit(): void {
-    // ponytail: password-reset API wiring is a later PR; panel is mock-faithful UX only
-    this.infoMessage.set('إذا كان البريد مسجّلاً، ستصلك رسالة بإرشادات الاستعادة.');
-    this.showForgotPanel.set(false);
+    if (this.forgotSubmitting()) {
+      return;
+    }
+    const email = (this.form.resetEmail || this.form.email || '').trim();
+    if (!email) {
+      this.errorMessage.set('أدخل البريد الإلكتروني أولاً.');
+      return;
+    }
+
+    this.errorMessage.set(null);
+    this.infoMessage.set(null);
+    this.forgotSubmitting.set(true);
+
+    this.loginService.requestPasswordReset(email).subscribe({
+      next: () => {
+        this.forgotSubmitting.set(false);
+        // Enumeration-safe copy (Nest always 200 when email format is valid).
+        this.infoMessage.set('إذا كان البريد مسجّلاً، ستصلك رسالة بإرشادات الاستعادة.');
+        this.showForgotPanel.set(false);
+      },
+      error: (error: unknown) => {
+        this.forgotSubmitting.set(false);
+        this.errorMessage.set(
+          error instanceof ApiError
+            ? error.message
+            : 'تعذّر إرسال رابط الاستعادة. حاول مرة أخرى.',
+        );
+      },
+    });
   }
 }
