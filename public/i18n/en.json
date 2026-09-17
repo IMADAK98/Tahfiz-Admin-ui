@@ -195,5 +195,40 @@
     "footerAdminLogin": "Admin login",
     "footerHome": "Home",
     "studentsEntry": "Verify identity"
+  },
+  "attendanceReport": {
+    "title": "Attendance report",
+    "subtitle": "Read-only — daily marks come from the teacher app",
+    "halqa": "Ḥalaqa",
+    "halqaPlaceholder": "Select ḥalaqa",
+    "week": "Week",
+    "prevWeek": "Previous week",
+    "nextWeek": "Next week",
+    "search": "Search",
+    "searchPlaceholder": "Student name…",
+    "exportCsv": "Export CSV",
+    "exportOk": "CSV exported",
+    "exportEmpty": "Nothing to export for this week",
+    "weekBadge": "Sun–Thu week",
+    "studentCol": "Student",
+    "holiday": "Holiday",
+    "holidayBlankTitle": "Holiday — not marked",
+    "legendBlank": "Blank cell = not marked",
+    "status": {
+      "present": "Present",
+      "absent": "Absent",
+      "leave": "Leave",
+      "late": "Late",
+      "excused": "Excused"
+    },
+    "emptyTitle": "No attendance marks yet",
+    "emptyBody": "There are no attendance marks for this week. That does not mean there are no students. The grid stays for filtering/reading; daily entry is on the teacher app.",
+    "noHalqasTitle": "No ḥalaqas in the active term",
+    "noHalqasBody": "Add a ḥalaqa to the current term, then return here.",
+    "noteAdmin": "Center admin: filter and read only. Attendance cannot be edited on web — use the teacher app if needed.",
+    "loading": "Loading…",
+    "loadHalqasFailed": "Could not load ḥalaqas",
+    "loadTableFailed": "Could not load attendance table",
+    "studentsCount": "{{count}} students"
   }
 }
