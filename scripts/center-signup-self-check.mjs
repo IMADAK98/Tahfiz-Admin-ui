@@ -56,4 +56,35 @@ if (passPayload.adminPassportNumber !== 'AB1' || passPayload.adminIdentification
   throw new Error('expected passport only');
 }
 
+function toIsoDate(value) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function validateCenterSignupForm(form) {
+  if (!form.adminName.trim()) return 'اسم المدير مطلوب';
+  if (form.identityDocumentType === IdentityDocumentType.Passport) {
+    if (!form.adminPassportNumber.trim()) return 'رقم جواز السفر مطلوب';
+  } else if (!form.adminIdentificationNumber.trim()) {
+    return 'رقم الهوية الوطنية مطلوب';
+  }
+  if (!form.adminEmail.trim()) return 'البريد الإلكتروني مطلوب';
+  if (!form.adminPhone.trim()) return 'رقم الجوال مطلوب';
+  if (!form.adminBirthDate) return 'تاريخ الميلاد مطلوب';
+  if (!form.adminAddress.trim()) return 'عنوان المدير مطلوب';
+  if (!form.adminNationality.trim()) return 'الجنسية مطلوبة';
+  if (!form.centerName.trim()) return 'اسم المركز مطلوب';
+  if (!form.centerAddress.trim()) return 'عنوان المركز مطلوب';
+  return null;
+}
+
+if (validateCenterSignupForm({ ...base, adminName: '  ', identityDocumentType: IdentityDocumentType.NationalId }) !== 'اسم المدير مطلوب') {
+  throw new Error('expected admin name required');
+}
+if (toIsoDate(new Date(2020, 0, 5)) !== '2020-01-05') {
+  throw new Error('expected iso date');
+}
+
 console.log('center-signup-self-check: ok');

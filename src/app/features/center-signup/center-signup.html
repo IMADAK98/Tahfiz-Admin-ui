@@ -1,4 +1,4 @@
-<div class="signup-page">
+<div class="signup-page" dir="rtl" lang="ar">
   <div class="signup-wrap">
     <a class="brand-row" routerLink="/">
       <span class="brand-mark" aria-hidden="true">ت</span>
@@ -17,9 +17,7 @@
 
           <form
             class="signup-form"
-            #htmlForm
-            #signupForm="ngForm"
-            (ngSubmit)="onSubmit(htmlForm, signupForm)"
+            (ngSubmit)="onSubmit()"
             novalidate
             aria-label="نموذج تسجيل مركز جديد"
           >
@@ -28,29 +26,28 @@
             <div class="input-group">
               <label for="adminName">اسم المدير <span class="req" title="مطلوب">*</span></label>
               <input
-                class="input"
-                type="text"
+                pInputText
                 id="adminName"
                 name="adminName"
                 [(ngModel)]="form.adminName"
-                required
                 autocomplete="name"
+                fluid
                 [disabled]="submitting()"
               />
             </div>
 
             <div class="id-block">
-              <label class="check-row">
+              <div class="remember-row">
                 <p-checkbox
                   [(ngModel)]="usePassport"
                   name="noNationalId"
                   [binary]="true"
                   inputId="noNationalId"
-                  (onChange)="onIdModeChange()"
+                  (ngModelChange)="onIdModeChange()"
                   [disabled]="submitting()"
                 />
-                <span>لا يوجد رقم هوية</span>
-              </label>
+                <label for="noNationalId">لا يوجد رقم هوية</label>
+              </div>
               <p class="hint">اختر رقم الهوية الوطنية أو جواز السفر — أحدهما مطلوب.</p>
 
               @if (form.identityDocumentType === IdentityDocumentType.NationalId) {
@@ -59,14 +56,13 @@
                     رقم الهوية الوطنية <span class="req">*</span>
                   </label>
                   <input
-                    class="input"
-                    type="text"
+                    pInputText
                     id="adminIdentificationNumber"
                     name="adminIdentificationNumber"
                     [(ngModel)]="form.adminIdentificationNumber"
                     inputmode="numeric"
                     autocomplete="off"
-                    required
+                    fluid
                     [disabled]="submitting()"
                   />
                 </div>
@@ -74,13 +70,12 @@
                 <div class="input-group">
                   <label for="adminPassportNumber">رقم جواز السفر <span class="req">*</span></label>
                   <input
-                    class="input"
-                    type="text"
+                    pInputText
                     id="adminPassportNumber"
                     name="adminPassportNumber"
                     [(ngModel)]="form.adminPassportNumber"
                     autocomplete="off"
-                    required
+                    fluid
                     [disabled]="submitting()"
                   />
                 </div>
@@ -90,13 +85,14 @@
             <div class="input-group">
               <label for="adminEmail">البريد الإلكتروني <span class="req">*</span></label>
               <input
-                class="input"
-                type="email"
+                pInputText
                 id="adminEmail"
                 name="adminEmail"
+                type="email"
                 [(ngModel)]="form.adminEmail"
-                required
                 autocomplete="email"
+                dir="ltr"
+                fluid
                 [disabled]="submitting()"
               />
             </div>
@@ -104,26 +100,29 @@
             <div class="input-group">
               <label for="adminPhone">رقم الجوال <span class="req">*</span></label>
               <input
-                class="input"
-                type="tel"
+                pInputText
                 id="adminPhone"
                 name="adminPhone"
+                type="tel"
                 [(ngModel)]="form.adminPhone"
-                required
                 autocomplete="tel"
+                dir="ltr"
+                fluid
                 [disabled]="submitting()"
               />
             </div>
 
             <div class="input-group">
               <label for="adminBirthDate">تاريخ الميلاد <span class="req">*</span></label>
-              <input
-                class="input"
-                type="date"
-                id="adminBirthDate"
+              <p-datepicker
+                inputId="adminBirthDate"
                 name="adminBirthDate"
-                [(ngModel)]="form.adminBirthDate"
-                required
+                [(ngModel)]="adminBirthDate"
+                dateFormat="yy-mm-dd"
+                [showIcon]="true"
+                [maxDate]="today"
+                appendTo="body"
+                fluid
                 [disabled]="submitting()"
               />
             </div>
@@ -131,13 +130,12 @@
             <div class="input-group">
               <label for="adminAddress">عنوان المدير <span class="req">*</span></label>
               <input
-                class="input"
-                type="text"
+                pInputText
                 id="adminAddress"
                 name="adminAddress"
                 [(ngModel)]="form.adminAddress"
-                required
                 autocomplete="street-address"
+                fluid
                 [disabled]="submitting()"
               />
             </div>
@@ -145,12 +143,11 @@
             <div class="input-group">
               <label for="adminNationality">الجنسية <span class="req">*</span></label>
               <input
-                class="input"
-                type="text"
+                pInputText
                 id="adminNationality"
                 name="adminNationality"
                 [(ngModel)]="form.adminNationality"
-                required
+                fluid
                 [disabled]="submitting()"
               />
             </div>
@@ -160,12 +157,11 @@
             <div class="input-group">
               <label for="centerName">اسم المركز <span class="req">*</span></label>
               <input
-                class="input"
-                type="text"
+                pInputText
                 id="centerName"
                 name="centerName"
                 [(ngModel)]="form.centerName"
-                required
+                fluid
                 [disabled]="submitting()"
               />
             </div>
@@ -173,19 +169,22 @@
             <div class="input-group">
               <label for="centerAddress">عنوان المركز <span class="req">*</span></label>
               <input
-                class="input"
-                type="text"
+                pInputText
                 id="centerAddress"
                 name="centerAddress"
                 [(ngModel)]="form.centerAddress"
-                required
+                fluid
                 [disabled]="submitting()"
               />
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg btn-block" [disabled]="submitting()">
-              {{ submitting() ? 'جاري الإرسال…' : 'تسجيل' }}
-            </button>
+            <p-button
+              [type]="'submit'"
+              [label]="submitting() ? 'جاري الإرسال…' : 'تسجيل'"
+              styleClass="w-full"
+              [loading]="submitting()"
+              [disabled]="submitting()"
+            />
           </form>
         </div>
       } @else {
@@ -193,7 +192,9 @@
           <div class="success-icon" aria-hidden="true">✓</div>
           <h2>تم إرسال طلبك</h2>
           <p>سنراجعه، ثم نرسل إليك بريدًا عند التفعيل</p>
-          <a class="btn btn-primary btn-lg" routerLink="/login">تسجيل الدخول</a>
+          <a routerLink="/login" class="btn-link-wrap">
+            <p-button [type]="'button'" label="تسجيل الدخول" styleClass="w-full" />
+          </a>
         </div>
       }
     </div>

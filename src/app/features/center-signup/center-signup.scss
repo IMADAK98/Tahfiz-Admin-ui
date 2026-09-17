@@ -1,0 +1,35 @@
+.signup-page .p-button {
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.signup-form .p-button {
+  width: 100%;
+  justify-content: center;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 12px;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+  }
+}
+
+.signup-form .p-datepicker,
+.signup-form .p-inputtext {
+  width: 100%;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-link-wrap {
+  display: block;
+  text-decoration: none;
+}
