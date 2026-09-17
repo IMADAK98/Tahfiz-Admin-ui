@@ -1,6 +1,7 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
@@ -24,7 +25,7 @@ import { TeachersService } from '../teachers.service';
 
 @Component({
   selector: 'app-teacher-form-modal',
-  imports: [FormsModule, Button],
+  imports: [FormsModule, Button, Select],
   templateUrl: './teacher-form-modal.html',
   styleUrl: './teacher-form-modal.scss',
 })
@@ -39,11 +40,11 @@ export class TeacherFormModalComponent {
   readonly saved = output<void>();
   readonly closed = output<void>();
 
-  protected readonly qualificationOptions = TEACHER_QUALIFICATION_OPTIONS;
+  protected readonly qualificationOptions = [...TEACHER_QUALIFICATION_OPTIONS];
   protected readonly tajweedOptions = TEACHER_TAJWEED_LEVEL_OPTIONS;
   protected readonly ageGroupOptions = TEACHER_AGE_GROUP_OPTIONS;
   protected readonly workPeriodOptions = TEACHER_WORK_PERIOD_OPTIONS;
-  protected readonly yesNoOptions = TEACHER_YES_NO_OPTIONS;
+  protected readonly yesNoOptions = [...TEACHER_YES_NO_OPTIONS];
 
   protected readonly form: TeacherFormModel = createEmptyTeacherForm();
   protected readonly submitting = signal(false);

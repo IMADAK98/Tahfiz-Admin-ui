@@ -22,17 +22,17 @@
         <div class="plan-item-form-grid">
           <div class="input-group">
             <label for="edit-item-type">النوع</label>
-            <select
-              class="select"
-              id="edit-item-type"
+            <p-select
+              inputId="edit-item-type"
+              name="type"
+              [options]="itemTypeOptions"
+              optionLabel="label"
+              optionValue="value"
               [ngModel]="form().type"
               (ngModelChange)="patchForm({ type: $event })"
-              name="type"
-            >
-              @for (option of itemTypeOptions; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
 
           <fieldset class="dir-fieldset brand-dir">
@@ -55,46 +55,45 @@
         <div class="plan-item-range-grid">
           <div class="input-group">
             <label for="edit-from-surah">من سورة</label>
-            <select
-              class="select"
-              id="edit-from-surah"
-              [ngModel]="form().fromSurah"
-              (ngModelChange)="onFromSurahChange(+$event)"
+            <p-select
+              inputId="edit-from-surah"
               name="fromSurah"
-            >
-              @for (surah of surahOptions(); track surah.number) {
-                <option [ngValue]="surah.number">{{ surah.label }}</option>
-              }
-            </select>
+              [options]="surahOptions()"
+              optionLabel="label"
+              optionValue="number"
+              [ngModel]="form().fromSurah"
+              (ngModelChange)="onFromSurahChange($event)"
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
           <div class="input-group">
             <label for="edit-from-ayah">من آية</label>
-            <select
-              class="select"
-              id="edit-from-ayah"
-              [ngModel]="form().fromAyah"
-              (ngModelChange)="patchForm({ fromAyah: +$event })"
+            <p-select
+              inputId="edit-from-ayah"
               name="fromAyah"
+              [options]="ayahsBySurah()[form().fromSurah] ?? []"
+              [ngModel]="form().fromAyah"
+              (ngModelChange)="patchForm({ fromAyah: $event })"
               [disabled]="!(ayahsBySurah()[form().fromSurah]?.length)"
-            >
-              @for (ayah of ayahsBySurah()[form().fromSurah] ?? []; track ayah) {
-                <option [ngValue]="ayah">{{ ayah }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
           <div class="input-group">
             <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
-            <select class="select" id="edit-to-surah" [ngModel]="form().toSurah" name="toSurah" disabled>
-              @if (form().toSurah; as toSurah) {
-                @for (surah of surahOptions(); track surah.number) {
-                  @if (surah.number === toSurah) {
-                    <option [ngValue]="surah.number">{{ surah.label }}</option>
-                  }
-                }
-              } @else {
-                <option [ngValue]="null">—</option>
-              }
-            </select>
+            <p-select
+              inputId="edit-to-surah"
+              name="toSurah"
+              [options]="surahOptions()"
+              optionLabel="label"
+              optionValue="number"
+              [ngModel]="form().toSurah"
+              placeholder="—"
+              [disabled]="true"
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
           <div class="input-group">
             <label for="edit-to-ayah">إلى آية <span class="hint-inline">(عرض فقط)</span></label>
@@ -112,17 +111,17 @@
         <div class="plan-item-amount-grid">
           <div class="input-group">
             <label for="edit-amount-type">نوع المقدار</label>
-            <select
-              class="select"
-              id="edit-amount-type"
+            <p-select
+              inputId="edit-amount-type"
+              name="amountType"
+              [options]="amountTypeOptions"
+              optionLabel="label"
+              optionValue="value"
               [ngModel]="form().amountType"
               (ngModelChange)="patchForm({ amountType: $event })"
-              name="amountType"
-            >
-              @for (option of amountTypeOptions; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
           <div class="input-group">
             <label for="edit-amount-value">القيمة</label>

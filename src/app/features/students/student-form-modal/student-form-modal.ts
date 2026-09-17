@@ -1,6 +1,7 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -10,7 +11,7 @@ import { StudentsService } from '../students.service';
 
 @Component({
   selector: 'app-student-form-modal',
-  imports: [FormsModule, Button],
+  imports: [FormsModule, Button, Select],
   templateUrl: './student-form-modal.html',
   styleUrl: './student-form-modal.scss',
 })
@@ -22,9 +23,9 @@ export class StudentFormModalComponent {
   readonly saved = output<void>();
   readonly closed = output<void>();
 
-  protected readonly educationStageOptions = EDUCATION_STAGE_OPTIONS;
-  protected readonly hifzQualityOptions = HIFZ_QUALITY_OPTIONS;
-  protected readonly yesNoOptions = STUDENT_YES_NO_OPTIONS;
+  protected readonly educationStageOptions = [...EDUCATION_STAGE_OPTIONS];
+  protected readonly hifzQualityOptions = [...HIFZ_QUALITY_OPTIONS];
+  protected readonly yesNoOptions = [...STUDENT_YES_NO_OPTIONS];
 
   protected readonly form: StudentFormModel = createEmptyStudentForm();
   protected readonly submitting = signal(false);

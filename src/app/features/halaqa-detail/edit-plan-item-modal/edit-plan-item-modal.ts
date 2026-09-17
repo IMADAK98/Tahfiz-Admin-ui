@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { QuranApiService } from '../../../core/api/quran-api.service';
 import { SurahApiRecord } from '../../../core/api/models/study-plan.model';
@@ -23,7 +24,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-plan-item-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, Select],
   templateUrl: './edit-plan-item-modal.html',
 })
 export class EditPlanItemModalComponent {
@@ -38,9 +39,9 @@ export class EditPlanItemModalComponent {
   readonly saved = output<void>();
   readonly closed = output<void>();
 
-  protected readonly itemTypeOptions = STUDY_PLAN_ITEM_TYPE_OPTIONS;
+  protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
-  protected readonly amountTypeOptions = STUDY_PLAN_AMOUNT_TYPE_OPTIONS;
+  protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
   protected readonly form = signal<PlanItemFormModel>(createPlanItemFormFromView({
     id: 0,
     type: 'HIFZ',

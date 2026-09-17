@@ -47,21 +47,25 @@
         </div>
         <div class="filter-field">
           <label for="filter-category">الفئة</label>
-          <select class="select" id="filter-category" [(ngModel)]="filters.category" style="width: auto">
-            <option value="">كل الفئات</option>
-            @for (option of categoryOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+          <p-select
+            inputId="filter-category"
+            [options]="categoryFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="filters.category"
+            appendTo="body"
+          />
         </div>
         <div class="filter-field">
           <label for="filter-period">الفترة</label>
-          <select class="select" id="filter-period" [(ngModel)]="filters.period" style="width: auto">
-            <option value="">كل الفترات</option>
-            @for (option of periodOptions; track option.value) {
-              <option [value]="option.value">{{ option.label }}</option>
-            }
-          </select>
+          <p-select
+            inputId="filter-period"
+            [options]="periodFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="filters.period"
+            appendTo="body"
+          />
         </div>
       </div>
       <span class="badge badge-primary">{{ filteredCountLabel() }}</span>

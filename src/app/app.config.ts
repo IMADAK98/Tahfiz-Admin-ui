@@ -44,6 +44,17 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     provideAnimationsAsync(),
     providePrimeNG({
+      overlayAppendTo: 'body',
+      overlayOptions: {
+        appendTo: 'body',
+        baseZIndex: 1100,
+      },
+      zIndex: {
+        modal: 1100,
+        overlay: 1100,
+        menu: 1100,
+        tooltip: 1100,
+      },
       theme: {
         preset: TahfizPreset,
         options: {

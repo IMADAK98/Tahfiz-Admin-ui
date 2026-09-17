@@ -134,7 +134,7 @@ export class StudentsComponent {
   }
 
   protected async copyRegistrationLink(): Promise<void> {
-    const link = this.linkResult()?.registrationLink?.trim();
+    const link = this.linkResult()?.registrationUrl?.trim();
     if (!link) {
       return;
     }

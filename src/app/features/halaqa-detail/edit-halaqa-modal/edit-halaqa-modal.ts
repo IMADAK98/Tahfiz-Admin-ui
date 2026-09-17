@@ -1,6 +1,7 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { ActiveTeacher } from '../../../core/api/models/teacher.model';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -17,7 +18,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-halaqa-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, Select],
   templateUrl: './edit-halaqa-modal.html',
   styleUrl: './edit-halaqa-modal.scss',
 })
@@ -32,8 +33,8 @@ export class EditHalaqaModalComponent {
   readonly saved = output<HalaqaDetailViewModel>();
   readonly closed = output<void>();
 
-  protected readonly categoryOptions = HALQA_CATEGORY_OPTIONS;
-  protected readonly periodOptions = HALQA_PERIOD_OPTIONS;
+  protected readonly categoryOptions = [...HALQA_CATEGORY_OPTIONS];
+  protected readonly periodOptions = [...HALQA_PERIOD_OPTIONS];
   protected readonly form = signal<EditHalaqaFormModel>(createEditHalaqaForm({
     id: 0,
     name: '',

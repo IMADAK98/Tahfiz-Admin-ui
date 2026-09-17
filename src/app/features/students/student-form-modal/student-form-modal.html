@@ -147,19 +147,19 @@
             </div>
             <div class="input-group">
               <label for="sf-stage">المرحلة الدراسية</label>
-              <select
-                class="select"
-                id="sf-stage"
+              <p-select
+                inputId="sf-stage"
                 name="educationStage"
-                required
                 [(ngModel)]="form.educationStage"
+                [options]="educationStageOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of educationStageOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
           </div>
 
@@ -167,35 +167,35 @@
           <div class="form-grid-2">
             <div class="input-group">
               <label for="sf-is-hafiz">هل الطالب حافظ؟</label>
-              <select
-                class="select"
-                id="sf-is-hafiz"
+              <p-select
+                inputId="sf-is-hafiz"
                 name="isHafiz"
-                required
                 [(ngModel)]="form.isHafiz"
+                [options]="yesNoOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of yesNoOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
             <div class="input-group">
               <label for="sf-hifz-quality">جودة الحفظ</label>
-              <select
-                class="select"
-                id="sf-hifz-quality"
+              <p-select
+                inputId="sf-hifz-quality"
                 name="hifzQuality"
-                required
                 [(ngModel)]="form.hifzQuality"
+                [options]="hifzQualityOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of hifzQualityOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
             <div class="input-group">
               <label for="sf-surah-from">من سورة (1–114)</label>

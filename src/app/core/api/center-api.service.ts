@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
-import { ApiError } from './api-error';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { ActiveTerm } from './models/term.model';
@@ -84,12 +83,12 @@ export class CenterApiService {
 
   generateRegistrationLink(centerId: number): Observable<RegistrationLinkResult> {
     return this.http
-      .post<ApiEnvelope<unknown>>(
+      .post<ApiEnvelope<RegistrationLinkResult>>(
         `${this.apiBaseUrl}/center/${centerId}/generate-registration-link`,
         {},
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(map((res) => mapRegistrationLink(unwrapEnvelopeOrNull(res.body, res.status))));
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
   private getTeachers(url: string, query: ActiveTeachersQuery): Observable<ActiveTeacher[]> {
@@ -108,21 +107,4 @@ export class CenterApiService {
       .get<ApiEnvelope<ActiveTeacher[]>>(url, withSkipGlobalErrorToast({ observe: 'response', params }))
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
-}
-
-function mapRegistrationLink(data: unknown): RegistrationLinkResult {
-  if (typeof data === 'string' && data.trim()) {
-    return { registrationLink: data.trim() };
-  }
-  if (data && typeof data === 'object') {
-    const record = data as Record<string, unknown>;
-    const link = [record['registrationLink'], record['url'], record['link']].find(
-      (value) => typeof value === 'string' && value.trim(),
-    ) as string | undefined;
-    if (link) {
-      const expiresAt = typeof record['expiresAt'] === 'string' ? record['expiresAt'] : null;
-      return { registrationLink: link.trim(), expiresAt };
-    }
-  }
-  throw new ApiError('تعذّر قراءة رابط التسجيل', 200);
 }

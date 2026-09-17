@@ -20,35 +20,35 @@
         <div class="form-grid-2">
           <div class="input-group">
             <label for="edit-category">الفئة</label>
-            <select
-              class="select"
-              id="edit-category"
+            <p-select
+              inputId="edit-category"
+              name="category"
+              [options]="categoryOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="اختر الفئة"
               [ngModel]="form().category"
               (ngModelChange)="form.update((current) => ({ ...current, category: $event }))"
-              name="category"
               required
-            >
-              <option value="" disabled>اختر الفئة</option>
-              @for (option of categoryOptions; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
           <div class="input-group">
             <label for="edit-period">الفترة</label>
-            <select
-              class="select"
-              id="edit-period"
+            <p-select
+              inputId="edit-period"
+              name="period"
+              [options]="periodOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="اختر الفترة"
               [ngModel]="form().period"
               (ngModelChange)="form.update((current) => ({ ...current, period: $event }))"
-              name="period"
               required
-            >
-              <option value="" disabled>اختر الفترة</option>
-              @for (option of periodOptions; track option.value) {
-                <option [ngValue]="option.value">{{ option.label }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
         </div>
 
@@ -67,20 +67,20 @@
           </div>
           <div class="input-group">
             <label for="edit-teacher">المعلّم</label>
-            <select
-              class="select"
-              id="edit-teacher"
+            <p-select
+              inputId="edit-teacher"
+              name="teacherId"
+              [options]="teachers()"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="اختر المعلّم"
               [ngModel]="form().teacherId"
               (ngModelChange)="form.update((current) => ({ ...current, teacherId: $event }))"
-              name="teacherId"
               required
               [disabled]="pickersLoading()"
-            >
-              <option [ngValue]="null" disabled>اختر المعلّم</option>
-              @for (teacher of teachers(); track teacher.id) {
-                <option [ngValue]="teacher.id">{{ teacher.name }}</option>
-              }
-            </select>
+              [fluid]="true"
+              appendTo="body"
+            />
           </div>
         </div>
 

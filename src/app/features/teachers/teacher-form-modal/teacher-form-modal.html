@@ -119,35 +119,35 @@
           <div class="form-grid-2">
             <div class="input-group">
               <label for="tf-academic">المؤهل الأكاديمي</label>
-              <select
-                class="select"
-                id="tf-academic"
+              <p-select
+                inputId="tf-academic"
                 name="qualification"
-                required
                 [(ngModel)]="form.qualification"
+                [options]="qualificationOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of qualificationOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
             <div class="input-group">
               <label for="tf-maknoon">شهادة مكنون</label>
-              <select
-                class="select"
-                id="tf-maknoon"
+              <p-select
+                inputId="tf-maknoon"
                 name="hasCertificate"
-                required
                 [(ngModel)]="form.hasCertificate"
+                [options]="yesNoOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of yesNoOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
             <div class="input-group">
               <label for="tf-parts">عدد الأجزاء المحفوظة</label>
@@ -165,35 +165,35 @@
             </div>
             <div class="input-group">
               <label for="tf-sanad">السند</label>
-              <select
-                class="select"
-                id="tf-sanad"
+              <p-select
+                inputId="tf-sanad"
                 name="hasSanadInHifz"
-                required
                 [(ngModel)]="form.hasSanadInHifz"
+                [options]="yesNoOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of yesNoOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
             <div class="input-group">
               <label for="tf-ijazah">الإجازة في الحفظ</label>
-              <select
-                class="select"
-                id="tf-ijazah"
+              <p-select
+                inputId="tf-ijazah"
                 name="hasIjazahInHifz"
-                required
                 [(ngModel)]="form.hasIjazahInHifz"
+                [options]="yesNoOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="— اختر —"
                 [disabled]="submitting()"
-              >
-                <option value="">— اختر —</option>
-                @for (option of yesNoOptions; track option.value) {
-                  <option [value]="option.value">{{ option.label }}</option>
-                }
-              </select>
+                required
+                [fluid]="true"
+                appendTo="body"
+              />
             </div>
           </div>
 

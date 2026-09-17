@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../core/api/api-error';
 import { HalqaListItem } from '../../core/api/models/halqa.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
@@ -18,7 +19,7 @@ import { HalaqatService } from './halaqat.service';
 
 @Component({
   selector: 'app-halaqat',
-  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent],
+  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent, Select],
   templateUrl: './halaqat.html',
   styleUrl: './halaqat.scss',
 })
@@ -27,8 +28,14 @@ export class HalaqatComponent {
   private readonly auth = inject(AuthService);
 
   protected readonly HalaqatLoadState = HalaqatLoadState;
-  protected readonly categoryOptions = HALQA_CATEGORY_OPTIONS;
-  protected readonly periodOptions = HALQA_PERIOD_OPTIONS;
+  protected readonly categoryFilterOptions = [
+    { value: '' as const, label: 'كل الفئات' },
+    ...HALQA_CATEGORY_OPTIONS,
+  ];
+  protected readonly periodFilterOptions = [
+    { value: '' as const, label: 'كل الفترات' },
+    ...HALQA_PERIOD_OPTIONS,
+  ];
   protected readonly filters: HalaqatFiltersModel = createEmptyHalaqatFilters();
 
   protected readonly loadState = signal(HalaqatLoadState.Loading);

@@ -99,20 +99,24 @@
           <div class="input-group">
             <label for="teacher" class="field-req">المعلّم</label>
             @if (teachers().length) {
-              <select
-                class="select"
-                id="teacher"
+              <p-select
+                inputId="teacher"
                 name="teacherId"
-                [(ngModel)]="form.teacherId"
+                [options]="teachers()"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="— اختر معلّماً —"
+                [filter]="true"
+                filterBy="name"
+                filterPlaceholder="ابحث باسم المعلّم…"
+                emptyFilterMessage="لا يوجد معلّمون مطابقون"
+                [fluid]="true"
+                appendTo="body"
                 required
                 [disabled]="submitting()"
+                [(ngModel)]="form.teacherId"
                 (ngModelChange)="onTeacherChange($event)"
-              >
-                <option [ngValue]="null">— اختر معلّماً —</option>
-                @for (teacher of teachers(); track teacher.id) {
-                  <option [ngValue]="teacher.id">{{ teacher.name }}</option>
-                }
-              </select>
+              />
               @if (selectedTeacher(); as teacher) {
                 <div class="chips" aria-live="polite">
                   <span class="sel-chip">
@@ -130,21 +134,25 @@
         <div class="input-group">
           <label for="students" class="field-req">الطلاب</label>
           @if (students().length) {
-            <select
-              class="select student-picker"
-              id="students"
-              name="studentIds"
-              multiple
-              size="4"
-              aria-describedby="students-hint"
+            <p-select
+              #studentPicker
+              inputId="students"
+              name="studentPickerId"
+              [options]="availableStudents()"
+              optionLabel="name"
+              optionValue="id"
+              [filter]="true"
+              filterBy="name"
+              filterPlaceholder="ابحث باسم الطالب…"
+              placeholder="اختر طالباً"
+              emptyFilterMessage="لا يوجد طلاب مطابقون"
+              emptyMessage="لا يوجد طلاب متبقون"
+              [showClear]="false"
+              [fluid]="true"
+              appendTo="body"
               [disabled]="submitting()"
-              [ngModel]="form.studentIds"
-              (ngModelChange)="onStudentsChange($event)"
-            >
-              @for (student of students(); track student.id) {
-                <option [ngValue]="student.id">{{ student.name }}</option>
-              }
-            </select>
+              (onChange)="onStudentPicked($event.value)"
+            />
             @if (selectedStudents().length) {
               <div class="chips" aria-live="polite">
                 @for (student of selectedStudents(); track student.id) {
@@ -157,9 +165,7 @@
                 }
               </div>
             }
-            <span class="hint" id="students-hint">
-              يمكن اختيار أكثر من طالب. الرقائق تعرض المحدّدين ويمكن إزالتهم.
-            </span>
+            <span class="hint" id="students-hint">يمكن اختيار أكثر من طالب. المحدّدون يظهرون أسفل القائمة ويُزالون منها حتى تُحذف الرقاقة.</span>
           } @else {
             <p class="picker-empty">{{ 'halaqat.picker.noStudents' | translate }}</p>
           }

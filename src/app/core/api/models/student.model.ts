@@ -50,7 +50,7 @@ export interface CreateManualStudentPayload {
 
 /** POST /center/{centerId}/generate-registration-link */
 export interface RegistrationLinkResult {
-  registrationLink: string;
+  registrationUrl: string;
   expiresAt?: string | null;
 }
 

@@ -127,6 +127,18 @@
   }
 }
 
+.input-group p-select,
+.filter-field p-select {
+  width: 100%;
+  min-height: 45px;
+}
+
+/* ponytail: modal-backdrop is z-index 100; default overlay stacking sits under it. */
+.p-overlay,
+.p-select-overlay {
+  z-index: 1100;
+}
+
 .radio-row {
   display: flex;
   flex-wrap: wrap;

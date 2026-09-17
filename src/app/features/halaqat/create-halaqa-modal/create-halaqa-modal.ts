@@ -1,6 +1,7 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -14,7 +15,7 @@ import { HalaqatService } from '../halaqat.service';
 
 @Component({
   selector: 'app-create-halaqa-modal',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, Select],
   templateUrl: './create-halaqa-modal.html',
   styleUrl: './create-halaqa-modal.scss',
 })
@@ -36,6 +37,7 @@ export class CreateHalaqaModalComponent {
   protected readonly teachers = signal<ActiveTeacher[]>([]);
   protected readonly students = signal<ActiveStudent[]>([]);
   protected readonly pickersLoading = signal(false);
+  private readonly studentPicker = viewChild<Select>('studentPicker');
 
   protected readonly termLabel = computed(() => {
     const term = this.activeTerm();
@@ -66,11 +68,6 @@ export class CreateHalaqaModalComponent {
     return this.teachers().find((teacher) => teacher.id === teacherId) ?? null;
   }
 
-  protected selectedStudents(): ActiveStudent[] {
-    const ids = new Set(this.form.studentIds);
-    return this.students().filter((student) => ids.has(student.id));
-  }
-
   protected onBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.close();
@@ -93,8 +90,29 @@ export class CreateHalaqaModalComponent {
     this.form.teacherId = null;
   }
 
-  protected onStudentsChange(studentIds: number[]): void {
-    this.form.studentIds = studentIds;
+  protected availableStudents(): ActiveStudent[] {
+    const selectedIds = new Set(this.form.studentIds);
+    return this.students().filter((student) => !selectedIds.has(student.id));
+  }
+
+  protected selectedStudents(): ActiveStudent[] {
+    const selectedIds = new Set(this.form.studentIds);
+    return this.students().filter((student) => selectedIds.has(student.id));
+  }
+
+  protected onStudentPicked(studentId: number | null): void {
+    if (studentId == null) {
+      return;
+    }
+    if (!this.form.studentIds.includes(studentId)) {
+      this.form.studentIds = [...this.form.studentIds, studentId];
+    }
+    const picker = this.studentPicker();
+    // ponytail: Select keeps the last id, so the same student is a no-op after chip-remove until clear().
+    queueMicrotask(() => {
+      picker?.clear();
+      picker?.hide();
+    });
   }
 
   protected removeStudent(studentId: number): void {
@@ -163,6 +181,7 @@ export class CreateHalaqaModalComponent {
 
   private resetForm(): void {
     Object.assign(this.form, createEmptyCreateHalaqaForm());
+    this.studentPicker()?.clear();
     this.errorMessage.set(null);
   }
 }

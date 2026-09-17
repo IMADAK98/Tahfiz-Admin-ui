@@ -64,17 +64,18 @@
             <li class="plan-edit-item">
               <div class="plan-edit-item-top">
                 <div class="input-group">
-                  <label>النوع</label>
-                  <select
-                    class="select"
+                  <label [attr.for]="'type-' + index">النوع</label>
+                  <p-select
+                    [inputId]="'type-' + index"
+                    [options]="itemTypeOptions"
+                    optionLabel="label"
+                    optionValue="value"
                     [ngModel]="item.type"
                     (ngModelChange)="updateItem(index, { type: $event })"
                     [name]="'type-' + index"
-                  >
-                    @for (option of itemTypeOptions; track option.value) {
-                      <option [ngValue]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                    [fluid]="true"
+                    appendTo="body"
+                  />
                 </div>
                 <fieldset class="dir-fieldset brand-dir">
                   <legend>الاتجاه</legend>
@@ -104,48 +105,49 @@
 
               <div class="plan-item-range-grid plan-item-range-from-only">
                 <div class="input-group">
-                  <label>من سورة</label>
-                  <select
-                    class="select"
+                  <label [attr.for]="'fromSurah-' + index">من سورة</label>
+                  <p-select
+                    [inputId]="'fromSurah-' + index"
+                    [options]="surahOptions()"
+                    optionLabel="label"
+                    optionValue="number"
                     [ngModel]="item.fromSurah"
-                    (ngModelChange)="onFromSurahChange(index, +$event)"
+                    (ngModelChange)="onFromSurahChange(index, $event)"
                     [name]="'fromSurah-' + index"
                     [disabled]="surahsLoading()"
-                  >
-                    @for (surah of surahOptions(); track surah.number) {
-                      <option [ngValue]="surah.number">{{ surah.label }}</option>
-                    }
-                  </select>
+                    [fluid]="true"
+                    appendTo="body"
+                  />
                 </div>
                 <div class="input-group">
-                  <label>من آية</label>
-                  <select
-                    class="select"
+                  <label [attr.for]="'fromAyah-' + index">من آية</label>
+                  <p-select
+                    [inputId]="'fromAyah-' + index"
+                    [options]="ayahsBySurah()[item.fromSurah] ?? []"
                     [ngModel]="item.fromAyah"
-                    (ngModelChange)="updateItem(index, { fromAyah: +$event })"
+                    (ngModelChange)="updateItem(index, { fromAyah: $event })"
                     [name]="'fromAyah-' + index"
                     [disabled]="!(ayahsBySurah()[item.fromSurah]?.length)"
-                  >
-                    @for (ayah of ayahsBySurah()[item.fromSurah] ?? []; track ayah) {
-                      <option [ngValue]="ayah">{{ ayah }}</option>
-                    }
-                  </select>
+                    [fluid]="true"
+                    appendTo="body"
+                  />
                 </div>
               </div>
 
               <div class="plan-item-amount-grid">
                 <div class="input-group">
-                  <label>نوع المقدار</label>
-                  <select
-                    class="select"
+                  <label [attr.for]="'amountType-' + index">نوع المقدار</label>
+                  <p-select
+                    [inputId]="'amountType-' + index"
+                    [options]="amountTypeOptions"
+                    optionLabel="label"
+                    optionValue="value"
                     [ngModel]="item.amountType"
                     (ngModelChange)="updateItem(index, { amountType: $event })"
                     [name]="'amountType-' + index"
-                  >
-                    @for (option of amountTypeOptions; track option.value) {
-                      <option [ngValue]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                    [fluid]="true"
+                    appendTo="body"
+                  />
                 </div>
                 <div class="input-group">
                   <label>القيمة</label>
