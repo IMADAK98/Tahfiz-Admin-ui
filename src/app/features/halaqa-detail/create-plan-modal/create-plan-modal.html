@@ -102,13 +102,13 @@
                 }
               </div>
 
-              <div class="plan-item-range-grid">
+              <div class="plan-item-range-grid plan-item-range-from-only">
                 <div class="input-group">
                   <label>من سورة</label>
                   <select
                     class="select"
                     [ngModel]="item.fromSurah"
-                    (ngModelChange)="updateItem(index, { fromSurah: +$event })"
+                    (ngModelChange)="onFromSurahChange(index, +$event)"
                     [name]="'fromSurah-' + index"
                     [disabled]="surahsLoading()"
                   >
@@ -119,40 +119,17 @@
                 </div>
                 <div class="input-group">
                   <label>من آية</label>
-                  <input
-                    class="input"
-                    type="number"
-                    min="1"
+                  <select
+                    class="select"
                     [ngModel]="item.fromAyah"
                     (ngModelChange)="updateItem(index, { fromAyah: +$event })"
                     [name]="'fromAyah-' + index"
-                  />
-                </div>
-                <div class="input-group">
-                  <label>إلى سورة <span class="hint">(اختياري)</span></label>
-                  <select
-                    class="select"
-                    [ngModel]="item.toSurah"
-                    (ngModelChange)="updateItem(index, { toSurah: $event ? +$event : null })"
-                    [name]="'toSurah-' + index"
-                    [disabled]="surahsLoading()"
+                    [disabled]="!(ayahsBySurah()[item.fromSurah]?.length)"
                   >
-                    <option [ngValue]="null">—</option>
-                    @for (surah of surahOptions(); track surah.number) {
-                      <option [ngValue]="surah.number">{{ surah.label }}</option>
+                    @for (ayah of ayahsBySurah()[item.fromSurah] ?? []; track ayah) {
+                      <option [ngValue]="ayah">{{ ayah }}</option>
                     }
                   </select>
-                </div>
-                <div class="input-group">
-                  <label>إلى آية <span class="hint">(اختياري)</span></label>
-                  <input
-                    class="input"
-                    type="number"
-                    min="1"
-                    [ngModel]="item.toAyah"
-                    (ngModelChange)="updateItem(index, { toAyah: $event ? +$event : null })"
-                    [name]="'toAyah-' + index"
-                  />
                 </div>
               </div>
 

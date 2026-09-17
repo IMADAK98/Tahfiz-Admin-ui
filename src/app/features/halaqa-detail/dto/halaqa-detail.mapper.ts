@@ -125,16 +125,35 @@ export function formatFromRange(surahName: string, ayah: number): string {
   return `من سورة ${surahName}، الآية ${ayah}`;
 }
 
+export function surahNumberOf(surah: SurahApiRecord): number {
+  return surah.number ?? surah.id;
+}
+
+export function surahNameOf(surah: SurahApiRecord): string {
+  return surah.surahName ?? surah.arabicName ?? surah.name ?? String(surahNumberOf(surah));
+}
+
+export function ayahNumbersOf(surah: SurahApiRecord): number[] {
+  return Array.isArray(surah.ayahs) ? surah.ayahs : [];
+}
+
 export function buildSurahNameMap(surahs: SurahApiRecord[]): Map<number, string> {
   const map = new Map<number, string>();
   for (const surah of surahs) {
-    const number = surah.number ?? surah.id;
-    const name = surah.arabicName ?? surah.name ?? String(number);
-    map.set(number, name);
+    map.set(surahNumberOf(surah), surahNameOf(surah));
   }
   return map;
 }
 
 export function surahSelectLabel(number: number, name: string): string {
   return `${number} — ${name}`;
+}
+
+export function mapSurahSelectOptions(
+  surahs: SurahApiRecord[],
+): { number: number; label: string }[] {
+  return surahs.map((surah) => {
+    const number = surahNumberOf(surah);
+    return { number, label: surahSelectLabel(number, surahNameOf(surah)) };
+  });
 }

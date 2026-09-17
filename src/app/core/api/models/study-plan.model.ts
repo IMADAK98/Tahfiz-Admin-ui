@@ -102,4 +102,6 @@ export interface SurahApiRecord {
   number?: number;
   name?: string;
   arabicName?: string;
+  surahName?: string;
+  ayahs?: number[];
 }

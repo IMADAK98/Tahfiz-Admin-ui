@@ -19,4 +19,12 @@ export class QuranApiService {
       })
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
+
+  getSurahById(id: number): Observable<SurahApiRecord> {
+    return this.http
+      .get<ApiEnvelope<SurahApiRecord>>(`${this.apiBaseUrl}/quran/surah/${id}`, {
+        observe: 'response',
+      })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
 }

@@ -9,8 +9,9 @@ import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import {
   PlanItemFormModel,
   StudyPlanItemViewModel,
+  ayahNumbersOf,
   createPlanItemFormFromView,
-  surahSelectLabel,
+  mapSurahSelectOptions,
   validatePlanItemForm,
 } from '../dto';
 import {
@@ -57,18 +58,11 @@ export class EditPlanItemModalComponent {
     directionLabel: 'عادي',
   }));
   protected readonly surahs = signal<SurahApiRecord[]>([]);
+  protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
-  protected readonly surahOptions = computed(() =>
-    this.surahs().map((surah) => ({
-      number: surah.number ?? surah.id,
-      label: surahSelectLabel(
-        surah.number ?? surah.id,
-        surah.arabicName ?? surah.name ?? String(surah.number ?? surah.id),
-      ),
-    })),
-  );
+  protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
   constructor() {
     effect(() => {
@@ -79,6 +73,7 @@ export class EditPlanItemModalComponent {
       this.form.set(createPlanItemFormFromView(item));
       this.errorMessage.set(null);
       this.loadSurahs();
+      this.loadAyahs(item.fromSurahNumber);
     });
   }
 
@@ -97,6 +92,11 @@ export class EditPlanItemModalComponent {
 
   protected patchForm(patch: Partial<PlanItemFormModel>): void {
     this.form.update((current) => ({ ...current, ...patch }));
+  }
+
+  protected onFromSurahChange(fromSurah: number): void {
+    this.patchForm({ fromSurah, fromAyah: 1 });
+    this.loadAyahs(fromSurah);
   }
 
   protected onSubmit(event: Event): void {
@@ -131,6 +131,24 @@ export class EditPlanItemModalComponent {
     this.quranApi.getSurahs().subscribe({
       next: (surahs) => this.surahs.set(surahs),
       error: () => this.surahs.set([]),
+    });
+  }
+
+  private loadAyahs(surahId: number): void {
+    if (!surahId || this.ayahsBySurah()[surahId]) {
+      return;
+    }
+
+    this.quranApi.getSurahById(surahId).subscribe({
+      next: (surah) => {
+        this.ayahsBySurah.update((current) => ({
+          ...current,
+          [surahId]: ayahNumbersOf(surah),
+        }));
+      },
+      error: () => {
+        this.ayahsBySurah.update((current) => ({ ...current, [surahId]: [] }));
+      },
     });
   }
 }

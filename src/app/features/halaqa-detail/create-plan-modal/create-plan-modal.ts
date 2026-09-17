@@ -8,8 +8,9 @@ import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import {
   HalaqaStudentViewModel,
   PlanItemFormModel,
+  ayahNumbersOf,
   createEmptyPlanItemForm,
-  surahSelectLabel,
+  mapSurahSelectOptions,
   validatePlanItemForm,
 } from '../dto';
 import {
@@ -44,19 +45,12 @@ export class CreatePlanModalComponent {
   protected readonly selectedStudentIds = signal<number[]>([]);
   protected readonly items = signal<PlanItemFormModel[]>([createEmptyPlanItemForm()]);
   protected readonly surahs = signal<SurahApiRecord[]>([]);
+  protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly surahsLoading = signal(false);
 
-  protected readonly surahOptions = computed(() =>
-    this.surahs().map((surah) => ({
-      number: surah.number ?? surah.id,
-      label: surahSelectLabel(
-        surah.number ?? surah.id,
-        surah.arabicName ?? surah.name ?? String(surah.number ?? surah.id),
-      ),
-    })),
-  );
+  protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
   constructor() {
     effect(() => {
@@ -92,7 +86,9 @@ export class CreatePlanModalComponent {
   }
 
   protected addItem(): void {
-    this.items.update((current) => [...current, createEmptyPlanItemForm()]);
+    const item = createEmptyPlanItemForm();
+    this.items.update((current) => [...current, item]);
+    this.loadAyahs(item.fromSurah);
   }
 
   protected removeItem(index: number): void {
@@ -103,6 +99,11 @@ export class CreatePlanModalComponent {
     this.items.update((current) =>
       current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
     );
+  }
+
+  protected onFromSurahChange(index: number, fromSurah: number): void {
+    this.updateItem(index, { fromSurah, fromAyah: 1 });
+    this.loadAyahs(fromSurah);
   }
 
   protected onSubmit(event: Event): void {
@@ -157,10 +158,31 @@ export class CreatePlanModalComponent {
       next: (surahs) => {
         this.surahs.set(surahs);
         this.surahsLoading.set(false);
+        for (const item of this.items()) {
+          this.loadAyahs(item.fromSurah);
+        }
       },
       error: () => {
         this.surahs.set([]);
         this.surahsLoading.set(false);
+      },
+    });
+  }
+
+  private loadAyahs(surahId: number): void {
+    if (!surahId || this.ayahsBySurah()[surahId]) {
+      return;
+    }
+
+    this.quranApi.getSurahById(surahId).subscribe({
+      next: (surah) => {
+        this.ayahsBySurah.update((current) => ({
+          ...current,
+          [surahId]: ayahNumbersOf(surah),
+        }));
+      },
+      error: () => {
+        this.ayahsBySurah.update((current) => ({ ...current, [surahId]: [] }));
       },
     });
   }

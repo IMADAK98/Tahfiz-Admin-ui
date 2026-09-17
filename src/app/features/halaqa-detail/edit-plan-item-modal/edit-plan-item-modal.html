@@ -59,7 +59,7 @@
               class="select"
               id="edit-from-surah"
               [ngModel]="form().fromSurah"
-              (ngModelChange)="patchForm({ fromSurah: +$event })"
+              (ngModelChange)="onFromSurahChange(+$event)"
               name="fromSurah"
             >
               @for (surah of surahOptions(); track surah.number) {
@@ -69,15 +69,18 @@
           </div>
           <div class="input-group">
             <label for="edit-from-ayah">من آية</label>
-            <input
-              class="input"
+            <select
+              class="select"
               id="edit-from-ayah"
-              type="number"
-              min="1"
               [ngModel]="form().fromAyah"
               (ngModelChange)="patchForm({ fromAyah: +$event })"
               name="fromAyah"
-            />
+              [disabled]="!(ayahsBySurah()[form().fromSurah]?.length)"
+            >
+              @for (ayah of ayahsBySurah()[form().fromSurah] ?? []; track ayah) {
+                <option [ngValue]="ayah">{{ ayah }}</option>
+              }
+            </select>
           </div>
           <div class="input-group">
             <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
