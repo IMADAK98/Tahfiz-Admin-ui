@@ -8,6 +8,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login').then((m) => m.LoginComponent),
   },
   {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/reset-password/reset-password').then((m) => m.ResetPasswordComponent),
+  },
+  {
     path: 'user/signup',
     loadComponent: () =>
       import('./features/center-signup/center-signup').then((m) => m.CenterSignupComponent),

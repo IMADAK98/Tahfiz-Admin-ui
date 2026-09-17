@@ -2,6 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { AuthApiService } from '../api/auth-api.service';
+import {
+  RequestPasswordResetBody,
+  ResetPasswordBody,
+} from '../api/password-reset.model';
 import { ApiError } from '../api/api-error';
 import { decodeJwtClaims, JwtClaims } from './jwt.helpers';
 import { TokenStorageService } from './token-storage.service';
@@ -78,5 +82,15 @@ export class AuthService {
         return of(undefined);
       }),
     );
+  }
+
+  requestPasswordReset(email: string): Observable<void> {
+    const body: RequestPasswordResetBody = { email: email.trim() };
+    return this.authApi.requestPasswordReset(body);
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    const body: ResetPasswordBody = { token, newPassword };
+    return this.authApi.resetPassword(body);
   }
 }

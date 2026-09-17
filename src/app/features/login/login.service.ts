@@ -12,4 +12,8 @@ export class LoginService {
     const request = toLoginRequest(form);
     return this.auth.login(request.email, request.password);
   }
+
+  requestPasswordReset(email: string): Observable<void> {
+    return this.auth.requestPasswordReset(email);
+  }
 }
