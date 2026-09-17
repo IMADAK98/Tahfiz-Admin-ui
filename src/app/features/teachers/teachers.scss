@@ -1,0 +1,146 @@
+.teachers-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.teachers-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.teachers-header h1 {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.teachers-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  flex: 1;
+}
+
+.toolbar-filters .input-group {
+  margin: 0;
+  min-width: 220px;
+  max-width: 320px;
+}
+
+.count-badge {
+  align-self: center;
+  font-weight: 800;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: start;
+    padding: 12px 14px;
+    color: var(--color-muted);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  }
+
+  td {
+    padding: 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+  }
+}
+
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.empty-block {
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-elevated);
+
+  h2 {
+    margin: 0 0 var(--space-2);
+    color: var(--color-primary);
+  }
+
+  p {
+    color: var(--color-muted);
+    margin: 0 0 var(--space-5);
+    max-width: 32em;
+    margin-inline: auto;
+    line-height: 1.55;
+  }
+}
+
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.load-error {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.no-results {
+  margin: 0;
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--color-muted);
+}

@@ -12,7 +12,8 @@
     "check:login-submit": "node scripts/login-submit-self-check.mjs",
     "check:center-signup": "node scripts/center-signup-self-check.mjs",
     "check:term-validation": "node scripts/term-validation-self-check.mjs",
-    "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs"
+    "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs",
+    "check:teacher-validation": "node scripts/teacher-validation-self-check.mjs"
   },
   "private": true,
   "engines": {

@@ -7,6 +7,10 @@
       "halaqaCreated": "تم إنشاء الحلقة",
       "reEnrollmentApproved": "تم قبول طلب إعادة التسجيل",
       "reEnrollmentRejected": "تم رفض طلب إعادة التسجيل",
+      "teacherCreated": "تم إضافة المعلّم",
+      "teacherUpdated": "تم تحديث بيانات المعلّم",
+      "teacherRequestApproved": "تم قبول طلب المعلّم",
+      "teacherRequestRejected": "تم رفض طلب المعلّم",
       "copied": "تم النسخ"
     },
     "error": {

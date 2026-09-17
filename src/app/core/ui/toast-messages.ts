@@ -7,6 +7,10 @@ export const TOAST_I18N = {
     halaqaCreated: 'toast.success.halaqaCreated',
     reEnrollmentApproved: 'toast.success.reEnrollmentApproved',
     reEnrollmentRejected: 'toast.success.reEnrollmentRejected',
+    teacherCreated: 'toast.success.teacherCreated',
+    teacherUpdated: 'toast.success.teacherUpdated',
+    teacherRequestApproved: 'toast.success.teacherRequestApproved',
+    teacherRequestRejected: 'toast.success.teacherRequestRejected',
     copied: 'toast.success.copied',
   },
   warn: {
@@ -60,4 +64,16 @@ export function resolveServerErrorToastDisplay(
     summary: requestFailedTitle,
     detail: message,
   };
+}
+
+/**
+ * Collapses `resolveServerErrorToastDisplay` into a single toast body for callers using
+ * `notifyErrorBody` (no title/detail split UI available there).
+ */
+export function formatServerErrorToastBody(
+  serverMessage: string,
+  requestFailedWithMessage: (message: string) => string,
+): string {
+  const display = resolveServerErrorToastDisplay(serverMessage, '', requestFailedWithMessage);
+  return display.mode === 'single' ? display.body : `${display.summary}: ${display.detail}`;
 }

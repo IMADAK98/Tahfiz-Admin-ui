@@ -1,0 +1,266 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="teacher-form-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="teacher-form-title">{{ title }}</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="submitting()"
+          (onClick)="close()"
+        >
+          ×
+        </p-button>
+      </div>
+
+      <form (ngSubmit)="onSubmit($event)">
+        <div class="modal-body teacher-form-body">
+          @if (errorMessage()) {
+            <p class="form-error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <h3 class="modal-section-title">البيانات الشخصية</h3>
+          <div class="form-grid-2">
+            <div class="input-group">
+              <label for="tf-name">الاسم الكامل</label>
+              <input
+                class="input"
+                id="tf-name"
+                name="fullName"
+                type="text"
+                required
+                [(ngModel)]="form.fullName"
+                placeholder="مثال: محمد العتيبي"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="tf-email">البريد الإلكتروني</label>
+              <input
+                class="input"
+                id="tf-email"
+                name="email"
+                type="email"
+                required
+                [(ngModel)]="form.email"
+                placeholder="name@example.com"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="tf-phone">رقم الجوال</label>
+              <input
+                class="input"
+                id="tf-phone"
+                name="phone"
+                type="tel"
+                required
+                [(ngModel)]="form.phone"
+                placeholder="05XXXXXXXX"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            @if (isAdd) {
+              <div class="input-group">
+                <label for="tf-nationality">الجنسية</label>
+                <input
+                  class="input"
+                  id="tf-nationality"
+                  name="nationality"
+                  type="text"
+                  required
+                  [(ngModel)]="form.nationality"
+                  placeholder="مثال: سعودي"
+                  [disabled]="submitting()"
+                />
+              </div>
+              <div class="input-group">
+                <label for="tf-address">العنوان</label>
+                <input
+                  class="input"
+                  id="tf-address"
+                  name="address"
+                  type="text"
+                  required
+                  [(ngModel)]="form.address"
+                  placeholder="الحي، المدينة"
+                  [disabled]="submitting()"
+                />
+              </div>
+              <div class="input-group">
+                <label for="tf-birthdate">تاريخ الميلاد</label>
+                <input
+                  class="input"
+                  id="tf-birthdate"
+                  name="birthDate"
+                  type="date"
+                  required
+                  [(ngModel)]="form.birthDate"
+                  [disabled]="submitting()"
+                />
+              </div>
+            }
+          </div>
+
+          <h3 class="modal-section-title">المؤهلات</h3>
+          <div class="form-grid-2">
+            <div class="input-group">
+              <label for="tf-academic">المؤهل الأكاديمي</label>
+              <select
+                class="select"
+                id="tf-academic"
+                name="qualification"
+                required
+                [(ngModel)]="form.qualification"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of qualificationOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="tf-maknoon">شهادة مكنون</label>
+              <select
+                class="select"
+                id="tf-maknoon"
+                name="hasCertificate"
+                required
+                [(ngModel)]="form.hasCertificate"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of yesNoOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="tf-parts">عدد الأجزاء المحفوظة</label>
+              <input
+                class="input"
+                id="tf-parts"
+                name="numberOfMemorizedJuz"
+                type="number"
+                [attr.min]="isAdd ? 1 : 0"
+                max="30"
+                required
+                [(ngModel)]="form.numberOfMemorizedJuz"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="tf-sanad">السند</label>
+              <select
+                class="select"
+                id="tf-sanad"
+                name="hasSanadInHifz"
+                required
+                [(ngModel)]="form.hasSanadInHifz"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of yesNoOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="tf-ijazah">الإجازة في الحفظ</label>
+              <select
+                class="select"
+                id="tf-ijazah"
+                name="hasIjazahInHifz"
+                required
+                [(ngModel)]="form.hasIjazahInHifz"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of yesNoOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <span style="font-size: 0.875rem; font-weight: 600">مستوى التجويد</span>
+            <div class="chip-row" role="radiogroup">
+              @for (option of tajweedOptions; track option.value) {
+                <label class="chip-option">
+                  <input
+                    type="radio"
+                    name="tajweedLevel"
+                    [value]="option.value"
+                    [(ngModel)]="form.tajweedLevel"
+                    [disabled]="submitting()"
+                  />
+                  {{ option.label }}
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="input-group">
+            <span style="font-size: 0.875rem; font-weight: 600">الفئات العمرية</span>
+            <div class="chip-row" role="group">
+              @for (option of ageGroupOptions; track option.value) {
+                <label class="chip-option">
+                  <input
+                    type="checkbox"
+                    [checked]="isAgeGroupChecked(option.value)"
+                    (change)="toggleAgeGroup(option.value, $any($event.target).checked)"
+                    [disabled]="submitting()"
+                  />
+                  {{ option.label }}
+                </label>
+              }
+            </div>
+          </div>
+
+          <div class="input-group">
+            <span style="font-size: 0.875rem; font-weight: 600">فترات العمل</span>
+            <div class="chip-row" role="group">
+              @for (option of workPeriodOptions; track option.value) {
+                <label class="chip-option">
+                  <input
+                    type="checkbox"
+                    [checked]="isWorkPeriodChecked(option.value)"
+                    (change)="toggleWorkPeriod(option.value, $any($event.target).checked)"
+                    [disabled]="submitting()"
+                  />
+                  {{ option.label }}
+                </label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <p-button type="submit" label="حفظ" [loading]="submitting()" [disabled]="submitting()" />
+          <p-button
+            type="button"
+            label="إلغاء"
+            severity="secondary"
+            [disabled]="submitting()"
+            (onClick)="close()"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,7 +1,103 @@
-<section class="flex flex-col gap-4">
-  <header>
-    <p class="badge badge-neutral mb-3">قريباً — PR6</p>
-    <h2 class="text-xl font-bold mb-2">المعلمون</h2>
-    <p style="color: var(--color-muted)">قائمة المعلمين النشطين في المركز.</p>
+<section class="teachers-page">
+  <header class="teachers-header">
+    <div>
+      <h1>المعلمون</h1>
+    </div>
+    <div class="teachers-actions">
+      <p-button type="button" label="طلبات المعلمين" severity="secondary" (onClick)="goToRequests()" />
+      <p-button type="button" label="+ إضافة معلّم" (onClick)="openAddModal()" />
+    </div>
   </header>
+
+  @if (loadState() === TeachersLoadState.Loading) {
+    <p style="color: var(--color-muted)">جاري تحميل المعلمين…</p>
+  } @else if (loadState() === TeachersLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+  } @else if (!teachers().length) {
+    <div class="empty-block">
+      <h2>لا يوجد معلمون بعد</h2>
+      <p>أضِف معلّماً مباشرة، أو راجع طلبات الانضمام ثم فعّلها.</p>
+      <div class="empty-actions">
+        <p-button type="button" label="إضافة معلّم" (onClick)="openAddModal()" />
+        <p-button type="button" label="عرض الطلبات" severity="secondary" (onClick)="goToRequests()" />
+      </div>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <div class="input-group">
+          <label for="teacher-search">بحث</label>
+          <input
+            class="input search"
+            id="teacher-search"
+            type="search"
+            placeholder="ابحث بالاسم…"
+            aria-label="بحث في المعلمين"
+            [(ngModel)]="search"
+          />
+        </div>
+      </div>
+      <span class="badge badge-primary count-badge">{{ countLabel() }}</span>
+    </div>
+
+    <div class="card table-wrap">
+      @if (filteredTeachers().length) {
+        <table class="data-table" aria-label="المعلمون النشطون">
+          <thead>
+            <tr>
+              <th>المعلّم</th>
+              <th>الجوال</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (teacher of filteredTeachers(); track teacher.id) {
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <span class="avatar-initial" aria-hidden="true">{{ teacherInitial(teacher.name) }}</span>
+                    <span>{{ teacher.name }}</span>
+                  </div>
+                </td>
+                <td>{{ teacher.phone || '—' }}</td>
+                <td><span class="badge badge-success">نشط</span></td>
+                <td>
+                  <div class="row-actions">
+                    <p-button
+                      type="button"
+                      label="التفاصيل"
+                      severity="secondary"
+                      size="small"
+                      (onClick)="goToDetail(teacher)"
+                    />
+                    <p-button
+                      type="button"
+                      label="تعديل"
+                      [text]="true"
+                      size="small"
+                      [loading]="isEditLoading(teacher)"
+                      [disabled]="isEditLoading(teacher)"
+                      (onClick)="openEditModal(teacher)"
+                    />
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="no-results">لا يوجد معلمون مطابقون للبحث.</p>
+      }
+    </div>
+  }
 </section>
+
+<app-teacher-form-modal
+  [visible]="showFormModal()"
+  [mode]="formMode()"
+  [teacher]="editingTeacher()"
+  (saved)="onTeacherSaved()"
+  (closed)="closeFormModal()"
+/>
