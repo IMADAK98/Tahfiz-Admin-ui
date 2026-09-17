@@ -1,0 +1,403 @@
+<div class="signup-page student-signup-page" dir="rtl" lang="ar">
+  <div class="signup-wrap student-signup-wrap">
+    <a class="brand-row" routerLink="/">
+      <span class="brand-mark" aria-hidden="true">ت</span>
+      تحفيظ
+    </a>
+
+    <div class="signup-card">
+      @if (showSuccess()) {
+        <div class="success-panel show" role="status">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <h2>تم إرسال طلبك</h2>
+          <p>طلب تسجيل الطالب قيد المراجعة لدى إدارة المركز. لن يتم تسجيل الدخول تلقائياً.</p>
+          <p-button
+            [type]="'button'"
+            label="العودة للرئيسية"
+            styleClass="w-full"
+            (onClick)="goHome()"
+          />
+        </div>
+      } @else {
+        <h1>تسجيل طالب</h1>
+        <p class="signup-sub">خطوتان: البيانات وولي الأمر، ثم حالة الحفظ</p>
+
+        @if (tokenStatus() === 'loading') {
+          <p class="login-info" role="status">جاري التحقق من رابط التسجيل…</p>
+        }
+
+        @if (tokenStatus() === 'missing') {
+          <p class="signup-error" role="alert">
+            رابط التسجيل ناقص. افتح الرابط الذي أرسله المركز (يتضمّن رمز الدعوة).
+          </p>
+        }
+
+        @if (tokenStatus() === 'invalid') {
+          <p class="signup-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        @if (tokenStatus() === 'valid' && tokenContext(); as ctx) {
+          <div class="badge-ok">رابط دعوة صالح</div>
+          <div class="context-banner" aria-label="سياق الدعوة">
+            <dl>
+              <dt>المركز</dt>
+              <dd>{{ ctx.centerName }}</dd>
+              <dt>الدورة</dt>
+              <dd>{{ ctx.termName }}</dd>
+              <dt>ينتهي الرابط</dt>
+              <dd>{{ formatExpires(ctx.expiresAt) }}</dd>
+            </dl>
+          </div>
+        }
+
+        @if (errorMessage() && tokenStatus() === 'valid') {
+          <p class="signup-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        @if (tokenStatus() === 'valid') {
+          <div class="steps" role="list" aria-label="خطوات التسجيل">
+            <div class="step-pill" [class.active]="step() === 1" [class.done]="step() === 2" role="listitem">
+              <span class="step-num">1</span> البيانات وولي الأمر
+            </div>
+            <div class="step-pill" [class.active]="step() === 2" role="listitem">
+              <span class="step-num">2</span> حالة الحفظ
+            </div>
+          </div>
+
+          <form
+            class="signup-form"
+            #htmlForm
+            #signupForm="ngForm"
+            (ngSubmit)="onSubmit(htmlForm, signupForm)"
+            novalidate
+            aria-label="نموذج تسجيل طالب"
+          >
+            @if (step() === 1) {
+              <h2 class="section-title">بيانات الطالب</h2>
+
+              <div class="form-grid-2">
+                <div class="input-group">
+                  <label for="s-name">اسم الطالب الكامل <span class="req">*</span></label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="s-name"
+                    name="name"
+                    [(ngModel)]="name"
+                    required
+                    autocomplete="name"
+                    placeholder="مثال: عبدالله بن سعد الدوسري"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label for="s-dob">تاريخ الميلاد <span class="req">*</span></label>
+                  <input
+                    class="input"
+                    id="s-dob"
+                    name="birthDate"
+                    type="date"
+                    [(ngModel)]="birthDate"
+                    required
+                    [disabled]="submitting()"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label for="s-email">بريد الطالب <span class="req">*</span></label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="s-email"
+                    name="email"
+                    type="email"
+                    [(ngModel)]="email"
+                    required
+                    autocomplete="email"
+                    dir="ltr"
+                    placeholder="student@example.com"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label for="s-phone">جوال الطالب <span class="req">*</span></label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="s-phone"
+                    name="phone"
+                    type="tel"
+                    [(ngModel)]="phone"
+                    required
+                    autocomplete="tel"
+                    dir="ltr"
+                    placeholder="05XXXXXXXX"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label for="s-address">العنوان <span class="req">*</span></label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="s-address"
+                    name="address"
+                    [(ngModel)]="address"
+                    required
+                    autocomplete="street-address"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                </div>
+
+                <div class="input-group">
+                  <label for="s-edu">المرحلة الدراسية <span class="req">*</span></label>
+                  <p-select
+                    inputId="s-edu"
+                    name="educationStage"
+                    [(ngModel)]="educationStage"
+                    [options]="educationOptions"
+                    optionLabel="labelAr"
+                    optionValue="value"
+                    placeholder="اختر المرحلة"
+                    [disabled]="submitting()"
+                    required
+                    fluid
+                  />
+                </div>
+              </div>
+
+              <div class="id-block" style="margin-top: var(--space-4)">
+                <label class="check-row">
+                  <p-checkbox
+                    [(ngModel)]="usePassport"
+                    name="usePassport"
+                    [binary]="true"
+                    inputId="usePassport"
+                    (onChange)="onIdModeChange()"
+                    [disabled]="submitting()"
+                  />
+                  <span>استخدام جواز السفر بدل الهوية</span>
+                </label>
+
+                @if (!usePassport) {
+                  <div class="input-group">
+                    <label for="s-nid">رقم الهوية الوطنية <span class="req">*</span></label>
+                    <input
+                      pInputText
+                      class="input"
+                      id="s-nid"
+                      name="identificationNumber"
+                      [(ngModel)]="identificationNumber"
+                      inputmode="numeric"
+                      maxlength="10"
+                      required
+                      autocomplete="off"
+                      dir="ltr"
+                      fluid
+                      [disabled]="submitting()"
+                    />
+                  </div>
+                } @else {
+                  <div class="input-group">
+                    <label for="s-pass">رقم جواز السفر <span class="req">*</span></label>
+                    <input
+                      pInputText
+                      class="input"
+                      id="s-pass"
+                      name="passportNumber"
+                      [(ngModel)]="passportNumber"
+                      maxlength="10"
+                      required
+                      autocomplete="off"
+                      dir="ltr"
+                      fluid
+                      [disabled]="submitting()"
+                    />
+                  </div>
+                }
+              </div>
+
+              <h2 class="section-title">بيانات ولي الأمر</h2>
+              <div class="form-grid-2">
+                <div class="input-group">
+                  <label for="g-name">اسم ولي الأمر</label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="g-name"
+                    name="parentName"
+                    [(ngModel)]="parentName"
+                    placeholder="سعد الدوسري"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                  <span class="hint">للاستخدام المحلي في الواجهة — Nest يستقبل جوال ولي الأمر فقط.</span>
+                </div>
+                <div class="input-group">
+                  <label for="g-phone">جوال ولي الأمر <span class="req">*</span></label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="g-phone"
+                    name="parentPhone"
+                    type="tel"
+                    [(ngModel)]="parentPhone"
+                    required
+                    dir="ltr"
+                    placeholder="05XXXXXXXX"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <p-button
+                  [type]="'button'"
+                  label="التالي: حالة الحفظ ←"
+                  (onClick)="goStep2(htmlForm, signupForm)"
+                  [disabled]="submitting()"
+                />
+                <p-button
+                  [type]="'button'"
+                  label="إلغاء"
+                  severity="secondary"
+                  [outlined]="true"
+                  (onClick)="goHome()"
+                />
+              </div>
+            }
+
+            @if (step() === 2) {
+              <h2 class="section-title">حالة الحفظ</h2>
+
+              <div class="input-group">
+                <span id="mem-label" class="field-label">مستوى الحفظ الحالي</span>
+                <div class="radio-stack" role="radiogroup" aria-labelledby="mem-label">
+                  <label class="radio-chip">
+                    <input
+                      type="radio"
+                      name="memorization"
+                      value="none"
+                      [(ngModel)]="memorization"
+                      (ngModelChange)="onMemorizationChange()"
+                      [disabled]="submitting()"
+                    />
+                    لم يسبق له الحفظ
+                  </label>
+                  <label class="radio-chip">
+                    <input
+                      type="radio"
+                      name="memorization"
+                      value="partial"
+                      [(ngModel)]="memorization"
+                      (ngModelChange)="onMemorizationChange()"
+                      [disabled]="submitting()"
+                    />
+                    حفظ جزئي
+                  </label>
+                  <label class="radio-chip">
+                    <input
+                      type="radio"
+                      name="memorization"
+                      value="khatm"
+                      [(ngModel)]="memorization"
+                      (ngModelChange)="onMemorizationChange()"
+                      [disabled]="submitting()"
+                    />
+                    خاتم (أتمّ القرآن)
+                  </label>
+                </div>
+              </div>
+
+              @if (memorization === 'partial') {
+                <div class="input-group" style="margin-top: var(--space-4)">
+                  <label for="mem-detail">تفاصيل الحفظ الجزئي</label>
+                  <input
+                    pInputText
+                    class="input"
+                    id="mem-detail"
+                    name="memDetail"
+                    [(ngModel)]="memDetail"
+                    placeholder="مثال: حتى سورة الكهف / 10 أجزاء"
+                    fluid
+                    [disabled]="submitting()"
+                  />
+                  <span class="hint">يساعد المعلّم على وضع الطالب على خطة الحفظ / التثبيت / المراجعة.</span>
+                </div>
+
+                <div class="form-grid-2" style="margin-top: var(--space-4)">
+                  <div class="input-group">
+                    <label for="surahFrom">من سورة (1–114) <span class="req">*</span></label>
+                    <input
+                      class="input"
+                      id="surahFrom"
+                      name="surahFrom"
+                      type="number"
+                      min="1"
+                      max="114"
+                      [(ngModel)]="surahFrom"
+                      required
+                      [disabled]="submitting()"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="surahTo">إلى سورة (1–114) <span class="req">*</span></label>
+                    <input
+                      class="input"
+                      id="surahTo"
+                      name="surahTo"
+                      type="number"
+                      min="1"
+                      max="114"
+                      [(ngModel)]="surahTo"
+                      required
+                      [disabled]="submitting()"
+                    />
+                  </div>
+                </div>
+              }
+
+              <div class="form-actions">
+                <p-button
+                  [type]="'button'"
+                  label="→ رجوع"
+                  severity="secondary"
+                  [outlined]="true"
+                  (onClick)="goStep1()"
+                  [disabled]="submitting()"
+                />
+                <p-button
+                  [type]="'submit'"
+                  [label]="submitting() ? 'جاري الإرسال…' : 'إرسال الطلب'"
+                  [loading]="submitting()"
+                  [disabled]="submitting()"
+                />
+                <p-button
+                  [type]="'button'"
+                  label="إلغاء"
+                  severity="secondary"
+                  [text]="true"
+                  (onClick)="goHome()"
+                />
+              </div>
+            }
+          </form>
+        }
+      }
+    </div>
+
+    <p class="signup-footer-links">
+      <a routerLink="/identify" [queryParams]="token ? { token } : {}">لدي حساب بالفعل — تحقق</a>
+      <a routerLink="/login">دخول المشرف</a>
+      <a routerLink="/">الرئيسية</a>
+    </p>
+  </div>
+</div>

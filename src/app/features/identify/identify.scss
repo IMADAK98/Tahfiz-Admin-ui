@@ -1,0 +1,197 @@
+/* Identify — public brand card (mock 16). Cairo + تحفيظ + mark ت. Host note hidden. */
+
+.identify-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  font-family: 'Cairo', system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse at 80% 0%, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 50%),
+    var(--color-surface);
+}
+
+.identify-wrap {
+  width: 100%;
+  max-width: 480px;
+}
+
+.identify-card {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+
+  h1 {
+    font-size: 1.35rem;
+    margin: 0 0 var(--space-2);
+    text-align: center;
+  }
+}
+
+.identify-sub {
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  margin-bottom: var(--space-5);
+}
+
+.badge-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border-radius: var(--radius-pill);
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: var(--space-3);
+}
+
+.context-banner {
+  background: var(--color-primary-soft);
+  border: 1px solid #c5e4dc;
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  font-size: 0.9rem;
+
+  dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 12px;
+  }
+
+  dt {
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+  }
+}
+
+.identify-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.found-banner {
+  background: var(--color-success-soft);
+  border: 1px solid #abefc6;
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+.identify-new-student {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+
+  p {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    margin-bottom: var(--space-3);
+  }
+}
+
+.identify-footer {
+  text-align: center;
+  margin-top: var(--space-5);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+
+  a {
+    color: var(--color-muted);
+    font-weight: 600;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.identify-page .p-button {
+  font-family: inherit;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.identify-page .check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.identify-page .hint {
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.identify-page .req {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+.identify-page .signup-error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.identify-page .login-info {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: var(--radius-input);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.identify-page .success-panel {
+  text-align: center;
+  padding: var(--space-4) 0;
+
+  h2 {
+    font-size: 1.25rem;
+    margin-bottom: var(--space-3);
+  }
+
+  p {
+    color: var(--color-muted);
+    margin-bottom: var(--space-5);
+  }
+}
+
+.identify-page .success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto var(--space-4);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* Yellow product-host note from mock 16 — intentionally not shipped */
