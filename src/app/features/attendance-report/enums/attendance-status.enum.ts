@@ -1,19 +1,25 @@
 /**
- * Chips: حاضر / غائب / إجازة / متأخر / معذور
- * Nest OpenAPI: PRESENT|ABSENT|LEAVE|LATE|NOT_MARKED|HOLIDAY (no EXCUSED yet).
+ * Chips: حاضر / غائب / متأخر / معذور
+ * Nest OpenAPI: PRESENT|ABSENT|LEAVE|LATE|NOT_MARKED|HOLIDAY
+ * Product lock 2026-09-17: LEAVE → معذور (drop separate إجازة chip).
  */
 export enum AttendanceStatusUi {
   Present = 'PRESENT',
   Absent = 'ABSENT',
   Leave = 'LEAVE',
   Late = 'LATE',
-  Excused = 'EXCUSED',
   NotMarked = 'NOT_MARKED',
   Holiday = 'HOLIDAY',
 }
 
 export type AttendanceChipKind =
-  | 'present' | 'absent' | 'leave' | 'late' | 'excused' | 'blank' | 'holiday';
+  | 'present'
+  | 'absent'
+  | 'leave'
+  | 'late'
+  | 'excused'
+  | 'blank'
+  | 'holiday';
 
 export interface AttendanceStatusView {
   kind: AttendanceChipKind;
@@ -26,17 +32,13 @@ const MARKED: ReadonlySet<string> = new Set([
   AttendanceStatusUi.Absent,
   AttendanceStatusUi.Leave,
   AttendanceStatusUi.Late,
-  AttendanceStatusUi.Excused,
 ]);
 
 export function isMarkedAttendanceStatus(status: string | null | undefined): boolean {
   return !!status && MARKED.has(status);
 }
 
-/**
- * TODO(Nest): OpenAPI has no EXCUSED — if live returns EXCUSED, chip = معذور.
- * TODO(Nest): Confirm LEAVE always means إجازة (not معذور).
- */
+/** Nest LEAVE → معذور. HOLIDAY / blank stay non-marked. */
 export function mapAttendanceStatus(
   status: string | null | undefined,
   isHoliday = false,
@@ -50,17 +52,17 @@ export function mapAttendanceStatus(
     case AttendanceStatusUi.Absent:
       return { kind: 'absent', label: 'غائب', chipClass: 'absent' };
     case AttendanceStatusUi.Leave:
-      return { kind: 'leave', label: 'إجازة', chipClass: 'leave' };
+      return { kind: 'excused', label: 'معذور', chipClass: 'excused' };
     case AttendanceStatusUi.Late:
       return { kind: 'late', label: 'متأخر', chipClass: 'late' };
-    case AttendanceStatusUi.Excused:
+    case 'EXCUSED':
       return { kind: 'excused', label: 'معذور', chipClass: 'excused' };
     case AttendanceStatusUi.NotMarked:
     case null:
     case undefined:
     case '':
-      return { kind: 'blank', label: '—', chipClass: null };
+      return { kind: 'blank', label: '', chipClass: null };
     default:
-      return { kind: 'blank', label: '—', chipClass: null };
+      return { kind: 'blank', label: '', chipClass: null };
   }
 }
