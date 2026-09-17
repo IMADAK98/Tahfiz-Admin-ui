@@ -96,8 +96,8 @@ export const routes: Routes = [
       {
         path: 'reports/attendance',
         loadComponent: () =>
-          import('./features/reports-attendance/reports-attendance').then(
-            (m) => m.ReportsAttendanceComponent,
+          import('./features/attendance-report/attendance-report').then(
+            (m) => m.AttendanceReportComponent,
           ),
       },
       {
@@ -105,6 +105,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/reports-progress/reports-progress').then((m) => m.ReportsProgressComponent),
       },
+      { path: 'attendance-report', redirectTo: 'reports/attendance', pathMatch: 'full' },
     ],
   },
   {

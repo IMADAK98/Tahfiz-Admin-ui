@@ -1,0 +1,156 @@
+<section class="att-report" dir="rtl" lang="ar">
+  <header class="att-report__header">
+    <div>
+      <p class="att-report__eyebrow">قراءة فقط — التسجيل اليومي من تطبيق المعلّم</p>
+      <h1 class="att-report__title">تقرير الحضور</h1>
+    </div>
+    <div class="att-report__header-actions">
+      <p-button
+        type="button"
+        label="تصدير CSV"
+        severity="secondary"
+        [outlined]="true"
+        [disabled]="loading() || !dayHeaders().length"
+        (onClick)="exportCsv()"
+      />
+    </div>
+  </header>
+
+  <div class="att-report__filters" role="search" aria-label="فلاتر التقرير — حلقة وأسبوع وبحث">
+    <div class="att-report__field">
+      <label for="att-halqa">الحلقة</label>
+      <p-select
+        inputId="att-halqa"
+        [options]="halqaOptions()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="اختر الحلقة"
+        [ngModel]="selectedHalqaId()"
+        (ngModelChange)="onHalqaChange($event)"
+        styleClass="w-full"
+      />
+    </div>
+
+    <div class="att-report__field att-report__field--week">
+      <label>الأسبوع</label>
+      <div class="att-report__week-nav">
+        <p-button
+          type="button"
+          icon="pi pi-chevron-right"
+          severity="secondary"
+          [text]="true"
+          [rounded]="true"
+          ariaLabel="الأسبوع السابق"
+          (onClick)="prevWeek()"
+        />
+        <span class="att-report__week-label" aria-live="polite">{{ weekLabel() }}</span>
+        <p-button
+          type="button"
+          icon="pi pi-chevron-left"
+          severity="secondary"
+          [text]="true"
+          [rounded]="true"
+          ariaLabel="الأسبوع التالي"
+          (onClick)="nextWeek()"
+        />
+      </div>
+    </div>
+
+    <div class="att-report__field att-report__field--search">
+      <label for="att-q">بحث</label>
+      <input
+        id="att-q"
+        type="search"
+        pInputText
+        class="w-full"
+        placeholder="اسم الطالب…"
+        [ngModel]="studentQuery()"
+        (ngModelChange)="onStudentQuery($event)"
+      />
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="att-report__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (bootstrapping() || loading()) {
+    <p class="att-report__status" role="status">جاري التحميل…</p>
+  }
+
+  @if (!bootstrapping() && !loading() && selectedHalqaId() && showEmptyMarks()) {
+    <div class="att-report__empty">
+      <h2>لا علامات حضور بعد</h2>
+      <p>
+        لا توجد علامات حضور في هذا الأسبوع. هذا <strong>لا يعني</strong> عدم وجود طلاب. الجدول يبقى
+        للتصفية والقراءة؛ الإدخال اليومي من تطبيق المعلّم.
+      </p>
+    </div>
+  }
+
+  @if (!bootstrapping() && !loading() && selectedHalqaId() && table() && !showEmptyMarks()) {
+    <div class="att-report__meta">
+      @if (selectedHalqaName(); as hn) {
+        <span class="badge badge-neutral">{{ hn }}@if (termName()) { · {{ termName() }} }</span>
+      }
+      <span class="badge badge-primary">أسبوع أحد–خميس</span>
+      <span class="badge badge-neutral">{{ studentCountLabel() }}</span>
+    </div>
+
+    <div class="att-report__legend" aria-hidden="true">
+      <span class="chip-att present">حاضر</span>
+      <span class="chip-att absent">غائب</span>
+      <span class="chip-att leave">إجازة</span>
+      <span class="chip-att late">متأخر</span>
+      <span class="chip-att excused">معذور</span>
+      <span class="cell-blank">خلية فارغة = بلا علامة</span>
+    </div>
+
+    <div class="att-report__table-wrap">
+      <table class="att-report__table" aria-label="جدول الحضور الأسبوعي">
+        <thead>
+          <tr>
+            <th>الطالب</th>
+            @for (h of dayHeaders(); track h.date) {
+              <th class="day-head" [class.is-holiday]="h.isHoliday" [attr.title]="h.holidayHint">
+                <span class="dow">{{ h.dowAr }}</span>
+                <span class="dom">{{ h.dayOfMonth }}@if (h.isHoliday) { · عطلة }</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.studentId) {
+            <tr>
+              <td class="name-cell"><strong>{{ row.studentName }}</strong></td>
+              @for (cell of row.cells; track cell.date) {
+                <td>
+                  @if (cell.chipClass) {
+                    <span class="chip-att" [class]="cell.chipClass">{{ cell.label }}</span>
+                  } @else {
+                    <span
+                      class="cell-blank"
+                      [attr.title]="cell.isHoliday ? 'يوم عطلة — بلا علامة' : null"
+                      >{{ cell.label }}</span
+                    >
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="att-report__note">
+      إدارة المركز: تصفية وقراءة فقط. لا يمكن تعديل الحضور من الويب — يُعدَّل من تطبيق المعلّم إن لزم.
+    </p>
+  }
+
+  @if (!bootstrapping() && !loading() && !selectedHalqaId() && halqaOptions().length === 0) {
+    <div class="att-report__empty">
+      <h2>لا حلقات في الدورة النشطة</h2>
+      <p>أضف حلقة للدورة الحالية ثم عد إلى تقرير الحضور.</p>
+    </div>
+  }
+</section>

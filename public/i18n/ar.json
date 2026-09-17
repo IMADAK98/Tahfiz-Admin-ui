@@ -195,5 +195,40 @@
     "footerAdminLogin": "دخول المشرف",
     "footerHome": "الرئيسية",
     "studentsEntry": "التحقق من الهوية"
+  },
+  "attendanceReport": {
+    "title": "تقرير الحضور",
+    "subtitle": "قراءة فقط — التسجيل اليومي من تطبيق المعلّم",
+    "halqa": "الحلقة",
+    "halqaPlaceholder": "اختر الحلقة",
+    "week": "الأسبوع",
+    "prevWeek": "الأسبوع السابق",
+    "nextWeek": "الأسبوع التالي",
+    "search": "بحث",
+    "searchPlaceholder": "اسم الطالب…",
+    "exportCsv": "تصدير CSV",
+    "exportOk": "تم تصدير CSV",
+    "exportEmpty": "لا بيانات للتصدير في هذا الأسبوع",
+    "weekBadge": "أسبوع أحد–خميس",
+    "studentCol": "الطالب",
+    "holiday": "عطلة",
+    "holidayBlankTitle": "يوم عطلة — بلا علامة",
+    "legendBlank": "خلية فارغة = بلا علامة",
+    "status": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "leave": "إجازة",
+      "late": "متأخر",
+      "excused": "معذور"
+    },
+    "emptyTitle": "لا علامات حضور بعد",
+    "emptyBody": "لا توجد علامات حضور في هذا الأسبوع. هذا لا يعني عدم وجود طلاب. الجدول يبقى للتصفية والقراءة؛ الإدخال اليومي من تطبيق المعلّم.",
+    "noHalqasTitle": "لا حلقات في الدورة النشطة",
+    "noHalqasBody": "أضف حلقة للدورة الحالية ثم عد إلى تقرير الحضور.",
+    "noteAdmin": "إدارة المركز: تصفية وقراءة فقط. لا يمكن تعديل الحضور من الويب — يُعدَّل من تطبيق المعلّم إن لزم.",
+    "loading": "جاري التحميل…",
+    "loadHalqasFailed": "تعذر تحميل الحلقات",
+    "loadTableFailed": "تعذر تحميل جدول الحضور",
+    "studentsCount": "{{count}} طالب"
   }
 }
