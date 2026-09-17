@@ -1,0 +1,309 @@
+.pr-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.pr-report__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+}
+
+.pr-report__eyebrow {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-muted, #5a6b62);
+}
+
+.pr-report__title {
+  margin: 4px 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text, #15241c);
+}
+
+.pr-report__header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* TWO-ROW filter card — spacing lock from mock 14 */
+.pr-report__filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+  margin-bottom: 0;
+  padding: var(--space-4, 16px) var(--space-5, 24px);
+  background: var(--color-surface-elevated, #fffdf8);
+  border: 1px solid var(--color-border, #ddd5c6);
+  border-radius: var(--radius-card, 12px);
+}
+
+.pr-report__filter-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.9fr) minmax(220px, 1.1fr) minmax(180px, 1fr);
+  gap: var(--space-4, 16px) var(--space-5, 24px);
+  align-items: end;
+}
+
+.pr-report__filter-row--context {
+  grid-template-columns: 1fr;
+}
+
+.pr-report__field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--color-muted, #5a6b62);
+  }
+}
+
+.pr-report__field--context {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+
+  label {
+    flex: 0 0 auto;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.pr-report__period-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-height: 42px;
+}
+
+:host ::ng-deep .pr-period-pill {
+  font-weight: 700;
+  font-size: 0.8125rem;
+}
+
+.pr-report__week-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  height: 42px;
+  padding-inline: 8px;
+  background: var(--color-surface-elevated, #fffdf8);
+  border: 1px solid var(--color-border, #ddd5c6);
+  border-radius: var(--radius-input, 10px);
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+}
+
+.pr-report__week-label {
+  font-weight: 700;
+  color: var(--color-text, #15241c);
+  flex: 0 1 auto;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.pr-report__date-input {
+  flex: 0 1 220px;
+  width: auto;
+  max-width: 280px;
+  height: 42px;
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--color-border, #ddd5c6);
+  border-radius: var(--radius-input, 10px);
+  background: var(--color-surface-elevated, #fffdf8);
+  font: inherit;
+  color: var(--color-text, #15241c);
+}
+
+.pr-report__meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pr-report__table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface-elevated, #fffdf8);
+  border: 1px solid var(--color-border, #ddd5c6);
+  border-radius: var(--radius-card, 12px);
+}
+
+.pr-report__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: start;
+    padding: 12px 14px;
+    color: var(--color-muted, #5a6b62);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-bottom: 1px solid var(--color-border, #ddd5c6);
+    background: var(--color-surface, #f3eee3);
+  }
+
+  td {
+    padding: 14px;
+    border-bottom: 1px solid var(--color-border, #ddd5c6);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: #fbf9f6;
+  }
+}
+
+.name-cell strong {
+  display: block;
+  font-size: 0.9375rem;
+}
+
+.pct {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--color-text, #15241c);
+
+  &.is-zero {
+    color: var(--color-muted, #5a6b62);
+  }
+}
+
+.pct-bar {
+  height: 6px;
+  background: var(--color-surface, #f3eee3);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 4px;
+  min-width: 80px;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: var(--color-primary, #1b4d3e);
+    border-radius: 999px;
+  }
+
+  &.is-tath > span {
+    background: var(--color-success, #1b6b45);
+  }
+
+  &.is-mur > span {
+    background: var(--color-accent, #c4a035);
+  }
+}
+
+.pr-report__updated {
+  font-size: 0.8125rem;
+  color: var(--color-muted, #5a6b62);
+}
+
+.pr-report__note {
+  font-size: 0.8125rem;
+  color: var(--color-muted, #5a6b62);
+  margin: 0;
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+  background: var(--color-surface, #f3eee3);
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--color-border, #ddd5c6);
+}
+
+.pr-report__empty {
+  text-align: center;
+  padding: var(--space-7, 48px) var(--space-5, 24px);
+  border: 1.5px dashed var(--color-border-strong, #c9c0b0);
+  border-radius: var(--radius-card, 12px);
+  background: var(--color-surface-elevated, #fffdf8);
+
+  h2 {
+    margin: 0 0 var(--space-2, 8px);
+  }
+
+  p {
+    color: var(--color-muted, #5a6b62);
+    margin: 0 auto;
+    max-width: 34em;
+  }
+}
+
+.pr-report__error {
+  color: var(--color-danger, #c62828);
+  font-weight: 600;
+}
+
+.pr-report__status {
+  color: var(--color-muted, #5a6b62);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-neutral {
+  background: var(--color-surface, #f3eee3);
+  color: var(--color-muted, #5a6b62);
+  border: 1px solid var(--color-border, #ddd5c6);
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &.hifz {
+    background: var(--color-primary-soft, #e4f0ea);
+    color: var(--color-primary, #1b4d3e);
+  }
+
+  &.tath {
+    background: var(--color-success-soft, #e8f6ee);
+    color: var(--color-success, #1b6b45);
+  }
+
+  &.mur {
+    background: var(--color-warning-soft, #fffaeb);
+    color: #8a6a12;
+  }
+}
+
+@media (max-width: 900px) {
+  .pr-report__filter-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pr-report__period-pills {
+    flex-wrap: wrap;
+  }
+
+  .pr-report__week-nav {
+    flex-wrap: wrap;
+  }
+
+  .pr-report__field--context {
+    flex-wrap: wrap;
+  }
+}

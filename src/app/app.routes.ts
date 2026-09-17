@@ -103,7 +103,7 @@ export const routes: Routes = [
       {
         path: 'reports/progress',
         loadComponent: () =>
-          import('./features/reports-progress/reports-progress').then((m) => m.ReportsProgressComponent),
+          import('./features/progress-report/progress-report').then((m) => m.ProgressReportComponent),
       },
       { path: 'attendance-report', redirectTo: 'reports/attendance', pathMatch: 'full' },
     ],
