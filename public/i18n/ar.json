@@ -11,6 +11,11 @@
       "teacherUpdated": "تم تحديث بيانات المعلّم",
       "teacherRequestApproved": "تم قبول طلب المعلّم",
       "teacherRequestRejected": "تم رفض طلب المعلّم",
+      "studentCreated": "تم تسجيل الطالب",
+      "studentRequestApproved": "تم قبول طلب الطالب",
+      "studentRequestRejected": "تم رفض طلب الطالب",
+      "registrationLinkGenerated": "تم إنشاء رابط التسجيل",
+      "registrationLinkCopied": "تم نسخ رابط التسجيل",
       "copied": "تم النسخ"
     },
     "error": {

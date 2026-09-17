@@ -1,2 +1,2 @@
-/** Placeholder — add feature DTOs when API wiring lands. */
-export {};
+export * from './student-form.model';
+export * from './student-id.helpers';

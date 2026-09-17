@@ -1,7 +1,222 @@
-<section class="flex flex-col gap-4">
-  <header>
-    <p class="badge badge-neutral mb-3">قريباً — PR6</p>
-    <h2 class="text-xl font-bold mb-2">الطلاب</h2>
-    <p style="color: var(--color-muted)">قائمة الطلاب النشطين وروابط التسجيل.</p>
+<section class="students-page">
+  <header class="students-header">
+    <div>
+      <h1>الطلاب النشطون</h1>
+    </div>
+    <div class="students-actions">
+      <p-button
+        type="button"
+        label="رابط تسجيل الطالب"
+        severity="secondary"
+        [loading]="generatingLink()"
+        [disabled]="generatingLink()"
+        (onClick)="generateRegistrationLink()"
+      />
+      <p-button type="button" label="+ تسجيل طالب" (onClick)="openAddModal()" />
+    </div>
   </header>
+
+  @if (loadState() === StudentsLoadState.Loading) {
+    <p style="color: var(--color-muted)">جاري تحميل الطلاب…</p>
+  } @else if (loadState() === StudentsLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+  } @else if (!students().length) {
+    <div class="empty-block">
+      <h2>لا يوجد طلاب نشطون</h2>
+      <p>سجّل طالباً يدوياً أو أنشئ رابط تسجيل لمشاركته مع أولياء الأمور، ثم راجع طلبات الطلاب.</p>
+      <div class="empty-actions">
+        <p-button type="button" label="تسجيل طالب" (onClick)="openAddModal()" />
+        <p-button
+          type="button"
+          label="إنشاء رابط تسجيل"
+          severity="secondary"
+          [loading]="generatingLink()"
+          [disabled]="generatingLink()"
+          (onClick)="generateRegistrationLink()"
+        />
+      </div>
+    </div>
+  } @else {
+    <div class="toolbar">
+      <div class="toolbar-filters">
+        <div class="input-group">
+          <label for="student-search">بحث</label>
+          <input
+            class="input search"
+            id="student-search"
+            type="search"
+            placeholder="ابحث باسم الطالب…"
+            aria-label="بحث في الطلاب"
+            [(ngModel)]="search"
+          />
+        </div>
+      </div>
+      <span class="badge badge-primary count-badge">{{ countLabel() }}</span>
+    </div>
+
+    @if (filteredStudents().length) {
+      <div class="person-grid">
+        @for (student of filteredStudents(); track student.id) {
+          <article class="card person-card">
+            <div class="person-card-head">
+              <div class="name-cell">
+                <strong>{{ student.name }}</strong>
+                <span>{{ student.email || '—' }} · userId {{ student.id }}</span>
+              </div>
+              <span class="badge" [class.badge-success]="student.isActive !== false" [class.badge-neutral]="student.isActive === false">
+                {{ student.isActive === false ? 'غير نشط' : 'نشط' }}
+              </span>
+            </div>
+            <dl class="detail-grid">
+              <div>
+                <dt>الجوال</dt>
+                <dd>{{ student.phone || '—' }}</dd>
+              </div>
+              <div>
+                <dt>رقم الهوية</dt>
+                <dd>{{ student.identificationNumber || '—' }}</dd>
+              </div>
+              <div>
+                <dt>الجنسية</dt>
+                <dd>{{ student.nationality || '—' }}</dd>
+              </div>
+              <div>
+                <dt>تاريخ الميلاد</dt>
+                <dd>{{ formatStudentDate(student.birthDate) }}</dd>
+              </div>
+            </dl>
+            <div class="row-actions">
+              <p-button type="button" label="التفاصيل" severity="secondary" size="small" (onClick)="openDetail(student)" />
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="no-results">لا يوجد طلاب مطابقون للبحث.</p>
+    }
+  }
 </section>
+
+<app-student-form-modal
+  [visible]="showFormModal()"
+  (saved)="onStudentSaved()"
+  (closed)="closeFormModal()"
+/>
+
+@if (detailStudent(); as student) {
+  <div class="modal-backdrop" role="presentation" (click)="closeDetail()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="student-detail-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="student-detail-title">تفاصيل الطالب</h2>
+        <p-button type="button" [text]="true" [rounded]="true" severity="secondary" ariaLabel="إغلاق" (onClick)="closeDetail()">
+          ×
+        </p-button>
+      </div>
+      <div class="modal-body">
+        <dl class="detail-grid">
+          <div>
+            <dt>الاسم</dt>
+            <dd>{{ student.name }}</dd>
+          </div>
+          <div>
+            <dt>المعرف</dt>
+            <dd>userId {{ student.id }}</dd>
+          </div>
+          <div>
+            <dt>البريد</dt>
+            <dd>{{ student.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>الجوال</dt>
+            <dd>{{ student.phone || '—' }}</dd>
+          </div>
+          <div>
+            <dt>رقم الهوية</dt>
+            <dd>{{ student.identificationNumber || '—' }}</dd>
+          </div>
+          <div>
+            <dt>رقم الجواز</dt>
+            <dd>{{ student.passportNumber || '—' }}</dd>
+          </div>
+          <div>
+            <dt>الجنسية</dt>
+            <dd>{{ student.nationality || '—' }}</dd>
+          </div>
+          <div>
+            <dt>العنوان</dt>
+            <dd>{{ student.address || '—' }}</dd>
+          </div>
+          <div>
+            <dt>تاريخ الميلاد</dt>
+            <dd>{{ formatStudentDate(student.birthDate) }}</dd>
+          </div>
+          <div>
+            <dt>الحالة</dt>
+            <dd>{{ student.isActive === false ? 'غير نشط' : 'نشط' }}</dd>
+          </div>
+        </dl>
+      </div>
+      <div class="modal-footer">
+        <p-button type="button" label="إغلاق" severity="secondary" (onClick)="closeDetail()" />
+      </div>
+    </div>
+  </div>
+}
+
+@if (showLinkModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeLinkModal()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="link-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="link-title">رابط تسجيل الطالب</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="generatingLink()"
+          (onClick)="closeLinkModal()"
+        >
+          ×
+        </p-button>
+      </div>
+      <div class="modal-body">
+        @if (generatingLink()) {
+          <p style="margin: 0; color: var(--color-muted)">جاري إنشاء الرابط…</p>
+        } @else if (linkError()) {
+          <p class="load-error" role="alert">{{ linkError() }}</p>
+        } @else if (linkResult(); as result) {
+          <p style="margin: 0; font-size: 0.875rem; color: var(--color-muted)">
+            تم إنشاء رابط آمن لمشاركته مع ولي الأمر. بعد الإرسال يظهر الطلب في طلبات الطلاب.
+          </p>
+          <div class="link-box" role="status">
+            <code dir="ltr">{{ result.registrationLink }}</code>
+            <p-button type="button" label="نسخ" size="small" (onClick)="copyRegistrationLink()" />
+          </div>
+          @if (result.expiresAt) {
+            <p class="hint">ينتهي في {{ formatStudentDate(result.expiresAt) }}</p>
+          }
+        }
+      </div>
+      <div class="modal-footer">
+        @if (linkResult()?.registrationLink) {
+          <p-button type="button" label="تم" (onClick)="closeLinkModal()" />
+        }
+        <p-button
+          type="button"
+          label="إغلاق"
+          severity="secondary"
+          [disabled]="generatingLink()"
+          (onClick)="closeLinkModal()"
+        />
+      </div>
+    </div>
+  </div>
+}

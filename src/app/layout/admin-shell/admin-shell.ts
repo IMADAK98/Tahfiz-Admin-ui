@@ -10,7 +10,7 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
   '/admin/halaqat': 'الحلقات',
   '/admin/teachers': 'المعلمون',
   '/admin/teacher-requests': 'طلبات المعلمين',
-  '/admin/students': 'الطلاب',
+  '/admin/students': 'الطلاب النشطون',
   '/admin/student-requests': 'طلبات الطلاب',
   '/admin/re-enrollment': 'طلبات إعادة التسجيل',
   '/admin/re-enrollment-requests': 'طلبات إعادة التسجيل',
@@ -69,7 +69,9 @@ export class AdminShellComponent {
         path === '/admin/dashboard' ||
         path === '/admin/halaqat' ||
         path === '/admin/teachers' ||
-        path === '/admin/teacher-requests',
+        path === '/admin/teacher-requests' ||
+        path === '/admin/students' ||
+        path === '/admin/student-requests',
     );
     if (path.startsWith('/admin/halaqat/') && path !== '/admin/halaqat') {
       this.pageTitle.set('تفاصيل الحلقة');

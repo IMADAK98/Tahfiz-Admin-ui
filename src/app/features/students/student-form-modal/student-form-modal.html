@@ -1,0 +1,244 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="student-form-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="student-form-title">تسجيل طالب</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="submitting()"
+          (onClick)="close()"
+        >
+          ×
+        </p-button>
+      </div>
+
+      <form (ngSubmit)="onSubmit($event)">
+        <div class="modal-body student-form-body">
+          @if (errorMessage()) {
+            <p class="form-error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <h3 class="modal-section-title">بيانات الطالب</h3>
+          <div class="form-grid-2">
+            <div class="input-group">
+              <label for="sf-name">الاسم الكامل</label>
+              <input
+                class="input"
+                id="sf-name"
+                name="fullName"
+                type="text"
+                required
+                [(ngModel)]="form.fullName"
+                placeholder="مثال: عبدالله بن سعد الدوسري"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-email">البريد الإلكتروني</label>
+              <input
+                class="input"
+                id="sf-email"
+                name="email"
+                type="email"
+                required
+                [(ngModel)]="form.email"
+                placeholder="name@example.com"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-phone">رقم الجوال</label>
+              <input
+                class="input"
+                id="sf-phone"
+                name="phone"
+                type="tel"
+                required
+                [(ngModel)]="form.phone"
+                placeholder="05XXXXXXXX"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-parent-phone">جوال ولي الأمر</label>
+              <input
+                class="input"
+                id="sf-parent-phone"
+                name="parentPhone"
+                type="tel"
+                required
+                [(ngModel)]="form.parentPhone"
+                placeholder="05XXXXXXXX"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-id">رقم الهوية</label>
+              <input
+                class="input"
+                id="sf-id"
+                name="identificationNumber"
+                type="text"
+                required
+                maxlength="10"
+                [(ngModel)]="form.identificationNumber"
+                placeholder="10 أرقام"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-passport">رقم الجواز</label>
+              <input
+                class="input"
+                id="sf-passport"
+                name="passportNumber"
+                type="text"
+                required
+                maxlength="10"
+                [(ngModel)]="form.passportNumber"
+                placeholder="رقم الجواز"
+                dir="ltr"
+                style="text-align: right"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-address">العنوان</label>
+              <input
+                class="input"
+                id="sf-address"
+                name="address"
+                type="text"
+                required
+                [(ngModel)]="form.address"
+                placeholder="الحي، المدينة"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-birthdate">تاريخ الميلاد</label>
+              <input
+                class="input"
+                id="sf-birthdate"
+                name="birthDate"
+                type="date"
+                required
+                [(ngModel)]="form.birthDate"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-stage">المرحلة الدراسية</label>
+              <select
+                class="select"
+                id="sf-stage"
+                name="educationStage"
+                required
+                [(ngModel)]="form.educationStage"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of educationStageOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <h3 class="modal-section-title">الحفظ</h3>
+          <div class="form-grid-2">
+            <div class="input-group">
+              <label for="sf-is-hafiz">هل الطالب حافظ؟</label>
+              <select
+                class="select"
+                id="sf-is-hafiz"
+                name="isHafiz"
+                required
+                [(ngModel)]="form.isHafiz"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of yesNoOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="sf-hifz-quality">جودة الحفظ</label>
+              <select
+                class="select"
+                id="sf-hifz-quality"
+                name="hifzQuality"
+                required
+                [(ngModel)]="form.hifzQuality"
+                [disabled]="submitting()"
+              >
+                <option value="">— اختر —</option>
+                @for (option of hifzQualityOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="sf-surah-from">من سورة (1–114)</label>
+              <input
+                class="input"
+                id="sf-surah-from"
+                name="surahFrom"
+                type="number"
+                min="1"
+                max="114"
+                required
+                [(ngModel)]="form.surahFrom"
+                [disabled]="submitting()"
+              />
+            </div>
+            <div class="input-group">
+              <label for="sf-surah-to">إلى سورة (1–114)</label>
+              <input
+                class="input"
+                id="sf-surah-to"
+                name="surahTo"
+                type="number"
+                min="1"
+                max="114"
+                required
+                [(ngModel)]="form.surahTo"
+                [disabled]="submitting()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <p-button type="submit" label="حفظ" [loading]="submitting()" [disabled]="submitting()" />
+          <p-button
+            type="button"
+            label="إلغاء"
+            severity="secondary"
+            [disabled]="submitting()"
+            (onClick)="close()"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+}
