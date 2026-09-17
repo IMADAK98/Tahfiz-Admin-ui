@@ -1,7 +1,226 @@
-<section class="flex flex-col gap-4">
-  <header>
-    <p class="badge badge-neutral mb-3">قريباً — PR7</p>
-    <h2 class="text-xl font-bold mb-2">طلبات الطلاب</h2>
-    <p style="color: var(--color-muted)">موافقة أو رفض طلبات انضمام الطلاب.</p>
+<section class="requests-page">
+  <header class="requests-header">
+    <div>
+      <h1>طلبات الطلاب</h1>
+      <p class="requests-subtitle">موافقة على طلبات التسجيل مع بيانات ولي الأمر وحالة الحفظ</p>
+    </div>
+    <p-button type="button" label="الطلاب النشطون" severity="secondary" routerLink="/admin/students" />
   </header>
+
+  @if (loadState() === StudentRequestsLoadState.Loading) {
+    <p style="color: var(--color-muted)">جاري تحميل الطلبات…</p>
+  } @else if (loadState() === StudentRequestsLoadState.Error) {
+    <p class="load-error" role="alert">{{ loadError() }}</p>
+    <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+  } @else if (!requests().length) {
+    <div class="empty-block">
+      <h2>لا توجد طلبات طلاب معلّقة</h2>
+      <p>الطلبات الواردة من رابط التسجيل أو النموذج تظهر هنا للقبول أو الرفض.</p>
+      <p-button type="button" label="عرض الطلاب" severity="secondary" routerLink="/admin/students" />
+    </div>
+  } @else {
+    <div class="toolbar">
+      <span class="badge badge-warning">{{ countLabel() }}</span>
+    </div>
+
+    <ul class="req-list">
+      @for (request of requests(); track request.id) {
+        <li>
+          <article class="card req-card" [attr.aria-labelledby]="'sr-' + request.id">
+            <div class="req-card-head">
+              <div>
+                <h2 [id]="'sr-' + request.id">{{ request.name }}</h2>
+                <div class="req-chips">
+                  <span class="req-chip">{{ request.parentPhone }}</span>
+                  <span class="badge badge-warning">بانتظار المراجعة</span>
+                </div>
+              </div>
+            </div>
+
+            @if (isExpanded(request.id)) {
+              <div class="req-details" [id]="'details-' + request.id">
+                <dl class="detail-grid">
+                  <div>
+                    <dt>عمر الطالب</dt>
+                    <dd>{{ request.ageYears != null ? request.ageYears + ' سنة' : '—' }}</dd>
+                  </div>
+                  <div>
+                    <dt>البريد</dt>
+                    <dd>{{ request.email }}</dd>
+                  </div>
+                  <div>
+                    <dt>جوال ولي الأمر</dt>
+                    <dd>{{ request.parentPhone }}</dd>
+                  </div>
+                  <div>
+                    <dt>جوال الطالب</dt>
+                    <dd>{{ request.phone }}</dd>
+                  </div>
+                  <div>
+                    <dt>المرحلة الدراسية</dt>
+                    <dd>{{ request.educationStageLabel }}</dd>
+                  </div>
+                  <div>
+                    <dt>حالة الحفظ</dt>
+                    <dd>{{ hifzSummary(request) }}</dd>
+                  </div>
+                  <div>
+                    <dt>حافظ؟</dt>
+                    <dd>{{ yesNoLabel(request.isHafiz) }}</dd>
+                  </div>
+                  <div>
+                    <dt>رقم الهوية</dt>
+                    <dd>{{ request.identificationNumber }}</dd>
+                  </div>
+                  <div>
+                    <dt>العنوان</dt>
+                    <dd>{{ request.address }}</dd>
+                  </div>
+                </dl>
+              </div>
+            }
+
+            <div class="req-card-foot">
+              <p-button
+                type="button"
+                [text]="true"
+                size="small"
+                [label]="isExpanded(request.id) ? 'إخفاء التفاصيل' : 'عرض التفاصيل'"
+                (onClick)="toggleDetails(request.id)"
+              />
+              <div class="row-actions">
+                <p-button
+                  type="button"
+                  label="قبول"
+                  size="small"
+                  [disabled]="actingId() !== null"
+                  (onClick)="openApprove(request)"
+                />
+                <p-button
+                  type="button"
+                  label="رفض"
+                  severity="danger"
+                  size="small"
+                  [disabled]="actingId() !== null"
+                  (onClick)="openReject(request)"
+                />
+              </div>
+            </div>
+          </article>
+        </li>
+      }
+    </ul>
+  }
 </section>
+
+@if (activeApproveRequest(); as request) {
+  <div class="modal-backdrop" role="presentation" (click)="closeApprove()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="approve-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="approve-title">قبول الطلب</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="actingId() !== null"
+          (onClick)="closeApprove()"
+        >
+          ×
+        </p-button>
+      </div>
+      <div class="modal-body">
+        <p style="margin: 0; font-size: 1rem; line-height: 1.55; font-weight: 600">
+          هل أنت متأكد من قبول طلب <strong>{{ request.name }}</strong>؟ سيُضاف كطالب نشط.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <p-button
+          type="button"
+          label="تأكيد القبول"
+          [loading]="actingId() === request.id"
+          [disabled]="actingId() !== null"
+          (onClick)="confirmApprove(request)"
+        />
+        <p-button
+          type="button"
+          label="إلغاء"
+          severity="secondary"
+          [disabled]="actingId() !== null"
+          (onClick)="closeApprove()"
+        />
+      </div>
+    </div>
+  </div>
+}
+
+@if (activeRejectRequest(); as request) {
+  <div class="modal-backdrop" role="presentation" (click)="closeReject()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reject-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="reject-title">رفض الطلب</h2>
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          [disabled]="actingId() !== null"
+          (onClick)="closeReject()"
+        >
+          ×
+        </p-button>
+      </div>
+      <form (ngSubmit)="confirmReject(request)">
+        <div class="modal-body">
+          <p class="reject-hint">رفض طلب <strong>{{ request.name }}</strong>.</p>
+          <div class="input-group">
+            <label for="f-rejection-reason">سبب الرفض</label>
+            <textarea
+              class="input"
+              id="f-rejection-reason"
+              name="rejectionReason"
+              rows="3"
+              required
+              [(ngModel)]="rejectionReason"
+              placeholder="مثال: لا يستوفي شروط المركز"
+              [disabled]="actingId() !== null"
+            ></textarea>
+          </div>
+          @if (rejectError(); as error) {
+            <p class="form-error" role="alert">{{ error }}</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <p-button
+            type="submit"
+            label="تأكيد الرفض"
+            severity="danger"
+            [loading]="actingId() === request.id"
+            [disabled]="actingId() !== null"
+          />
+          <p-button
+            type="button"
+            label="إلغاء"
+            severity="secondary"
+            [disabled]="actingId() !== null"
+            (onClick)="closeReject()"
+          />
+        </div>
+      </form>
+    </div>
+  </div>
+}

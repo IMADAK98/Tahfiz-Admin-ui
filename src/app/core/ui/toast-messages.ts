@@ -11,6 +11,11 @@ export const TOAST_I18N = {
     teacherUpdated: 'toast.success.teacherUpdated',
     teacherRequestApproved: 'toast.success.teacherRequestApproved',
     teacherRequestRejected: 'toast.success.teacherRequestRejected',
+    studentCreated: 'toast.success.studentCreated',
+    studentRequestApproved: 'toast.success.studentRequestApproved',
+    studentRequestRejected: 'toast.success.studentRequestRejected',
+    registrationLinkGenerated: 'toast.success.registrationLinkGenerated',
+    registrationLinkCopied: 'toast.success.registrationLinkCopied',
     copied: 'toast.success.copied',
   },
   warn: {

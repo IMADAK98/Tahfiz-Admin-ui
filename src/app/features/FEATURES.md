@@ -21,8 +21,8 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 | `teachers/` | `/admin/teachers` | `07` | Implemented |
 | `teacher-detail/` | `/admin/teachers/:id` | `19` | Implemented |
 | `teacher-requests/` | `/admin/teacher-requests` | `08` | Implemented |
-| `students/` | `/admin/students` | `10` | Placeholder |
-| `student-requests/` | `/admin/student-requests` | `11` | Placeholder |
+| `students/` | `/admin/students` | `10` | Implemented |
+| `student-requests/` | `/admin/student-requests` | `11` | Implemented |
 | `re-enrollment/` | `/admin/re-enrollment` | `15` | Implemented |
 | `reports-attendance/` | `/admin/reports/attendance` | `13` | Placeholder |
 | `reports-progress/` | `/admin/reports/progress` | `14` | Placeholder |
@@ -38,6 +38,17 @@ Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`) ra
 - Ids may be returned as JSON strings; all mappers coerce via `coerceTeacherId`. Approve/create responses may have `data: null` — callers always re-list after success.
 - `GET /halqa/by-teacher-id/{id}` is locked self-only for the `TEACHER` role (IDOR) — matches the existing `halqa-api.service.ts`/`halaqat.service.ts` "never by-teacher-id" convention. Teacher detail's "الحلقات المعيَّنة" section instead loads the center-scoped `GET /halqa?centerId=` list (same endpoint `halaqat.service.ts` already uses as its fallback) and filters client-side by teacher id.
 - `numberOfMemorizedJuz` minimum differs by DTO: `CreatePendingTeacherRequestDto` requires ≥1 (add form), `UpdateTeacherProfileDto` allows 0 (edit form) — validated per mode.
+
+## Students set — live API notes
+
+Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`):
+
+- List: `GET /center/{centerId}/active-students?page&limit&search`. Manual add: `POST /admin/student-requests/manual-create` (no `centerId`; JWT-scoped). Then re-list active-students — manual users do **not** appear in the requests queue.
+- Requests: `GET /admin/student-requests`, `GET …/{id}`, `POST …/{id}/approve` empty body, `POST …/{id}/reject` `{ rejectionReason }` required. Cards collapsed by default with عرض/إخفاء التفاصيل.
+- `educationStage` enum values include spaces (`ELEMENTARY SCHOOL`). List rows may use snake_case `surah_from`/`surah_to`.
+- No `GET /users/students/by-id/{id}` and `UpdateStudentProfileDto` is empty — list «التفاصيل» is read-only from the active-students row. Dropped mock «التقدّم» (no student progress route).
+- Registration link: `POST /center/{centerId}/generate-registration-link` + copy modal. Public signup page (mock 12) is out of scope.
+- Ids may be JSON strings; approve/manual-create often return `data: null` — callers always re-list after success.
 
 ## Future public (not routed yet)
 
