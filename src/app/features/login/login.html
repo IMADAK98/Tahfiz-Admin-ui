@@ -55,15 +55,7 @@
             <p-checkbox [(ngModel)]="form.rememberMe" name="remember" [binary]="true" inputId="remember" />
             <span>تذكّرني</span>
           </label>
-          <p-button
-            type="button"
-            label="نسيت كلمة المرور؟"
-            [text]="true"
-            size="small"
-            styleClass="btn-ghost-link"
-            [disabled]="submitting() || forgotSubmitting()"
-            (onClick)="showForgotPanel.set(true)"
-          />
+          <a href="#forgot-panel" class="forgot-link" (click)="onForgotLinkClick($event)">نسيت كلمة المرور؟</a>
         </div>
 
         <p-button

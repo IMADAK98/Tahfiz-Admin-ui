@@ -50,6 +50,11 @@ export class LoginComponent {
     }
   }
 
+  protected onForgotLinkClick(event: Event): void {
+    event.preventDefault();
+    this.showForgotPanel.set(true);
+  }
+
   onSubmit(event: Event): void {
     event.preventDefault();
     if (this.submitting()) {
