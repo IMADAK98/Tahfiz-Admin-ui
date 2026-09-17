@@ -1,0 +1,223 @@
+<section class="pr-report" dir="rtl" lang="ar">
+  <header class="pr-report__header">
+    <div>
+      <p class="pr-report__eyebrow">قراءة فقط — نسب الحفظ / التثبيت / المراجعة من تطبيق المعلّم</p>
+      <h1 class="pr-report__title">تقرير التقدّم</h1>
+    </div>
+    <div class="pr-report__header-actions">
+      <p-button
+        type="button"
+        label="تصدير CSV"
+        severity="secondary"
+        [outlined]="true"
+        [disabled]="loading() || !rows().length"
+        (onClick)="exportCsv()"
+      />
+    </div>
+  </header>
+
+  <!-- Filter TWO ROWS (spacing lock): row1 = حلقة | period pills | search; row2 = date context -->
+  <div class="pr-report__filters" role="search" aria-label="فلاتر التقرير — حلقة وفترة وبحث">
+    <div class="pr-report__filter-row">
+      <div class="pr-report__field">
+        <label for="pr-halqa">الحلقة</label>
+        <p-select
+          inputId="pr-halqa"
+          [options]="halqaOptions()"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="اختر الحلقة"
+          [ngModel]="selectedHalqaId()"
+          (ngModelChange)="onHalqaChange($event)"
+          styleClass="w-full"
+        />
+      </div>
+
+      <div class="pr-report__field">
+        <label id="pr-period-label">الفترة</label>
+        <div class="pr-report__period-pills" role="tablist" aria-labelledby="pr-period-label">
+          <p-button
+            type="button"
+            label="يوم"
+            [rounded]="true"
+            [outlined]="period() !== 'day'"
+            [severity]="period() === 'day' ? 'primary' : 'secondary'"
+            styleClass="pr-period-pill"
+            (onClick)="setPeriod('day')"
+          />
+          <p-button
+            type="button"
+            label="أسبوع"
+            [rounded]="true"
+            [outlined]="period() !== 'week'"
+            [severity]="period() === 'week' ? 'primary' : 'secondary'"
+            styleClass="pr-period-pill"
+            (onClick)="setPeriod('week')"
+          />
+          <p-button
+            type="button"
+            label="شهر"
+            [rounded]="true"
+            [outlined]="period() !== 'month'"
+            [severity]="period() === 'month' ? 'primary' : 'secondary'"
+            styleClass="pr-period-pill"
+            (onClick)="setPeriod('month')"
+          />
+        </div>
+      </div>
+
+      <div class="pr-report__field">
+        <label for="pr-q">بحث</label>
+        <input
+          id="pr-q"
+          type="search"
+          pInputText
+          class="w-full"
+          placeholder="اسم الطالب…"
+          [ngModel]="studentQuery()"
+          (ngModelChange)="onStudentQuery($event)"
+        />
+      </div>
+    </div>
+
+    <div class="pr-report__filter-row pr-report__filter-row--context">
+      @if (period() === 'week') {
+        <div class="pr-report__field pr-report__field--context">
+          <label>الأسبوع</label>
+          <div class="pr-report__week-nav">
+            <p-button
+              type="button"
+              icon="pi pi-chevron-right"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              ariaLabel="الأسبوع السابق"
+              (onClick)="prevWeek()"
+            />
+            <span class="pr-report__week-label" aria-live="polite">{{ weekLabel() }}</span>
+            <p-button
+              type="button"
+              icon="pi pi-chevron-left"
+              severity="secondary"
+              [text]="true"
+              [rounded]="true"
+              ariaLabel="الأسبوع التالي"
+              (onClick)="nextWeek()"
+            />
+          </div>
+        </div>
+      }
+      @if (period() === 'day') {
+        <div class="pr-report__field pr-report__field--context">
+          <label for="pr-day">اليوم</label>
+          <input
+            id="pr-day"
+            type="date"
+            class="pr-report__date-input"
+            [ngModel]="dateContext()"
+            (ngModelChange)="onDayChange($event)"
+          />
+        </div>
+      }
+      @if (period() === 'month') {
+        <div class="pr-report__field pr-report__field--context">
+          <label for="pr-month">الشهر</label>
+          <input
+            id="pr-month"
+            type="month"
+            class="pr-report__date-input"
+            [ngModel]="dateContext()"
+            (ngModelChange)="onMonthChange($event)"
+          />
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="pr-report__error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (bootstrapping() || loading()) {
+    <p class="pr-report__status" role="status">جاري التحميل…</p>
+  }
+
+  @if (!bootstrapping() && !loading() && selectedHalqaId() && showEmpty()) {
+    <div class="pr-report__empty">
+      <h2>لا توجد بيانات تقدّم بعد</h2>
+      <p>
+        لا توجد نسب مسجّلة في هذه الفترة. هذا <strong>لا يعني</strong> عدم وجود طلاب — الطالب قد يظهر
+        بنسبة <strong>0%</strong> قبل أي إدخال من تطبيق المعلّم.
+      </p>
+    </div>
+  }
+
+  @if (!bootstrapping() && !loading() && selectedHalqaId() && table() && !showEmpty()) {
+    <div class="pr-report__meta">
+      @if (selectedHalqaName(); as hn) {
+        <span class="badge badge-neutral"
+          >{{ hn }}@if (termName()) {
+            · {{ termName() }}
+          }</span
+        >
+      }
+      <span class="type-badge hifz">حفظ</span>
+      <span class="type-badge tath">تثبيت</span>
+      <span class="type-badge mur">مراجعة</span>
+      <span class="badge badge-neutral">فترة: {{ periodLabelAr() }}</span>
+      <span class="badge badge-neutral">{{ studentCountLabel() }}</span>
+    </div>
+
+    <div class="pr-report__table-wrap">
+      <table class="pr-report__table" aria-label="تقرير التقدّم">
+        <thead>
+          <tr>
+            <th>الطالب</th>
+            <th>نسبة الحفظ</th>
+            <th>نسبة التثبيت</th>
+            <th>نسبة المراجعة</th>
+            <th>آخر تحديث</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.studentId) {
+            <tr>
+              <td class="name-cell"><strong>{{ row.studentName }}</strong></td>
+              <td>
+                <div class="pct" [class.is-zero]="row.hifzPercent === 0">{{ row.hifzPercent }}%</div>
+                <div class="pct-bar" aria-hidden="true">
+                  <span [style.width.%]="row.hifzPercent"></span>
+                </div>
+              </td>
+              <td>
+                <div class="pct" [class.is-zero]="row.tathPercent === 0">{{ row.tathPercent }}%</div>
+                <div class="pct-bar is-tath" aria-hidden="true">
+                  <span [style.width.%]="row.tathPercent"></span>
+                </div>
+              </td>
+              <td>
+                <div class="pct" [class.is-zero]="row.murPercent === 0">{{ row.murPercent }}%</div>
+                <div class="pct-bar is-mur" aria-hidden="true">
+                  <span [style.width.%]="row.murPercent"></span>
+                </div>
+              </td>
+              <td class="pr-report__updated">{{ row.lastUpdatedLabel }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="pr-report__note">
+      إدارة المركز: تصفية وقراءة فقط. إدخال التقدّم اليومي من تطبيق المعلّم. نسبة 0% تعني بلا تسجيل بعد
+      — وليست «لا يوجد طلاب».
+    </p>
+  }
+
+  @if (!bootstrapping() && !loading() && !selectedHalqaId() && halqaOptions().length === 0) {
+    <div class="pr-report__empty">
+      <h2>لا حلقات في الدورة النشطة</h2>
+      <p>أضف حلقة للدورة الحالية ثم عد إلى تقرير التقدّم.</p>
+    </div>
+  }
+</section>
