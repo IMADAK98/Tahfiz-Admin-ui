@@ -11,6 +11,11 @@
       "teacherUpdated": "TODO: Teacher updated",
       "teacherRequestApproved": "TODO: Teacher request approved",
       "teacherRequestRejected": "TODO: Teacher request rejected",
+      "studentCreated": "TODO: Student registered",
+      "studentRequestApproved": "TODO: Student request approved",
+      "studentRequestRejected": "TODO: Student request rejected",
+      "registrationLinkGenerated": "TODO: Registration link generated",
+      "registrationLinkCopied": "TODO: Registration link copied",
       "copied": "TODO: Copied"
     },
     "error": {
