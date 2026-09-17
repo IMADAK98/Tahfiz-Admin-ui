@@ -9,6 +9,14 @@ export function isAdminRole(role: string | undefined | null): role is UserRole {
   return role !== undefined && role !== null && ADMIN_ROLE_SET.has(role);
 }
 
+export function isSystemAdminRole(role: string | undefined | null): boolean {
+  return role === 'SYSTEM_ADMIN';
+}
+
+export function isCenterAdminRole(role: string | undefined | null): boolean {
+  return role === 'ADMIN';
+}
+
 export function canAccessAdmin(claims: JwtClaims | null): boolean {
   return isAdminRole(claims?.role);
 }

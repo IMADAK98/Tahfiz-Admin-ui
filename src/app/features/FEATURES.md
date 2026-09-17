@@ -10,6 +10,14 @@ Angular 22 folder-per-feature layout. Each screen lives in its own folder with s
 | `login/` | `/login` | Implemented |
 | `center-signup/` | `/user/signup` | Implemented |
 
+## System admin (`/system-admin/...`, `systemAdminGuard`)
+
+| Folder | Route | Mock | Status |
+|---|---|---|---|
+| `center-requests/` | `/system-admin/center-requests` | `21` | Implemented |
+
+Slim SYSTEM_ADMIN shell (not center-admin sidebar): طلبات المراكز + muted لوحة المؤشرات. Center `ADMIN` → redirected to `/admin`. No Students/Terms/Ḥalaqāt KPI counts.
+
 ## Admin (`/admin/...`, `adminGuard`)
 
 | Folder | Route | Mock | Status |
@@ -50,6 +58,15 @@ Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`):
 - Registration link: `POST /center/{centerId}/generate-registration-link` + copy modal. Public signup page (mock 12) is out of scope.
 - Ids may be JSON strings; approve/manual-create often return `data: null` — callers always re-list after success.
 
+## SYSTEM_ADMIN center requests — live API notes
+
+Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`) + locked mock `21-system-admin-centers.html`:
+
+- Role: `SYSTEM_ADMIN` only (`GET /system-admin/center-requests`, `POST …/{id}/approve` empty, `POST …/{id}/reject` `{ rejectionReason }` required). Center `ADMIN` → Nest 403.
+- Nest `findAll()` returns **all** statuses — UI shows the mix (PENDING accept/reject, APPROVED/REJECTED chips only). No `studentsCount` / `termsCount` / `halaqatCount`.
+- Card fields: `centerName`, `centerAddress`, `adminName`, `adminEmail`, `adminPhone`, `adminIdentificationNumber`, `adminPassportNumber`, `adminBirthDate`, `adminNationality`, `adminAddress`, `status`, `rejectionReason`, `centerId` (after approve; also reads nested `center.id`).
+- Ids may be JSON strings; approve/reject often return `data: null` — callers always re-list after success. Reject form uses `SKIP_GLOBAL_ERROR_TOAST` for inline `سبب الرفض`.
+
 ## Future public (not routed yet)
 
 | Folder (planned) | Route | Mock |
@@ -68,6 +85,7 @@ Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`):
 |---|---|
 | `layout/public-shell/` | Landing + public chrome |
 | `layout/admin-shell/` | Admin sidebar + topbar |
+| `layout/system-admin-shell/` | Slim SYSTEM_ADMIN rail (center requests) |
 
 ## DTO / enum convention (per feature)
 

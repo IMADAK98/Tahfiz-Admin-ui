@@ -1,0 +1,46 @@
+<div class="sa-app">
+  <aside class="sa-rail" aria-label="تنقل مدير النظام">
+    <div class="sa-brand">
+      <div class="sa-logo" aria-hidden="true">ت</div>
+      <div>
+        <strong>تحفيظ</strong>
+        <span>مدير النظام</span>
+      </div>
+    </div>
+    <div>
+      <p class="sa-nav-label">القائمة</p>
+      <nav class="sa-nav">
+        <a
+          routerLink="/system-admin/center-requests"
+          routerLinkActive="active"
+          class="sa-nav-link"
+        >
+          <span aria-hidden="true">▣</span>
+          طلبات المراكز
+        </a>
+        <span class="sa-nav-link muted" aria-disabled="true">
+          <span aria-hidden="true">◈</span>
+          لوحة المؤشرات
+        </span>
+      </nav>
+    </div>
+    <div class="sa-rail-foot">
+      <div class="sa-user">
+        <span class="user-avatar" aria-hidden="true">{{ avatarInitial() }}</span>
+        {{ displayName() }}
+      </div>
+      <p-button
+        type="button"
+        [text]="true"
+        size="small"
+        [label]="loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج'"
+        [disabled]="loggingOut()"
+        (onClick)="logout()"
+      />
+    </div>
+  </aside>
+
+  <div class="sa-main">
+    <router-outlet />
+  </div>
+</div>

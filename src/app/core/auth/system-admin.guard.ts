@@ -1,15 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import {
-  canAccessAdmin,
   isAccessTokenValid,
+  isCenterAdminRole,
   isSystemAdminRole,
   isTeacherRole,
 } from './auth-role.helpers';
 import { AuthService } from './auth.service';
-import { SYSTEM_ADMIN_HOME } from './redirect.helpers';
+import { CENTER_ADMIN_HOME } from './redirect.helpers';
 
-export const adminGuard: CanActivateFn = (_route, state) => {
+/** JWT role SYSTEM_ADMIN only — center ADMIN is redirected to `/admin`. */
+export const systemAdminGuard: CanActivateFn = (_route, state) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
@@ -28,11 +29,11 @@ export const adminGuard: CanActivateFn = (_route, state) => {
   }
 
   if (isSystemAdminRole(claims?.role)) {
-    return router.createUrlTree([SYSTEM_ADMIN_HOME]);
+    return true;
   }
 
-  if (canAccessAdmin(claims)) {
-    return true;
+  if (isCenterAdminRole(claims?.role)) {
+    return router.createUrlTree([CENTER_ADMIN_HOME]);
   }
 
   auth.clearSession();

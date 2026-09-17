@@ -8,7 +8,7 @@ import { Password } from 'primeng/password';
 import { ApiError } from '../../core/api/api-error';
 import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers';
 import { AuthService } from '../../core/auth/auth.service';
-import { safeRedirectPath } from '../../core/auth/redirect.helpers';
+import { postLoginPath } from '../../core/auth/redirect.helpers';
 import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
 import { createEmptyLoginForm } from './dto/login-form.model';
 import { LoginQueryReason } from './enums/login-query-reason.enum';
@@ -72,7 +72,7 @@ export class LoginComponent {
         }
 
         const redirect = this.route.snapshot.queryParamMap.get('redirect');
-        void this.router.navigateByUrl(safeRedirectPath(redirect));
+        void this.router.navigateByUrl(postLoginPath(claims.role, redirect));
       },
       error: (error: unknown) => {
         this.submitting.set(false);

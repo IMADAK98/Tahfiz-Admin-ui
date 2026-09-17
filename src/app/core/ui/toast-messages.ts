@@ -14,6 +14,8 @@ export const TOAST_I18N = {
     studentCreated: 'toast.success.studentCreated',
     studentRequestApproved: 'toast.success.studentRequestApproved',
     studentRequestRejected: 'toast.success.studentRequestRejected',
+    centerRequestApproved: 'toast.success.centerRequestApproved',
+    centerRequestRejected: 'toast.success.centerRequestRejected',
     registrationLinkGenerated: 'toast.success.registrationLinkGenerated',
     registrationLinkCopied: 'toast.success.registrationLinkCopied',
     copied: 'toast.success.copied',

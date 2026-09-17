@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/auth/admin.guard';
+import { systemAdminGuard } from './core/auth/system-admin.guard';
 
 export const routes: Routes = [
   {
@@ -91,6 +92,24 @@ export const routes: Routes = [
         path: 'reports/progress',
         loadComponent: () =>
           import('./features/reports-progress/reports-progress').then((m) => m.ReportsProgressComponent),
+      },
+    ],
+  },
+  {
+    path: 'system-admin',
+    canActivate: [systemAdminGuard],
+    loadComponent: () =>
+      import('./layout/system-admin-shell/system-admin-shell').then(
+        (m) => m.SystemAdminShellComponent,
+      ),
+    children: [
+      { path: '', redirectTo: 'center-requests', pathMatch: 'full' },
+      {
+        path: 'center-requests',
+        loadComponent: () =>
+          import('./features/center-requests/center-requests').then(
+            (m) => m.CenterRequestsComponent,
+          ),
       },
     ],
   },
