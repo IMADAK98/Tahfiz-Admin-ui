@@ -9,6 +9,7 @@ import { TokenStorageService } from './token-storage.service';
 export const AUTH_RETRY = new HttpContextToken<boolean>(() => false);
 
 const AUTH_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'] as const;
+const ACCEPT_LANGUAGE = 'ar';
 
 let refreshInFlight$: Observable<string> | null = null;
 
@@ -27,6 +28,12 @@ function withBearer(url: string, req: Parameters<HttpInterceptorFn>[0], token: s
 
   return req.clone({
     setHeaders: { Authorization: `Bearer ${token}` },
+  });
+}
+
+function withAcceptLanguage(req: Parameters<HttpInterceptorFn>[0]) {
+  return req.clone({
+    setHeaders: { 'Accept-Language': ACCEPT_LANGUAGE },
   });
 }
 
@@ -67,7 +74,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenStorage = inject(TokenStorageService);
   const router = inject(Router);
 
-  const authedReq = withBearer(req.url, req, auth.getAccessToken());
+  const langReq = withAcceptLanguage(req);
+  const authedReq = withBearer(langReq.url, langReq, auth.getAccessToken());
 
   return next(authedReq).pipe(
     catchError((error: unknown) => {
@@ -75,7 +83,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
-      if (req.context.get(AUTH_RETRY) || isAuthEndpoint(req.url)) {
+      if (langReq.context.get(AUTH_RETRY) || isAuthEndpoint(langReq.url)) {
         tokenStorage.clearTokens();
         redirectToLogin(router, router.url);
         return throwError(() => error);
@@ -89,10 +97,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       return refreshAccessToken(auth, tokenStorage, router).pipe(
         switchMap((token) => {
-          const retryReq = req.clone({
-            context: req.context.set(AUTH_RETRY, true),
+          const retryReq = langReq.clone({
+            context: langReq.context.set(AUTH_RETRY, true),
           });
-          return next(withBearer(req.url, retryReq, token));
+          return next(withBearer(langReq.url, retryReq, token));
         }),
       );
     }),
