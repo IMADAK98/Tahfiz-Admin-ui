@@ -23,6 +23,8 @@ const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
   '/admin/re-enrollment-requests': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
 };
 
+const SIDEBAR_COLLAPSED_KEY = 'tahfiz.admin.sidebarCollapsed';
+
 @Component({
   selector: 'app-admin-shell',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
@@ -38,6 +40,7 @@ export class AdminShellComponent {
   protected readonly pageTitle = signal('لوحة التحكم');
   protected readonly pageSubtitle = signal<string | null>(null);
   protected readonly isDashboard = signal(false);
+  protected readonly sidebarCollapsed = signal(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
 
   constructor() {
     const claims = this.auth.getClaims();
@@ -49,6 +52,14 @@ export class AdminShellComponent {
     this.syncPageTitle(this.router.url);
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
       this.syncPageTitle((event as NavigationEnd).urlAfterRedirects);
+    });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed.update((collapsed) => {
+      const next = !collapsed;
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? '1' : '0');
+      return next;
     });
   }
 

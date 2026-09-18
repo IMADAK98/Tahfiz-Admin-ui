@@ -42,6 +42,7 @@
 
   --font: "Cairo", "Segoe UI", Tahoma, sans-serif;
   --sidebar-w: 260px;
+  --sidebar-w-collapsed: 80px;
   --content-max: 1440px;
 
   --toast-max-w: 380px;

@@ -1,65 +1,96 @@
 <div class="app-shell">
-  <aside class="sidebar" aria-label="قائمة الإدارة">
+  <aside
+    class="sidebar"
+    [class.is-collapsed]="sidebarCollapsed()"
+    aria-label="قائمة الإدارة"
+  >
     <div class="sidebar-brand">
       <div class="sidebar-logo" aria-hidden="true">ت</div>
       <div class="sidebar-brand-text">
         <strong>تحفيظ</strong>
         <span>إدارة المركز</span>
       </div>
+      <button
+        type="button"
+        class="sidebar-toggle"
+        (click)="toggleSidebar()"
+        [attr.aria-expanded]="!sidebarCollapsed()"
+        [attr.aria-label]="sidebarCollapsed() ? 'توسيع القائمة' : 'طي القائمة'"
+        [title]="sidebarCollapsed() ? 'توسيع القائمة' : 'طي القائمة'"
+      >
+        <i
+          class="pi"
+          [class.pi-angle-double-left]="sidebarCollapsed()"
+          [class.pi-angle-double-right]="!sidebarCollapsed()"
+          aria-hidden="true"
+        ></i>
+      </button>
     </div>
 
     <div class="nav-section">نظرة عامة</div>
-    <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+    <a
+      routerLink="/admin"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="nav-link"
+      title="لوحة التحكم"
+    >
       <span class="nav-icon" aria-hidden="true">▣</span>
-      <span>لوحة التحكم</span>
+      <span class="nav-label">لوحة التحكم</span>
     </a>
 
     <div class="nav-section">التشغيل</div>
-    <a routerLink="/admin/halaqat" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/halaqat" routerLinkActive="active" class="nav-link" title="الحلقات">
       <span class="nav-icon" aria-hidden="true">◉</span>
-      <span>الحلقات</span>
+      <span class="nav-label">الحلقات</span>
     </a>
-    <a routerLink="/admin/terms" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/terms" routerLinkActive="active" class="nav-link" title="الدورات">
       <span class="nav-icon" aria-hidden="true">◎</span>
-      <span>الدورات</span>
+      <span class="nav-label">الدورات</span>
     </a>
 
     <div class="nav-section">الأشخاص</div>
-    <a routerLink="/admin/teachers" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/teachers" routerLinkActive="active" class="nav-link" title="المعلمون">
       <span class="nav-icon" aria-hidden="true">👤</span>
-      <span>المعلمون</span>
+      <span class="nav-label">المعلمون</span>
     </a>
-    <a routerLink="/admin/teacher-requests" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/teacher-requests" routerLinkActive="active" class="nav-link" title="طلبات المعلمين">
       <span class="nav-icon" aria-hidden="true">📋</span>
-      <span>طلبات المعلمين</span>
+      <span class="nav-label">طلبات المعلمين</span>
     </a>
-    <a routerLink="/admin/students" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/students" routerLinkActive="active" class="nav-link" title="الطلاب">
       <span class="nav-icon" aria-hidden="true">🎓</span>
-      <span>الطلاب</span>
+      <span class="nav-label">الطلاب</span>
     </a>
-    <a routerLink="/admin/student-requests" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/student-requests" routerLinkActive="active" class="nav-link" title="طلبات الطلاب">
       <span class="nav-icon" aria-hidden="true">📥</span>
-      <span>طلبات الطلاب</span>
+      <span class="nav-label">طلبات الطلاب</span>
     </a>
-    <a routerLink="/admin/re-enrollment" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/re-enrollment" routerLinkActive="active" class="nav-link" title="إعادة التسجيل">
       <span class="nav-icon" aria-hidden="true">🔁</span>
-      <span>إعادة التسجيل</span>
+      <span class="nav-label">إعادة التسجيل</span>
     </a>
 
     <div class="nav-section">التقارير</div>
-    <a routerLink="/admin/reports/attendance" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/reports/attendance" routerLinkActive="active" class="nav-link" title="تقرير الحضور">
       <span class="nav-icon" aria-hidden="true">⏱</span>
-      <span>تقرير الحضور</span>
+      <span class="nav-label">تقرير الحضور</span>
     </a>
-    <a routerLink="/admin/reports/progress" routerLinkActive="active" class="nav-link">
+    <a routerLink="/admin/reports/progress" routerLinkActive="active" class="nav-link" title="تقرير التقدّم">
       <span class="nav-icon" aria-hidden="true">📈</span>
-      <span>تقرير التقدّم</span>
+      <span class="nav-label">تقرير التقدّم</span>
     </a>
 
     <div class="sidebar-footer">
-      <button type="button" class="nav-link w-full border-0 bg-transparent cursor-pointer" (click)="logout()" [disabled]="loggingOut()">
+      <button
+        type="button"
+        class="nav-link w-full border-0 bg-transparent cursor-pointer"
+        (click)="logout()"
+        [disabled]="loggingOut()"
+        [title]="loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج'"
+      >
         <span class="nav-icon" aria-hidden="true">⎋</span>
-        <span>{{ loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج' }}</span>
+        <span class="nav-label">{{ loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج' }}</span>
       </button>
     </div>
   </aside>

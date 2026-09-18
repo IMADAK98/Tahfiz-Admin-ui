@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
+import { DashboardCards } from '../../core/api/models/dashboard-cards.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
@@ -10,7 +11,6 @@ import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { CreateTermModalComponent } from '../terms/create-term-modal/create-term-modal';
 import { TermsService } from '../terms/terms.service';
 import { DashboardLoadState } from './enums/dashboard-load-state.enum';
-import { MOCK_DASHBOARD_KPIS } from './dto';
 import { DashboardService } from './dashboard.service';
 
 @Component({
@@ -28,11 +28,11 @@ export class DashboardComponent {
   private readonly toastMessage = inject(ToastMessageService);
 
   protected readonly DashboardLoadState = DashboardLoadState;
-  protected readonly mockKpis = MOCK_DASHBOARD_KPIS;
 
   protected readonly loadState = signal(DashboardLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
   protected readonly activeTerm = signal<ActiveTerm | null>(null);
+  protected readonly cards = signal<DashboardCards | null>(null);
   protected readonly showCreateModal = signal(false);
   protected readonly endingTerm = signal(false);
 
@@ -53,9 +53,10 @@ export class DashboardComponent {
     this.loadState.set(DashboardLoadState.Loading);
     this.loadError.set(null);
 
-    this.dashboardService.loadActiveTerm(centerId).subscribe({
-      next: (term) => {
-        this.activeTerm.set(term);
+    this.dashboardService.loadPage(centerId).subscribe({
+      next: ({ activeTerm, cards }) => {
+        this.activeTerm.set(activeTerm);
+        this.cards.set(cards);
         this.loadState.set(DashboardLoadState.Ready);
       },
       error: (error: unknown) => {

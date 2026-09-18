@@ -43,15 +43,30 @@
         </div>
       </div>
 
-      <div class="kpi-grid">
-        @for (kpi of mockKpis; track kpi.label) {
-          <article class="card kpi">
-            <div class="kpi-label">{{ kpi.label }}</div>
-            <div class="kpi-value">{{ kpi.value }}</div>
-            <div class="kpi-meta" [class.up]="kpi.metaTone === 'success'">{{ kpi.meta }}</div>
-          </article>
-        }
-      </div>
+      @if (cards(); as kpi) {
+        <div class="kpi-grid">
+          <a class="card kpi" routerLink="/admin/halaqat">
+            <div class="kpi-label">الحلقات النشطة</div>
+            <div class="kpi-value">{{ kpi.activeHalqasCount }}</div>
+          </a>
+          <a class="card kpi" routerLink="/admin/teachers">
+            <div class="kpi-label">المعلمون</div>
+            <div class="kpi-value">{{ kpi.teachersCount }}</div>
+          </a>
+          <a class="card kpi" routerLink="/admin/students">
+            <div class="kpi-label">الطلاب المسجّلون</div>
+            <div class="kpi-value">{{ kpi.activeStudentsCount }}</div>
+          </a>
+          <a class="card kpi" routerLink="/admin/teacher-requests">
+            <div class="kpi-label">طلبات المعلمين</div>
+            <div class="kpi-value">{{ kpi.pendingTeacherRequestsCount }}</div>
+          </a>
+          <a class="card kpi" routerLink="/admin/student-requests">
+            <div class="kpi-label">طلبات الطلاب</div>
+            <div class="kpi-value">{{ kpi.pendingStudentRequestsCount }}</div>
+          </a>
+        </div>
+      }
 
       <div class="layout-2">
         <section class="card panel" aria-labelledby="term-detail-title">

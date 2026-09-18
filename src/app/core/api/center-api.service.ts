@@ -13,6 +13,7 @@ import {
   RegistrationLinkResult,
   unwrapActiveStudentsPayload,
 } from './models/student.model';
+import { DashboardCards } from './models/dashboard-cards.model';
 import { ActiveTeacher, ActiveTeachersQuery } from './models/teacher.model';
 
 @Injectable({ providedIn: 'root' })
@@ -26,6 +27,15 @@ export class CenterApiService {
         observe: 'response',
       })
       .pipe(map((res) => unwrapEnvelopeOrNull(res.body, res.status)));
+  }
+
+  getDashboardCards(centerId: number): Observable<DashboardCards> {
+    return this.http
+      .get<ApiEnvelope<DashboardCards>>(
+        `${this.apiBaseUrl}/center/${centerId}/dashboard-cards`,
+        { observe: 'response' },
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
   getActiveTeachers(centerId: number, query: ActiveTeachersQuery = {}): Observable<ActiveTeacher[]> {
