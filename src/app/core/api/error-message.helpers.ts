@@ -1,6 +1,56 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiError } from './api-error';
-import { NestErrorBody } from './models/api-envelope.model';
+import { NestErrorBody, NestFieldError } from './models/api-envelope.model';
+
+/** Last write wins when Nest repeats the same fieldName. */
+export function parseNestFieldErrors(
+  errors: NestErrorBody['errors'] | unknown,
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!Array.isArray(errors)) {
+    return result;
+  }
+
+  for (const item of errors) {
+    if (!item || typeof item !== 'object') {
+      continue;
+    }
+    const row = item as Partial<NestFieldError>;
+    const fieldName = typeof row.fieldName === 'string' ? row.fieldName.trim() : '';
+    const message = typeof row.message === 'string' ? row.message.trim() : '';
+    if (!fieldName || !message) {
+      continue;
+    }
+    result[fieldName] = message;
+  }
+
+  return result;
+}
+
+/** ApiError.fieldErrors, else Nest `errors[]` on an HttpErrorResponse body. */
+export function fieldErrorsFromUnknown(error: unknown): Record<string, string> {
+  if (error instanceof ApiError) {
+    return error.fieldErrors;
+  }
+
+  if (error instanceof HttpErrorResponse) {
+    const body = error.error;
+    if (body && typeof body === 'object') {
+      return parseNestFieldErrors((body as NestErrorBody).errors);
+    }
+    return {};
+  }
+
+  if (error && typeof error === 'object') {
+    return parseNestFieldErrors((error as NestErrorBody).errors);
+  }
+
+  return {};
+}
+
+export function hasNestFieldErrors(error: unknown): boolean {
+  return Object.keys(fieldErrorsFromUnknown(error)).length > 0;
+}
 
 export function formatNestMessage(message: NestErrorBody['message']): string | undefined {
   if (typeof message === 'string') {

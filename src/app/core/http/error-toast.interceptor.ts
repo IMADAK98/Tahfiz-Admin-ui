@@ -3,6 +3,7 @@ import { Injector, inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import {
   extractHttpErrorMessage,
+  hasNestFieldErrors,
   isAbortedRequest,
   resolveErrorStatus,
   urlPathWithoutQuery,
@@ -37,6 +38,12 @@ export const errorToastInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (isAbortedRequest(error)) {
+        return throwError(() => error);
+      }
+
+      // Field errors belong under inputs (center-signup POC). Skip toast so
+      // Nest `errors[]` is not also dumped as a generic failure banner.
+      if (hasNestFieldErrors(error)) {
         return throwError(() => error);
       }
 

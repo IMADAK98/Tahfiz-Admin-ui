@@ -270,5 +270,8 @@
     "loadHalqasFailed": "تعذر تحميل الحلقات",
     "loadTableFailed": "تعذر تحميل تقرير التقدّم",
     "studentsCount": "{{count}} طالب"
+  },
+  "centerSignup": {
+    "fieldErrorsBanner": "راجع الحقول أدناه وصحّح الأخطاء."
   }
 }

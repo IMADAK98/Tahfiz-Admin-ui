@@ -30,10 +30,16 @@
                 id="adminName"
                 name="adminName"
                 [(ngModel)]="form.adminName"
+                (ngModelChange)="clearFieldError('adminName')"
                 autocomplete="name"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('adminName') ? true : null"
+                [attr.aria-describedby]="fieldError('adminName') ? 'adminName-error' : null"
               />
+              @if (fieldError('adminName'); as msg) {
+                <p class="signup-field-error" id="adminName-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="id-block">
@@ -60,11 +66,27 @@
                     id="adminIdentificationNumber"
                     name="adminIdentificationNumber"
                     [(ngModel)]="form.adminIdentificationNumber"
+                    (ngModelChange)="clearFieldError('adminIdentificationNumber')"
                     inputmode="numeric"
                     autocomplete="off"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('adminIdentificationNumber') ? true : null"
+                    [attr.aria-describedby]="
+                      fieldError('adminIdentificationNumber')
+                        ? 'adminIdentificationNumber-error'
+                        : null
+                    "
                   />
+                  @if (fieldError('adminIdentificationNumber'); as msg) {
+                    <p
+                      class="signup-field-error"
+                      id="adminIdentificationNumber-error"
+                      role="alert"
+                    >
+                      {{ msg }}
+                    </p>
+                  }
                 </div>
               } @else {
                 <div class="input-group">
@@ -74,10 +96,20 @@
                     id="adminPassportNumber"
                     name="adminPassportNumber"
                     [(ngModel)]="form.adminPassportNumber"
+                    (ngModelChange)="clearFieldError('adminPassportNumber')"
                     autocomplete="off"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('adminPassportNumber') ? true : null"
+                    [attr.aria-describedby]="
+                      fieldError('adminPassportNumber') ? 'adminPassportNumber-error' : null
+                    "
                   />
+                  @if (fieldError('adminPassportNumber'); as msg) {
+                    <p class="signup-field-error" id="adminPassportNumber-error" role="alert">
+                      {{ msg }}
+                    </p>
+                  }
                 </div>
               }
             </div>
@@ -90,11 +122,17 @@
                 name="adminEmail"
                 type="email"
                 [(ngModel)]="form.adminEmail"
+                (ngModelChange)="clearFieldError('adminEmail')"
                 autocomplete="email"
                 dir="ltr"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('adminEmail') ? true : null"
+                [attr.aria-describedby]="fieldError('adminEmail') ? 'adminEmail-error' : null"
               />
+              @if (fieldError('adminEmail'); as msg) {
+                <p class="signup-field-error" id="adminEmail-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="input-group">
@@ -105,11 +143,17 @@
                 name="adminPhone"
                 type="tel"
                 [(ngModel)]="form.adminPhone"
+                (ngModelChange)="clearFieldError('adminPhone')"
                 autocomplete="tel"
                 dir="ltr"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('adminPhone') ? true : null"
+                [attr.aria-describedby]="fieldError('adminPhone') ? 'adminPhone-error' : null"
               />
+              @if (fieldError('adminPhone'); as msg) {
+                <p class="signup-field-error" id="adminPhone-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="input-group">
@@ -118,6 +162,7 @@
                 inputId="adminBirthDate"
                 name="adminBirthDate"
                 [(ngModel)]="adminBirthDate"
+                (ngModelChange)="clearFieldError('adminBirthDate')"
                 dateFormat="yy-mm-dd"
                 [showIcon]="true"
                 [maxDate]="today"
@@ -125,6 +170,9 @@
                 fluid
                 [disabled]="submitting()"
               />
+              @if (fieldError('adminBirthDate'); as msg) {
+                <p class="signup-field-error" id="adminBirthDate-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="input-group">
@@ -134,10 +182,16 @@
                 id="adminAddress"
                 name="adminAddress"
                 [(ngModel)]="form.adminAddress"
+                (ngModelChange)="clearFieldError('adminAddress')"
                 autocomplete="street-address"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('adminAddress') ? true : null"
+                [attr.aria-describedby]="fieldError('adminAddress') ? 'adminAddress-error' : null"
               />
+              @if (fieldError('adminAddress'); as msg) {
+                <p class="signup-field-error" id="adminAddress-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="input-group">
@@ -147,9 +201,17 @@
                 id="adminNationality"
                 name="adminNationality"
                 [(ngModel)]="form.adminNationality"
+                (ngModelChange)="clearFieldError('adminNationality')"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('adminNationality') ? true : null"
+                [attr.aria-describedby]="
+                  fieldError('adminNationality') ? 'adminNationality-error' : null
+                "
               />
+              @if (fieldError('adminNationality'); as msg) {
+                <p class="signup-field-error" id="adminNationality-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <h2 class="section-title">معلومات المركز</h2>
@@ -161,9 +223,15 @@
                 id="centerName"
                 name="centerName"
                 [(ngModel)]="form.centerName"
+                (ngModelChange)="clearFieldError('centerName')"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('centerName') ? true : null"
+                [attr.aria-describedby]="fieldError('centerName') ? 'centerName-error' : null"
               />
+              @if (fieldError('centerName'); as msg) {
+                <p class="signup-field-error" id="centerName-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <div class="input-group">
@@ -173,9 +241,15 @@
                 id="centerAddress"
                 name="centerAddress"
                 [(ngModel)]="form.centerAddress"
+                (ngModelChange)="clearFieldError('centerAddress')"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('centerAddress') ? true : null"
+                [attr.aria-describedby]="fieldError('centerAddress') ? 'centerAddress-error' : null"
               />
+              @if (fieldError('centerAddress'); as msg) {
+                <p class="signup-field-error" id="centerAddress-error" role="alert">{{ msg }}</p>
+              }
             </div>
 
             <p-button

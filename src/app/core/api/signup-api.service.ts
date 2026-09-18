@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { apiErrorFromBody } from './api-error';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
@@ -26,6 +26,12 @@ export class SignupApiService {
           if (!envelopeOk(res.body, res.status)) {
             throw apiErrorFromBody(res.body, res.status);
           }
+        }),
+        catchError((err: unknown) => {
+          if (err instanceof HttpErrorResponse) {
+            return throwError(() => apiErrorFromBody(err.error, err.status));
+          }
+          return throwError(() => err);
         }),
       );
   }
