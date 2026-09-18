@@ -32,10 +32,13 @@
             required
             fluid
             [disabled]="submitting()"
-            [attr.aria-invalid]="fieldError('email') ? true : null"
-            [attr.aria-describedby]="fieldError('email') ? 'email-error' : null"
+            [attr.aria-invalid]="!showForgotPanel() && fieldError('email') ? true : null"
+            [attr.aria-describedby]="!showForgotPanel() && fieldError('email') ? 'email-error' : null"
           />
-          <app-field-error [message]="fieldError('email')" errorId="email-error" />
+          <app-field-error
+            [message]="showForgotPanel() ? undefined : fieldError('email')"
+            errorId="email-error"
+          />
         </div>
 
         <div class="input-group login-field">
@@ -53,7 +56,10 @@
             fluid
             [disabled]="submitting()"
           />
-          <app-field-error [message]="fieldError('password')" errorId="password-error" />
+          <app-field-error
+            [message]="showForgotPanel() ? undefined : fieldError('password')"
+            errorId="password-error"
+          />
         </div>
 
         <div class="row-between">
