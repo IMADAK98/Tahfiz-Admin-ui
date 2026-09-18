@@ -6,8 +6,15 @@ export interface ApiEnvelope<T = unknown> {
   data?: T;
 }
 
+/** Nest 400 field-level validation item (center-signup POC contract). */
+export interface NestFieldError {
+  fieldName: string;
+  message: string;
+}
+
 export interface NestErrorBody {
   statusCode?: number;
   message?: string | string[];
   error?: string;
+  errors?: NestFieldError[];
 }

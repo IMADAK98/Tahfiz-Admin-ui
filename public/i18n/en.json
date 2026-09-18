@@ -270,5 +270,8 @@
     "loadHalqasFailed": "Could not load ḥalaqas",
     "loadTableFailed": "Could not load progress report",
     "studentsCount": "{{count}} students"
+  },
+  "centerSignup": {
+    "fieldErrorsBanner": "Review the fields below and correct the errors."
   }
 }
