@@ -44,22 +44,29 @@ function hasNestFieldErrors(error) {
   return Object.keys(error.fieldErrors ?? parseNestFieldErrors(error.errors)).length > 0;
 }
 
+/** Locked Nest 400 body (IMADAK98/Tahfiz#3) — display messages as returned. */
 const contractBody = {
   statusCode: 400,
   error: 'Bad Request',
   message: 'Validation failed',
   errors: [
-    { fieldName: 'adminEmail', message: 'البريد الإلكتروني غير صالح' },
-    { fieldName: 'adminPhone', message: 'رقم الجوال غير صالح' },
+    { fieldName: 'adminEmail', message: 'adminEmail must be an email' },
+    { fieldName: 'adminName', message: 'adminName should not be empty' },
   ],
 };
 
 const parsed = parseNestFieldErrors(contractBody.errors);
-if (parsed.adminEmail !== 'البريد الإلكتروني غير صالح') {
+if (parsed.adminEmail !== 'adminEmail must be an email') {
   throw new Error('expected adminEmail message as returned');
 }
-if (parsed.adminPhone !== 'رقم الجوال غير صالح') {
-  throw new Error('expected adminPhone message as returned');
+if (parsed.adminName !== 'adminName should not be empty') {
+  throw new Error('expected adminName message as returned');
+}
+if (Object.keys(parsed).sort().join(',') !== 'adminEmail,adminName') {
+  throw new Error(`unexpected fieldNames: ${Object.keys(parsed)}`);
+}
+if ('adminPassword' in parsed) {
+  throw new Error('must not invent adminPassword');
 }
 
 const lastWins = parseNestFieldErrors([

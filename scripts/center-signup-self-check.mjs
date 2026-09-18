@@ -56,6 +56,29 @@ if (passPayload.adminPassportNumber !== 'AB1' || passPayload.adminIdentification
   throw new Error('expected passport only');
 }
 
+const dtoFieldNames = new Set([
+  'centerName',
+  'centerAddress',
+  'adminName',
+  'adminIdentificationNumber',
+  'adminPassportNumber',
+  'adminEmail',
+  'adminPhone',
+  'adminBirthDate',
+  'adminAddress',
+  'adminNationality',
+]);
+for (const payload of [idPayload, passPayload]) {
+  if ('adminPassword' in payload || 'identityDocumentType' in payload) {
+    throw new Error('must not send adminPassword or identityDocumentType');
+  }
+  for (const key of Object.keys(payload)) {
+    if (!dtoFieldNames.has(key)) {
+      throw new Error(`unexpected payload field: ${key}`);
+    }
+  }
+}
+
 function toIsoDate(value) {
   const year = value.getFullYear();
   const month = String(value.getMonth() + 1).padStart(2, '0');
