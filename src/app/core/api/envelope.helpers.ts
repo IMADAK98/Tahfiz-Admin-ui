@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, OperatorFunction, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiError, apiErrorFromBody } from './api-error';
 import { ApiEnvelope } from './models/api-envelope.model';
@@ -46,8 +46,8 @@ export function mapEnvelopeResponse<T>(res: { body: ApiEnvelope<T> | null; statu
 }
 
 /** Parse Nest JSON HttpErrorResponse into ApiError (keeps fieldErrors). */
-export function catchHttpAsApiError<T>() {
-  return catchError((err: unknown): Observable<T> => {
+export function catchHttpAsApiError<T>(): OperatorFunction<T, T> {
+  return catchError((err: unknown): Observable<never> => {
     if (err instanceof HttpErrorResponse) {
       return throwError(() => apiErrorFromBody(err.error, err.status));
     }

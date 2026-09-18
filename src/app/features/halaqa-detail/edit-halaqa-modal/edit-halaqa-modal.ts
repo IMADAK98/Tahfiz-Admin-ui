@@ -123,6 +123,10 @@ export class EditHalaqaModalComponent {
           ),
         );
       },
+    });
+  }
+
+  private loadTeachers(): void {
     const centerId = this.auth.getClaims()?.centerId;
     if (!centerId) {
       this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.centerUnknown));

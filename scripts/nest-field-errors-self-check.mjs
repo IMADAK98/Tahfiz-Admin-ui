@@ -189,6 +189,11 @@ for (const rel of rejectFiles) {
   }
 }
 
+const envelopeHelpers = readFileSync(join(root, 'src/app/core/api/envelope.helpers.ts'), 'utf8');
+if (!envelopeHelpers.includes('OperatorFunction<T, T>')) {
+  throw new Error('catchHttpAsApiError must return OperatorFunction<T, T>');
+}
+
 const signupTs = readFileSync(join(root, 'src/app/features/center-signup/center-signup.ts'), 'utf8');
 if (!signupTs.includes('validateCenterSignupForm') || !signupTs.includes('nestSubmitBanner')) {
   throw new Error('center-signup must keep client validate + Nest field banner');
