@@ -10,7 +10,7 @@ import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { CreateTermModalComponent } from '../terms/create-term-modal/create-term-modal';
 import { TermsService } from '../terms/terms.service';
 import { DashboardLoadState } from './enums/dashboard-load-state.enum';
-import { MOCK_DASHBOARD_KPIS, MOCK_TERM_PLAN_SUMMARY } from './dto';
+import { MOCK_DASHBOARD_KPIS } from './dto';
 import { DashboardService } from './dashboard.service';
 
 @Component({
@@ -98,10 +98,6 @@ export class DashboardComponent {
     });
   }
 
-  protected termBannerSummary(term: ActiveTerm): string {
-    return `${this.registrationSummary(term)} · ${MOCK_TERM_PLAN_SUMMARY}`;
-  }
-
   protected formatDate(value: string): string {
     const normalized = value.slice(0, 10);
     if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
@@ -133,17 +129,19 @@ export class DashboardComponent {
     }).format(parsed);
   }
 
-  protected registrationSummary(term: ActiveTerm): string {
-    const today = new Date().toISOString().slice(0, 10);
+  protected isRegistrationOpen(term: ActiveTerm): boolean {
+    const today = this.todayIsoDate();
     const regStart = this.formatDate(term.registerationStartDate);
     const regEnd = this.formatDate(term.registerationEndDate);
-    if (today >= regStart && today <= regEnd) {
-      return 'التسجيل مفتوح';
-    }
-    if (today < regStart) {
-      return 'التسجيل لم يبدأ بعد';
-    }
-    return 'التسجيل مغلق';
+    return today >= regStart && today <= regEnd;
+  }
+
+  private todayIsoDate(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private endActiveTerm(term: ActiveTerm): void {

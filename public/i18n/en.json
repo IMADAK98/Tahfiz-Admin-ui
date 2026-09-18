@@ -51,8 +51,7 @@
     "empty": {
       "title": "TODO: No re-enrollment requests",
       "body": "TODO: When a term ends and a student requests re-enrollment, requests appear here.",
-      "studentsLink": "TODO: Active students",
-      "hint": "TODO: Do not mix available-students with re-enrollment."
+      "studentsLink": "TODO: Active students"
     },
     "fields": {
       "guardian": "TODO: Guardian",
@@ -131,13 +130,11 @@
     "usePassport": "Use passport instead of national ID",
     "parentName": "Guardian name",
     "parentPhone": "Guardian phone",
-    "parentNameHint": "UI-only — Nest accepts guardian phone (parentPhone) only.",
     "memorizationLabel": "Current memorization level",
     "memNone": "No prior memorization",
     "memPartial": "Partial memorization",
     "memKhatm": "Khatm (completed the Qur’an)",
     "memDetail": "Partial memorization details",
-    "memDetailHint": "Helps the teacher place the student on HIFZ / TATHBEET / MURAJAA plans.",
     "surahFrom": "From surah (1–114)",
     "surahTo": "To surah (1–114)",
     "next": "Next: memorization →",
@@ -180,7 +177,6 @@
     "identificationNumber": "National ID number",
     "passportNumber": "Passport number",
     "usePassport": "Use passport instead of national ID",
-    "hint": "We will not create a new account here — this page verifies an existing student via the invite link.",
     "submit": "Verify and continue",
     "submitting": "Verifying…",
     "notFound": "No student found with this ID. You can sign up as a new student.",

@@ -112,7 +112,7 @@
                 </td>
                 <td>
                   <div class="row-actions">
-                    <button type="button" class="btn btn-secondary btn-sm">تعديل</button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="openEditModal(row)">تعديل</button>
                     <a class="btn btn-ghost btn-sm" [routerLink]="['/admin/halaqat', row.id]">التفاصيل</a>
                   </div>
                 </td>
@@ -132,5 +132,12 @@
   [activeTerm]="activeTerm()"
   (halaqaCreated)="onHalaqaCreated()"
   (closed)="closeCreateModal()"
+/>
+
+<app-edit-halaqa-modal
+  [visible]="showEditModal()"
+  [detail]="editDetail()"
+  (saved)="onHalqaSaved()"
+  (closed)="closeEditModal()"
 />
 

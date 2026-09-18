@@ -48,6 +48,7 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     provideAnimationsAsync(),
     providePrimeNG({
+      license: environment.primeUiLicense,
       overlayAppendTo: 'body',
       overlayOptions: {
         appendTo: 'body',

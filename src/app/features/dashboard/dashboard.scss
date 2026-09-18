@@ -126,12 +126,6 @@
   color: var(--color-primary);
 }
 
-.term-banner-sub {
-  font-size: 0.875rem;
-  color: var(--color-muted);
-  margin-top: 6px;
-}
-
 .term-detail-list {
   list-style: none;
   padding: 0;
@@ -234,12 +228,6 @@
       text-decoration: none;
     }
   }
-}
-
-.panel-note {
-  margin-top: var(--space-4);
-  font-size: 0.8125rem;
-  color: var(--color-muted);
 }
 
 .load-error {

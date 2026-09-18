@@ -6,6 +6,8 @@ import { ApiError } from '../../core/api/api-error';
 import { HalqaListItem } from '../../core/api/models/halqa.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { AuthService } from '../../core/auth/auth.service';
+import { HalaqaDetailViewModel } from '../halaqa-detail/dto';
+import { EditHalaqaModalComponent } from '../halaqa-detail/edit-halaqa-modal/edit-halaqa-modal';
 import { CreateHalaqaModalComponent } from './create-halaqa-modal/create-halaqa-modal';
 import { HalaqatFiltersModel, createEmptyHalaqatFilters } from './dto';
 import {
@@ -19,7 +21,7 @@ import { HalaqatService } from './halaqat.service';
 
 @Component({
   selector: 'app-halaqat',
-  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent, Select],
+  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent, EditHalaqaModalComponent, Select],
   templateUrl: './halaqat.html',
   styleUrl: './halaqat.scss',
 })
@@ -43,6 +45,8 @@ export class HalaqatComponent {
   protected readonly activeTerm = signal<ActiveTerm | null>(null);
   protected readonly halaqat = signal<HalqaListItem[]>([]);
   protected readonly showCreateModal = signal(false);
+  protected readonly showEditModal = signal(false);
+  protected readonly editDetail = signal<HalaqaDetailViewModel | null>(null);
 
   constructor() {
     this.reload();
@@ -114,6 +118,30 @@ export class HalaqatComponent {
 
   protected onHalaqaCreated(): void {
     this.showCreateModal.set(false);
+    this.reload();
+  }
+
+  protected openEditModal(row: HalqaListItem): void {
+    this.editDetail.set({
+      id: row.id,
+      name: row.name,
+      category: row.category,
+      periods: row.periods,
+      isActive: row.isActive,
+      studentLimit: row.studentLimit,
+      teacherId: row.teacherId,
+      teacherName: row.teacherName,
+    });
+    this.showEditModal.set(true);
+  }
+
+  protected closeEditModal(): void {
+    this.showEditModal.set(false);
+    this.editDetail.set(null);
+  }
+
+  protected onHalqaSaved(): void {
+    this.closeEditModal();
     this.reload();
   }
 }

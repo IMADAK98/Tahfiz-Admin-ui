@@ -38,6 +38,7 @@ export interface HalqaListItem {
   studentLimit: number;
   isActive: boolean;
   studentsCount: number;
+  teacherId: number | null;
   teacherName: string | null;
   studentNames: string[];
 }

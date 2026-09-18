@@ -34,6 +34,7 @@ export function mapHalqaApiRecord(record: HalqaApiRecord): HalqaListItem {
     studentLimit: record.studentLimit ?? 0,
     isActive: record.isActive ?? true,
     studentsCount,
+    teacherId: teacher ? coerceId(teacher.id) : null,
     teacherName: teacher?.name ?? null,
     studentNames,
   };

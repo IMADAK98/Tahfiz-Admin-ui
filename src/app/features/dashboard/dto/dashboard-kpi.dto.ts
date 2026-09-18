@@ -29,6 +29,3 @@ export const MOCK_DASHBOARD_KPIS: DashboardKpiCard[] = [
     metaTone: 'success',
   },
 ];
-
-/** Mock study-plan banner suffix until term plan API is wired. */
-export const MOCK_TERM_PLAN_SUMMARY = 'خطة الدراسة #9 (حفظ / تثبيت / مراجعة) · تجريبي';

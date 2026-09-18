@@ -37,10 +37,10 @@
         <div>
           <div class="term-banner-label">الدورة النشطة</div>
           <strong>{{ term.name }}</strong>
-          <span class="badge badge-primary" style="margin-inline-start: 8px">termId {{ term.id }}</span>
-          <div class="term-banner-sub">{{ termBannerSummary(term) }}</div>
+          @if (isRegistrationOpen(term)) {
+            <span class="badge badge-success" style="margin-inline-start: 8px">التسجيل مفتوح</span>
+          }
         </div>
-        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">إنهاء الدورة</button>
       </div>
 
       <div class="kpi-grid">
@@ -57,7 +57,6 @@
         <section class="card panel" aria-labelledby="term-detail-title">
           <div class="panel-head">
             <h3 id="term-detail-title">تفاصيل الدورة</h3>
-            <span class="badge badge-neutral">termId {{ term.id }}</span>
           </div>
           <ul class="term-detail-list">
             <li>
@@ -103,9 +102,6 @@
             </span>
             <a routerLink="/admin/reports/attendance">تقرير الحضور (قراءة فقط) <span>←</span></a>
           </div>
-          <p class="panel-note">
-            تسجيل الحضور والدرجات اليومية يتم من تطبيق المعلّم على الجوال — ليست مهمة لوحة الويب.
-          </p>
         </section>
       </div>
     }
