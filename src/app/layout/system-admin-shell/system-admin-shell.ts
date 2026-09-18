@@ -1,11 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Button } from 'primeng/button';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-system-admin-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Button],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './system-admin-shell.html',
   styleUrl: './system-admin-shell.scss',
 })

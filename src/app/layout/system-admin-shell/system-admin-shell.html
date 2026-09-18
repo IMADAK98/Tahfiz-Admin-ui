@@ -29,14 +29,15 @@
         <span class="user-avatar" aria-hidden="true">{{ avatarInitial() }}</span>
         {{ displayName() }}
       </div>
-      <p-button
+      <button
         type="button"
-        [text]="true"
-        size="small"
-        [label]="loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج'"
+        class="sa-nav-link sa-logout"
+        (click)="logout()"
         [disabled]="loggingOut()"
-        (onClick)="logout()"
-      />
+      >
+        <span aria-hidden="true">⎋</span>
+        {{ loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج' }}
+      </button>
     </div>
   </aside>
 

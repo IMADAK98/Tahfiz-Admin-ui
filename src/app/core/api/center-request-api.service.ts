@@ -22,7 +22,12 @@ export class CenterRequestApiService {
       )
       .pipe(
         map((res) => {
-          const data = unwrapEnvelopeOrNull(res.body, res.status);
+          const body = res.body;
+          // ponytail: legacy Nest handler returned a bare array — accept until all envs use envelope
+          if (Array.isArray(body)) {
+            return body;
+          }
+          const data = unwrapEnvelopeOrNull(body, res.status);
           return Array.isArray(data) ? data : [];
         }),
       );
