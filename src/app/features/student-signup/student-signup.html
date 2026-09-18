@@ -89,7 +89,11 @@
                     placeholder="مثال: عبدالله بن سعد الدوسري"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('name') ? true : null"
+                    [attr.aria-describedby]="fieldError('name') ? 's-name-error' : null"
+                    (ngModelChange)="clearFieldError('name')"
                   />
+                  <app-field-error [message]="fieldError('name')" errorId="s-name-error" />
                 </div>
 
                 <div class="input-group">
@@ -102,7 +106,9 @@
                     [(ngModel)]="birthDate"
                     required
                     [disabled]="submitting()"
+                    (ngModelChange)="clearFieldError('birthDate')"
                   />
+                  <app-field-error [message]="fieldError('birthDate')" errorId="s-dob-error" />
                 </div>
 
                 <div class="input-group">
@@ -120,7 +126,11 @@
                     placeholder="student@example.com"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('email') ? true : null"
+                    [attr.aria-describedby]="fieldError('email') ? 's-email-error' : null"
+                    (ngModelChange)="clearFieldError('email')"
                   />
+                  <app-field-error [message]="fieldError('email')" errorId="s-email-error" />
                 </div>
 
                 <div class="input-group">
@@ -138,7 +148,11 @@
                     placeholder="05XXXXXXXX"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('phone') ? true : null"
+                    [attr.aria-describedby]="fieldError('phone') ? 's-phone-error' : null"
+                    (ngModelChange)="clearFieldError('phone')"
                   />
+                  <app-field-error [message]="fieldError('phone')" errorId="s-phone-error" />
                 </div>
 
                 <div class="input-group">
@@ -153,7 +167,11 @@
                     autocomplete="street-address"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('address') ? true : null"
+                    [attr.aria-describedby]="fieldError('address') ? 's-address-error' : null"
+                    (ngModelChange)="clearFieldError('address')"
                   />
+                  <app-field-error [message]="fieldError('address')" errorId="s-address-error" />
                 </div>
 
                 <div class="input-group">
@@ -169,7 +187,9 @@
                     [disabled]="submitting()"
                     required
                     fluid
+                    (ngModelChange)="clearFieldError('educationStage')"
                   />
+                  <app-field-error [message]="fieldError('educationStage')" errorId="s-edu-error" />
                 </div>
               </div>
 
@@ -202,6 +222,15 @@
                       dir="ltr"
                       fluid
                       [disabled]="submitting()"
+                      [attr.aria-invalid]="fieldError('identificationNumber') ? true : null"
+                      [attr.aria-describedby]="
+                        fieldError('identificationNumber') ? 's-nid-error' : null
+                      "
+                      (ngModelChange)="clearFieldError('identificationNumber')"
+                    />
+                    <app-field-error
+                      [message]="fieldError('identificationNumber')"
+                      errorId="s-nid-error"
                     />
                   </div>
                 } @else {
@@ -219,7 +248,11 @@
                       dir="ltr"
                       fluid
                       [disabled]="submitting()"
+                      [attr.aria-invalid]="fieldError('passportNumber') ? true : null"
+                      [attr.aria-describedby]="fieldError('passportNumber') ? 's-pass-error' : null"
+                      (ngModelChange)="clearFieldError('passportNumber')"
                     />
+                    <app-field-error [message]="fieldError('passportNumber')" errorId="s-pass-error" />
                   </div>
                 }
               </div>
@@ -254,7 +287,11 @@
                     placeholder="05XXXXXXXX"
                     fluid
                     [disabled]="submitting()"
+                    [attr.aria-invalid]="fieldError('parentPhone') ? true : null"
+                    [attr.aria-describedby]="fieldError('parentPhone') ? 'g-phone-error' : null"
+                    (ngModelChange)="clearFieldError('parentPhone')"
                   />
+                  <app-field-error [message]="fieldError('parentPhone')" errorId="g-phone-error" />
                 </div>
               </div>
 
@@ -315,6 +352,10 @@
                     خاتم (أتمّ القرآن)
                   </label>
                 </div>
+                <app-field-error
+                  [message]="fieldError('hifzQuality', 'isHafiz')"
+                  errorId="mem-error"
+                />
               </div>
 
               @if (memorization === 'partial') {
@@ -346,7 +387,9 @@
                       [(ngModel)]="surahFrom"
                       required
                       [disabled]="submitting()"
+                      (ngModelChange)="clearFieldError('surahFrom')"
                     />
+                    <app-field-error [message]="fieldError('surahFrom')" errorId="surahFrom-error" />
                   </div>
                   <div class="input-group">
                     <label for="surahTo">إلى سورة (1–114) <span class="req">*</span></label>
@@ -360,7 +403,9 @@
                       [(ngModel)]="surahTo"
                       required
                       [disabled]="submitting()"
+                      (ngModelChange)="clearFieldError('surahTo')"
                     />
+                    <app-field-error [message]="fieldError('surahTo')" errorId="surahTo-error" />
                   </div>
                 </div>
               }

@@ -28,11 +28,12 @@
               optionValue="value"
               placeholder="اختر الفئة"
               [ngModel]="form().category"
-              (ngModelChange)="form.update((current) => ({ ...current, category: $event }))"
+              (ngModelChange)="form.update((current) => ({ ...current, category: $event })); clearFieldError('category')"
               required
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('category')" errorId="edit-category-error" />
           </div>
           <div class="input-group">
             <label for="edit-period">الفترة</label>
@@ -44,11 +45,12 @@
               optionValue="value"
               placeholder="اختر الفترة"
               [ngModel]="form().period"
-              (ngModelChange)="form.update((current) => ({ ...current, period: $event }))"
+              (ngModelChange)="form.update((current) => ({ ...current, period: $event })); clearFieldError('periods')"
               required
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('periods')" errorId="edit-period-error" />
           </div>
         </div>
 
@@ -75,12 +77,13 @@
               optionValue="id"
               placeholder="اختر المعلّم"
               [ngModel]="form().teacherId"
-              (ngModelChange)="form.update((current) => ({ ...current, teacherId: $event }))"
+              (ngModelChange)="form.update((current) => ({ ...current, teacherId: $event })); clearFieldError('teacherId')"
               required
               [disabled]="pickersLoading()"
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('teacherId')" errorId="edit-teacher-error" />
           </div>
         </div>
 
@@ -92,10 +95,11 @@
             type="number"
             min="1"
             [ngModel]="form().studentLimit"
-            (ngModelChange)="form.update((current) => ({ ...current, studentLimit: $event }))"
+            (ngModelChange)="form.update((current) => ({ ...current, studentLimit: $event })); clearFieldError('studentLimit')"
             name="studentLimit"
             required
           />
+          <app-field-error [message]="fieldError('studentLimit')" errorId="edit-student-limit-error" />
         </div>
       </form>
 

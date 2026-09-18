@@ -1,7 +1,9 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiError } from '../../../core/api/api-error';
+import { TranslateService } from '@ngx-translate/core';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
@@ -13,7 +15,7 @@ import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-create-term-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, FieldErrorComponent],
   templateUrl: './create-term-modal.html',
   styleUrl: './create-term-modal.scss',
 })
@@ -21,6 +23,7 @@ export class CreateTermModalComponent {
   private readonly termsService = inject(TermsService);
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly visible = input.required<boolean>();
   readonly termCreated = output<void>();
@@ -29,6 +32,18 @@ export class CreateTermModalComponent {
   protected readonly form: CreateTermFormModel = createEmptyCreateTermForm();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   protected holidaysEnabled(): boolean {
     return canPickHolidayDates(this.form);
@@ -63,11 +78,13 @@ export class CreateTermModalComponent {
     }
     this.form.holidayDates = [...this.form.holidayDates, date].sort();
     this.form.pendingHolidayDate = '';
+    this.clearFieldError('holidayDates');
     this.errorMessage.set(null);
   }
 
   protected removeHoliday(date: string): void {
     this.form.holidayDates = this.form.holidayDates.filter((item) => item !== date);
+    this.clearFieldError('holidayDates');
   }
 
   protected formatHolidayLabel(isoDate: string): string {
@@ -84,6 +101,7 @@ export class CreateTermModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
     this.errorMessage.set(null);
 
     const centerId = this.auth.getClaims()?.centerId;
@@ -109,7 +127,12 @@ export class CreateTermModalComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر إنشاء الدورة. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إنشاء الدورة. حاول مرة أخرى.',
+          ),
         );
       },
     });
@@ -117,6 +140,7 @@ export class CreateTermModalComponent {
 
   private resetForm(): void {
     Object.assign(this.form, createEmptyCreateTermForm());
+    this.fields.clearAll();
     this.errorMessage.set(null);
   }
 }

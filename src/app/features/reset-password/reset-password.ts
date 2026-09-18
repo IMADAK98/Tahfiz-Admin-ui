@@ -1,14 +1,17 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Password } from 'primeng/password';
-import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { AuthService } from '../../core/auth/auth.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
+import { TOAST_I18N } from '../../core/ui/toast-messages';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [FormsModule, RouterLink, Password, Button],
+  imports: [FormsModule, RouterLink, Password, Button, FieldErrorComponent],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',
 })
@@ -16,6 +19,7 @@ export class ResetPasswordComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly form = {
     newPassword: '',
@@ -24,6 +28,18 @@ export class ResetPasswordComponent implements OnInit {
   protected readonly token = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   ngOnInit(): void {
     const token =
@@ -48,6 +64,7 @@ export class ResetPasswordComponent implements OnInit {
       return;
     }
 
+    this.fields.clearAll();
     const password = this.form.newPassword;
     const confirm = this.form.confirmPassword;
     if (!password || password.length < 6) {
@@ -69,11 +86,17 @@ export class ResetPasswordComponent implements OnInit {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(
-          error instanceof ApiError
-            ? error.message
-            : 'تعذّر تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية.',
+        const banner = nestSubmitBanner(
+          error,
+          this.fields,
+          this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+          'تعذّر تغيير كلمة المرور. قد يكون الرابط منتهي الصلاحية.',
         );
+        if (this.fields.get('token') && !this.fields.get('newPassword')) {
+          this.errorMessage.set(this.fields.get('token') ?? banner);
+          return;
+        }
+        this.errorMessage.set(banner);
       },
     });
   }

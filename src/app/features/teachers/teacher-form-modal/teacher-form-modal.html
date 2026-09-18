@@ -41,7 +41,9 @@
                 [(ngModel)]="form.fullName"
                 placeholder="مثال: محمد العتيبي"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError(nameField())"
               />
+              <app-field-error [message]="fieldError(nameField())" errorId="tf-name-error" />
             </div>
             <div class="input-group">
               <label for="tf-email">البريد الإلكتروني</label>
@@ -56,7 +58,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('email')"
               />
+              <app-field-error [message]="fieldError('email')" errorId="tf-email-error" />
             </div>
             <div class="input-group">
               <label for="tf-phone">رقم الجوال</label>
@@ -71,7 +75,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('phone')"
               />
+              <app-field-error [message]="fieldError('phone')" errorId="tf-phone-error" />
             </div>
             @if (isAdd) {
               <div class="input-group">
@@ -85,7 +91,9 @@
                   [(ngModel)]="form.nationality"
                   placeholder="مثال: سعودي"
                   [disabled]="submitting()"
+                  (ngModelChange)="clearFieldError('nationality')"
                 />
+                <app-field-error [message]="fieldError('nationality')" errorId="tf-nationality-error" />
               </div>
               <div class="input-group">
                 <label for="tf-address">العنوان</label>
@@ -98,7 +106,9 @@
                   [(ngModel)]="form.address"
                   placeholder="الحي، المدينة"
                   [disabled]="submitting()"
+                  (ngModelChange)="clearFieldError('address')"
                 />
+                <app-field-error [message]="fieldError('address')" errorId="tf-address-error" />
               </div>
               <div class="input-group">
                 <label for="tf-birthdate">تاريخ الميلاد</label>
@@ -110,7 +120,9 @@
                   required
                   [(ngModel)]="form.birthDate"
                   [disabled]="submitting()"
+                  (ngModelChange)="clearFieldError('birthDate')"
                 />
+                <app-field-error [message]="fieldError('birthDate')" errorId="tf-birthdate-error" />
               </div>
             }
           </div>
@@ -131,7 +143,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('qualification')"
               />
+              <app-field-error [message]="fieldError('qualification')" errorId="tf-academic-error" />
             </div>
             <div class="input-group">
               <label for="tf-maknoon">شهادة مكنون</label>
@@ -147,7 +161,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('hasCertificate')"
               />
+              <app-field-error [message]="fieldError('hasCertificate')" errorId="tf-maknoon-error" />
             </div>
             <div class="input-group">
               <label for="tf-parts">عدد الأجزاء المحفوظة</label>
@@ -161,6 +177,11 @@
                 required
                 [(ngModel)]="form.numberOfMemorizedJuz"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('numberOfMemorizedJuz')"
+              />
+              <app-field-error
+                [message]="fieldError('numberOfMemorizedJuz')"
+                errorId="tf-parts-error"
               />
             </div>
             <div class="input-group">
@@ -177,7 +198,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('hasSanadInHifz')"
               />
+              <app-field-error [message]="fieldError('hasSanadInHifz')" errorId="tf-sanad-error" />
             </div>
             <div class="input-group">
               <label for="tf-ijazah">الإجازة في الحفظ</label>
@@ -193,7 +216,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('hasIjazahInHifz')"
               />
+              <app-field-error [message]="fieldError('hasIjazahInHifz')" errorId="tf-ijazah-error" />
             </div>
           </div>
 
@@ -208,11 +233,13 @@
                     [value]="option.value"
                     [(ngModel)]="form.tajweedLevel"
                     [disabled]="submitting()"
+                    (ngModelChange)="clearFieldError('tajweedLevel')"
                   />
                   {{ option.label }}
                 </label>
               }
             </div>
+            <app-field-error [message]="fieldError('tajweedLevel')" errorId="tf-tajweed-error" />
           </div>
 
           <div class="input-group">
@@ -230,6 +257,7 @@
                 </label>
               }
             </div>
+            <app-field-error [message]="fieldError('teachingAgeGroup')" errorId="tf-age-error" />
           </div>
 
           <div class="input-group">
@@ -247,6 +275,10 @@
                 </label>
               }
             </div>
+            <app-field-error
+              [message]="fieldError('availableWorkPeriod')"
+              errorId="tf-period-error"
+            />
           </div>
         </div>
 

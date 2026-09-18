@@ -2,7 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { extractHttpErrorMessage } from '../../core/api/error-message.helpers';
+import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { CenterRequestViewModel } from './dto';
 import {
@@ -16,7 +18,7 @@ import { CenterRequestsService } from './center-requests.service';
 
 @Component({
   selector: 'app-center-requests',
-  imports: [FormsModule, Button],
+  imports: [FormsModule, Button, FieldErrorComponent],
   templateUrl: './center-requests.html',
   styleUrl: './center-requests.scss',
 })
@@ -39,6 +41,15 @@ export class CenterRequestsComponent {
   protected rejectionReason = '';
   protected readonly rejectError = signal<string | null>(null);
   protected readonly actingId = signal<number | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+  }
 
   constructor() {
     this.reload();
@@ -105,6 +116,7 @@ export class CenterRequestsComponent {
     }
     this.rejectionReason = '';
     this.rejectError.set(null);
+    this.fields.clearAll();
     this.activeRejectRequest.set(request);
   }
 
@@ -125,6 +137,8 @@ export class CenterRequestsComponent {
       return;
     }
 
+    this.fields.clearAll();
+    this.rejectError.set(null);
     this.actingId.set(request.id);
     this.requestsService.reject(request.id, this.rejectionReason).subscribe({
       next: () => {
@@ -135,6 +149,10 @@ export class CenterRequestsComponent {
       },
       error: (error: unknown) => {
         this.actingId.set(null);
+        if (this.fields.apply(error) && this.fields.get('rejectionReason')) {
+          this.rejectError.set(null);
+          return;
+        }
         this.rejectError.set(
           extractHttpErrorMessage(error) ?? 'تعذّر رفض الطلب. حاول مرة أخرى.',
         );

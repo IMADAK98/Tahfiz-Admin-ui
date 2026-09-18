@@ -23,7 +23,9 @@ assert.match(
   /\[type\]="'submit'"/,
   'p-button type must be a property binding so the inner <button> is type=submit',
 );
-assert.match(html, /\(onClick\)="onSubmit\(\$event\)"/);
+assert.match(html, /fieldError\('email'\)/);
+assert.match(html, /fieldError\('password'\)/);
+assert.match(html, /<app-field-error/);
 assert.doesNotMatch(
   html,
   /<button[^>]*type="submit"/,

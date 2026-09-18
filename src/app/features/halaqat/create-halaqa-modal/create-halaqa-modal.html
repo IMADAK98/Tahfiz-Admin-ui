@@ -30,7 +30,9 @@
             placeholder="مثال: حلقة الفجر"
             required
             [disabled]="submitting()"
+            (ngModelChange)="clearFieldError('name')"
           />
+          <app-field-error [message]="fieldError('name')" errorId="h-name-error" />
         </div>
 
         <div class="input-group">
@@ -57,11 +59,13 @@
                   [value]="option.value"
                   [(ngModel)]="form.category"
                   [disabled]="submitting()"
+                  (ngModelChange)="clearFieldError('category')"
                 />
                 {{ option.label }}
               </label>
             }
           </div>
+          <app-field-error [message]="fieldError('category')" errorId="cat-error" />
         </div>
 
         <div class="input-group">
@@ -75,11 +79,13 @@
                   [value]="option.value"
                   [(ngModel)]="form.period"
                   [disabled]="submitting()"
+                  (ngModelChange)="clearFieldError('periods')"
                 />
                 {{ option.label }}
               </label>
             }
           </div>
+          <app-field-error [message]="fieldError('periods')" errorId="period-error" />
         </div>
 
         <div class="form-grid-2">
@@ -94,7 +100,9 @@
               max="50"
               [(ngModel)]="form.studentLimit"
               [disabled]="submitting()"
+              (ngModelChange)="clearFieldError('studentLimit')"
             />
+            <app-field-error [message]="fieldError('studentLimit')" errorId="capacity-error" />
           </div>
           <div class="input-group">
             <label for="teacher" class="field-req">المعلّم</label>
@@ -128,6 +136,7 @@
             } @else {
               <p class="picker-empty">{{ 'halaqat.picker.noTeachers' | translate }}</p>
             }
+            <app-field-error [message]="fieldError('teacherId')" errorId="teacher-error" />
           </div>
         </div>
 
@@ -169,6 +178,7 @@
           } @else {
             <p class="picker-empty">{{ 'halaqat.picker.noStudents' | translate }}</p>
           }
+          <app-field-error [message]="fieldError('studentsIds')" errorId="students-error" />
         </div>
       </form>
 

@@ -3,7 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { yesNoLabel } from '../students/enums';
 import { hifzSummary, StudentRequestViewModel } from './dto';
@@ -12,7 +14,7 @@ import { StudentRequestsService } from './student-requests.service';
 
 @Component({
   selector: 'app-student-requests',
-  imports: [FormsModule, RouterLink, Button],
+  imports: [FormsModule, RouterLink, Button, FieldErrorComponent],
   templateUrl: './student-requests.html',
   styleUrl: './student-requests.scss',
 })
@@ -34,6 +36,15 @@ export class StudentRequestsComponent {
   protected rejectionReason = '';
   protected readonly rejectError = signal<string | null>(null);
   protected readonly actingId = signal<number | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+  }
 
   constructor() {
     this.reload();
@@ -117,6 +128,7 @@ export class StudentRequestsComponent {
     }
     this.rejectionReason = '';
     this.rejectError.set(null);
+    this.fields.clearAll();
     this.activeRejectRequest.set(request);
   }
 
@@ -137,6 +149,8 @@ export class StudentRequestsComponent {
       return;
     }
 
+    this.fields.clearAll();
+    this.rejectError.set(null);
     this.actingId.set(request.id);
     this.requestsService.reject(request.id, this.rejectionReason).subscribe({
       next: () => {
@@ -147,6 +161,10 @@ export class StudentRequestsComponent {
       },
       error: (error: unknown) => {
         this.actingId.set(null);
+        if (this.fields.apply(error) && this.fields.get('rejectionReason')) {
+          this.rejectError.set(null);
+          return;
+        }
         this.rejectError.set(
           error instanceof ApiError ? error.message : 'تعذّر رفض الطلب. حاول مرة أخرى.',
         );

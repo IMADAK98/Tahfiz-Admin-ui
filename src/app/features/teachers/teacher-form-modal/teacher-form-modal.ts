@@ -1,10 +1,12 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
-import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { TeacherAgeGroup, TeacherWorkPeriod } from '../../../core/api/models/teacher.model';
 import {
@@ -25,7 +27,7 @@ import { TeachersService } from '../teachers.service';
 
 @Component({
   selector: 'app-teacher-form-modal',
-  imports: [FormsModule, Button, Select],
+  imports: [FormsModule, Button, Select, FieldErrorComponent],
   templateUrl: './teacher-form-modal.html',
   styleUrl: './teacher-form-modal.scss',
 })
@@ -33,6 +35,7 @@ export class TeacherFormModalComponent {
   private readonly teachersService = inject(TeachersService);
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly visible = input.required<boolean>();
   readonly mode = input.required<TeacherFormMode>();
@@ -49,6 +52,23 @@ export class TeacherFormModalComponent {
   protected readonly form: TeacherFormModel = createEmptyTeacherForm();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
+
+  /** Nest create uses teacherName; update uses name. */
+  protected nameField(): string {
+    return this.isAdd ? 'teacherName' : 'name';
+  }
 
   constructor() {
     effect(() => {
@@ -57,6 +77,7 @@ export class TeacherFormModalComponent {
       }
       const teacher = this.teacher();
       Object.assign(this.form, teacher ? mapTeacherDetailToForm(teacher) : createEmptyTeacherForm());
+      this.fields.clearAll();
       this.errorMessage.set(null);
     });
   }
@@ -76,6 +97,7 @@ export class TeacherFormModalComponent {
   protected toggleAgeGroup(value: TeacherAgeGroup, checked: boolean): void {
     this.form.ageGroups =
       checked ? [...this.form.ageGroups, value] : this.form.ageGroups.filter((item) => item !== value);
+    this.clearFieldError('teachingAgeGroup');
   }
 
   protected isWorkPeriodChecked(value: TeacherWorkPeriod): boolean {
@@ -85,6 +107,7 @@ export class TeacherFormModalComponent {
   protected toggleWorkPeriod(value: TeacherWorkPeriod, checked: boolean): void {
     this.form.workPeriods =
       checked ? [...this.form.workPeriods, value] : this.form.workPeriods.filter((item) => item !== value);
+    this.clearFieldError('availableWorkPeriod');
   }
 
   protected onBackdropClick(event: MouseEvent): void {
@@ -102,6 +125,7 @@ export class TeacherFormModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
     this.errorMessage.set(null);
 
     if (this.mode() === 'add') {
@@ -134,7 +158,12 @@ export class TeacherFormModalComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر إضافة المعلّم. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إضافة المعلّم. حاول مرة أخرى.',
+          ),
         );
       },
     });
@@ -163,7 +192,12 @@ export class TeacherFormModalComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر حفظ التعديلات. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر حفظ التعديلات. حاول مرة أخرى.',
+          ),
         );
       },
     });

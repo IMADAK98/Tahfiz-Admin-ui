@@ -3,16 +3,19 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ActiveStudent } from '../../../core/api/models/student.model';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
+import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { HalaqaStudentViewModel } from '../dto';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
 import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-enroll-students-modal',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, FieldErrorComponent],
   templateUrl: './enroll-students-modal.html',
 })
 export class EnrollStudentsModalComponent {
@@ -32,6 +35,11 @@ export class EnrollStudentsModalComponent {
   protected readonly pickersLoading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
 
   protected readonly availableCandidates = computed(() => {
     const enrolledIds = new Set(this.rosterStudents().map((student) => student.id));
@@ -44,6 +52,7 @@ export class EnrollStudentsModalComponent {
         return;
       }
       this.selectedStudentIds.set([]);
+      this.fields.clearAll();
       this.errorMessage.set(null);
       this.loadPickers();
     });
@@ -66,6 +75,7 @@ export class EnrollStudentsModalComponent {
     this.selectedStudentIds.update((ids) =>
       checked ? [...ids, studentId] : ids.filter((id) => id !== studentId),
     );
+    this.fields.clear('studentsIds');
   }
 
   protected isStudentSelected(studentId: number): boolean {
@@ -74,6 +84,7 @@ export class EnrollStudentsModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
     this.errorMessage.set(null);
 
     if (!this.selectedStudentIds().length) {
@@ -90,7 +101,14 @@ export class EnrollStudentsModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+        this.errorMessage.set(
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            error instanceof ApiError ? error.message : '',
+          ),
+        );
       },
     });
   }

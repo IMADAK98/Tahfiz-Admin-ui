@@ -28,8 +28,9 @@
                 </label>
               </li>
             }
-          </ul>
-        } @else {
+            </ul>
+            <app-field-error [message]="fieldError('studentsIds')" errorId="enroll-students-error" />
+          } @else {
           <p class="hint">{{ 'halaqat.picker.noStudents' | translate }}</p>
         }
       </form>

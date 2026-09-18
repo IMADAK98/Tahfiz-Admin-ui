@@ -38,7 +38,8 @@
   "errors": {
     "unexpected": "TODO: An unexpected error occurred. Please try again.",
     "network": "TODO: Could not reach the server. Check your network and try again.",
-    "sessionExpired": "TODO: Your session has expired. Please sign in again."
+    "sessionExpired": "TODO: Your session has expired. Please sign in again.",
+    "fieldErrorsBanner": "Review the fields below and correct the errors."
   },
   "reEnrollment": {
     "loading": "TODO: Loading re-enrollment requests…",

@@ -80,7 +80,11 @@
                 dir="ltr"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('identification') ? true : null"
+                [attr.aria-describedby]="fieldError('identification') ? 'nid-error' : null"
+                (ngModelChange)="clearFieldError('identification')"
               />
+              <app-field-error [message]="fieldError('identification')" errorId="nid-error" />
             </div>
           } @else {
             <div class="input-group">
@@ -98,7 +102,11 @@
                 dir="ltr"
                 fluid
                 [disabled]="submitting()"
+                [attr.aria-invalid]="fieldError('passportNumber') ? true : null"
+                [attr.aria-describedby]="fieldError('passportNumber') ? 'passport-error' : null"
+                (ngModelChange)="clearFieldError('passportNumber')"
               />
+              <app-field-error [message]="fieldError('passportNumber')" errorId="passport-error" />
             </div>
           }
 

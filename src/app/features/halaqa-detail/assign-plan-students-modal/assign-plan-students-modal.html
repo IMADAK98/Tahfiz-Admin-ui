@@ -30,8 +30,9 @@
                 </label>
               </li>
             }
-          </ul>
-        } @else {
+            </ul>
+            <app-field-error [message]="fieldError('studentIds')" errorId="assign-students-error" />
+          } @else {
           <p class="hint">جميع طلاب الحلقة مُعيَّنون على هذه الخطة.</p>
         }
       </form>

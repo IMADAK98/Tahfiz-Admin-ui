@@ -26,5 +26,8 @@ export function apiErrorFromBody(body: unknown, httpStatus: number): ApiError {
     const message = formatNestMessage(nest.message) ?? nest.error ?? 'Request failed';
     return new ApiError(message, httpStatus, nest.statusCode, parseNestFieldErrors(nest.errors));
   }
+  if (typeof body === 'string' && body.trim()) {
+    return new ApiError(body, httpStatus);
+  }
   return new ApiError('Request failed', httpStatus);
 }

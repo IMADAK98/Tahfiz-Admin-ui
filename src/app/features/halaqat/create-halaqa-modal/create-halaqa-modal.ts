@@ -1,9 +1,11 @@
 import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { ActiveTerm } from '../../../core/api/models/term.model';
 import { ActiveStudent } from '../../../core/api/models/student.model';
@@ -15,7 +17,7 @@ import { HalaqatService } from '../halaqat.service';
 
 @Component({
   selector: 'app-create-halaqa-modal',
-  imports: [FormsModule, TranslatePipe, Select],
+  imports: [FormsModule, TranslatePipe, Select, FieldErrorComponent],
   templateUrl: './create-halaqa-modal.html',
   styleUrl: './create-halaqa-modal.scss',
 })
@@ -23,6 +25,7 @@ export class CreateHalaqaModalComponent {
   private readonly halaqatService = inject(HalaqatService);
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly visible = input.required<boolean>();
   readonly activeTerm = input.required<ActiveTerm | null>();
@@ -34,6 +37,18 @@ export class CreateHalaqaModalComponent {
   protected readonly form: CreateHalaqaFormModel = createEmptyCreateHalaqaForm();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
   protected readonly teachers = signal<ActiveTeacher[]>([]);
   protected readonly students = signal<ActiveStudent[]>([]);
   protected readonly pickersLoading = signal(false);
@@ -84,6 +99,7 @@ export class CreateHalaqaModalComponent {
 
   protected onTeacherChange(teacherId: number | null): void {
     this.form.teacherId = teacherId;
+    this.clearFieldError('teacherId');
   }
 
   protected clearTeacher(): void {
@@ -106,6 +122,7 @@ export class CreateHalaqaModalComponent {
     }
     if (!this.form.studentIds.includes(studentId)) {
       this.form.studentIds = [...this.form.studentIds, studentId];
+      this.clearFieldError('studentsIds');
     }
     const picker = this.studentPicker();
     // ponytail: Select keeps the last id, so the same student is a no-op after chip-remove until clear().
@@ -117,6 +134,7 @@ export class CreateHalaqaModalComponent {
 
   protected removeStudent(studentId: number): void {
     this.form.studentIds = this.form.studentIds.filter((id) => id !== studentId);
+    this.clearFieldError('studentsIds');
   }
 
   protected shortStudentName(name: string): string {
@@ -125,6 +143,7 @@ export class CreateHalaqaModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
     this.errorMessage.set(null);
 
     const term = this.activeTerm();
@@ -150,7 +169,12 @@ export class CreateHalaqaModalComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر إنشاء الحلقة. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إنشاء الحلقة. حاول مرة أخرى.',
+          ),
         );
       },
     });
@@ -182,6 +206,7 @@ export class CreateHalaqaModalComponent {
   private resetForm(): void {
     Object.assign(this.form, createEmptyCreateHalaqaForm());
     this.studentPicker()?.clear();
+    this.fields.clearAll();
     this.errorMessage.set(null);
   }
 }

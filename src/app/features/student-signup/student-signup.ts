@@ -1,13 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { RegisterTokenValidation } from '../../core/api/models/student-signup.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, EducationStage } from './enums/education-stage.enum';
 import { HifzQuality, MemorizationLevel, mapMemorizationToHifz } from './enums/hifz-quality.enum';
@@ -15,7 +17,7 @@ import { StudentSignupService } from './student-signup.service';
 
 @Component({
   selector: 'app-student-signup',
-  imports: [FormsModule, RouterLink, Button, Checkbox, InputText, Select],
+  imports: [FormsModule, RouterLink, Button, Checkbox, InputText, Select, FieldErrorComponent],
   templateUrl: './student-signup.html',
   styleUrl: './student-signup.scss',
 })
@@ -24,6 +26,7 @@ export class StudentSignupComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly signup = inject(StudentSignupService);
   private readonly toast = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly educationOptions = [...EDUCATION_STAGE_OPTIONS];
   protected readonly EducationStage = EducationStage;
@@ -35,6 +38,18 @@ export class StudentSignupComponent implements OnInit {
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showSuccess = signal(false);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   protected token = '';
   protected name = '';
@@ -76,14 +91,17 @@ export class StudentSignupComponent implements OnInit {
   onIdModeChange(): void {
     if (this.usePassport) {
       this.identificationNumber = '';
+      this.clearFieldError('identificationNumber');
     } else {
       this.passportNumber = '';
+      this.clearFieldError('passportNumber');
     }
   }
 
   onMemorizationChange(): void {
     const mapped = mapMemorizationToHifz(this.memorization);
     this.hifzQuality = mapped.hifzQuality;
+    this.clearFieldError('hifzQuality', 'isHafiz');
     if (this.memorization === 'khatm') {
       this.surahFrom = 1;
       this.surahTo = 114;
@@ -123,6 +141,7 @@ export class StudentSignupComponent implements OnInit {
     }
 
     this.errorMessage.set(null);
+    this.fields.clearAll();
     this.submitting.set(true);
     this.onMemorizationChange();
 
@@ -155,11 +174,27 @@ export class StudentSignupComponent implements OnInit {
         },
         error: (error: unknown) => {
           this.submitting.set(false);
-          this.errorMessage.set(
-            error instanceof ApiError
-              ? error.message
-              : 'تعذّر إرسال الطلب. حاول مرة أخرى.',
+          const banner = nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إرسال الطلب. حاول مرة أخرى.',
           );
+          const step1Fields = [
+            'name',
+            'email',
+            'phone',
+            'birthDate',
+            'address',
+            'educationStage',
+            'identificationNumber',
+            'passportNumber',
+            'parentPhone',
+          ];
+          if (step1Fields.some((name) => this.fields.get(name))) {
+            this.step.set(1);
+          }
+          this.errorMessage.set(banner);
         },
       });
   }

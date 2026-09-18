@@ -1,19 +1,22 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { IdentifiedStudent, RegisterTokenValidation } from '../../core/api/models/identify.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { IdentifyTokenStatus } from './enums/identify-status.enum';
 import { IdentifyService } from './identify.service';
 
 @Component({
   selector: 'app-identify',
-  imports: [FormsModule, RouterLink, Button, Checkbox, InputText],
+  imports: [FormsModule, RouterLink, Button, Checkbox, InputText, FieldErrorComponent],
   templateUrl: './identify.html',
   styleUrl: './identify.scss',
 })
@@ -22,6 +25,7 @@ export class IdentifyComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly identify = inject(IdentifyService);
   private readonly toast = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly IdentifyTokenStatus = IdentifyTokenStatus;
   protected readonly tokenStatus = signal<IdentifyTokenStatus>(IdentifyTokenStatus.Loading);
@@ -30,6 +34,18 @@ export class IdentifyComponent implements OnInit {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly foundStudent = signal<IdentifiedStudent | null>(null);
   protected readonly activateDone = signal(false);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   protected token = '';
   protected termHint = '';
@@ -62,8 +78,10 @@ export class IdentifyComponent implements OnInit {
   onIdModeChange(): void {
     if (this.usePassport) {
       this.identification = '';
+      this.clearFieldError('identification');
     } else {
       this.passportNumber = '';
+      this.clearFieldError('passportNumber');
     }
   }
 
@@ -78,6 +96,7 @@ export class IdentifyComponent implements OnInit {
 
     this.errorMessage.set(null);
     this.foundStudent.set(null);
+    this.fields.clearAll();
     this.submitting.set(true);
 
     this.identify
@@ -98,15 +117,21 @@ export class IdentifyComponent implements OnInit {
         },
         error: (error: unknown) => {
           this.submitting.set(false);
+          const banner = nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر التحقق. حاول مرة أخرى.',
+          );
+          if (this.fields.hasAny()) {
+            this.errorMessage.set(banner);
+            return;
+          }
           if (error instanceof ApiError && error.httpStatus === 404) {
             this.errorMessage.set('لم يُعثر على طالب بهذه الهوية. يمكنك التسجيل كطالب جديد.');
             return;
           }
-          this.errorMessage.set(
-            error instanceof ApiError
-              ? error.message
-              : 'تعذّر التحقق. حاول مرة أخرى.',
-          );
+          this.errorMessage.set(banner);
         },
       });
   }
