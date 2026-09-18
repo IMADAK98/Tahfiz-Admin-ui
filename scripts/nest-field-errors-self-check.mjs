@@ -157,6 +157,9 @@ const loginHtml = readFileSync(join(root, 'src/app/features/login/login.html'), 
 if (!loginHtml.includes("fieldError('email')") || !loginHtml.includes("fieldError('password')")) {
   throw new Error('login must bind Nest email/password under inputs');
 }
+if (!loginHtml.includes("showForgotPanel() ? undefined : fieldError('email')")) {
+  throw new Error('login email under-field must hide when forgot panel is open (shared Nest email key)');
+}
 
 const teacherHtml = readFileSync(
   join(root, 'src/app/features/teachers/teacher-form-modal/teacher-form-modal.html'),
