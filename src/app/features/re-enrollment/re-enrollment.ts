@@ -3,8 +3,10 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N, resolveServerErrorToastDisplay } from '../../core/ui/toast-messages';
 import {
   isAlreadyProcessedError,
@@ -19,7 +21,7 @@ type ConfirmKind = 'approve' | 'reject';
 
 @Component({
   selector: 'app-re-enrollment',
-  imports: [RouterLink, FormsModule, TranslatePipe],
+  imports: [RouterLink, FormsModule, TranslatePipe, FieldErrorComponent],
   templateUrl: './re-enrollment.html',
   styleUrl: './re-enrollment.scss',
 })
@@ -39,6 +41,11 @@ export class ReEnrollmentComponent {
   protected readonly rejectReasons = signal<Record<number, string>>({});
   protected readonly rejectErrors = signal<Record<number, string | null>>({});
   protected readonly actingRequestId = signal<number | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
 
   protected readonly pendingCountLabel = computed(() =>
     this.formatCountLabel(this.requests().length),
@@ -117,6 +124,7 @@ export class ReEnrollmentComponent {
       return;
     }
     this.activeConfirm.set({ requestId: request.id, kind: 'reject' });
+    this.fields.clearAll();
     this.rejectErrors.update((current) => ({ ...current, [request.id]: null }));
   }
 
@@ -140,6 +148,7 @@ export class ReEnrollmentComponent {
 
   protected setRejectReason(requestId: number, value: string): void {
     this.rejectReasons.update((current) => ({ ...current, [requestId]: value }));
+    this.fields.clear('rejectionReason');
     this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
   }
 
@@ -185,6 +194,7 @@ export class ReEnrollmentComponent {
       return;
     }
 
+    this.fields.clearAll();
     this.actingRequestId.set(request.id);
     this.reEnrollmentService.rejectRequest(request.id, form).subscribe({
       next: () => {
@@ -221,6 +231,11 @@ export class ReEnrollmentComponent {
 
   private handleMutationError(error: unknown, requestId: number, action: 'approve' | 'reject'): void {
     this.actingRequestId.set(null);
+
+    if (this.fields.apply(error) && this.fields.get('rejectionReason')) {
+      this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
+      return;
+    }
 
     if (!(error instanceof ApiError)) {
       if (action === 'reject') {

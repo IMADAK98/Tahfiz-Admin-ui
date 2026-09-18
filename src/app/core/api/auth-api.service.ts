@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { bearerHeaders } from './http-auth.helpers';
 import { apiErrorFromBody } from './api-error';
-import { envelopeOk, mapEnvelopeResponse } from './envelope.helpers';
+import { catchHttpAsApiError, envelopeOk, mapEnvelopeResponse } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { AuthTokens, LoginRequest, RefreshRequest } from './models/auth.model';
 import { RequestPasswordResetBody, ResetPasswordBody } from './password-reset.model';
@@ -23,7 +23,7 @@ export class AuthApiService {
         request,
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(map(mapEnvelopeResponse));
+      .pipe(map(mapEnvelopeResponse), catchHttpAsApiError());
   }
 
   refresh(request: RefreshRequest): Observable<AuthTokens> {

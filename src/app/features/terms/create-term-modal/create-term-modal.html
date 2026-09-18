@@ -21,7 +21,9 @@
             [(ngModel)]="form.name"
             required
             [disabled]="submitting()"
+            (ngModelChange)="clearFieldError('name')"
           />
+          <app-field-error [message]="fieldError('name')" errorId="dawra-name-error" />
         </div>
 
         <div class="form-grid-2">
@@ -35,7 +37,9 @@
               [(ngModel)]="form.startDate"
               required
               [disabled]="submitting()"
+              (ngModelChange)="clearFieldError('startDate')"
             />
+            <app-field-error [message]="fieldError('startDate')" errorId="start-error" />
           </div>
           <div class="input-group">
             <label for="end">تاريخ النهاية</label>
@@ -47,7 +51,9 @@
               [(ngModel)]="form.endDate"
               required
               [disabled]="submitting()"
+              (ngModelChange)="clearFieldError('endDate')"
             />
+            <app-field-error [message]="fieldError('endDate')" errorId="end-error" />
           </div>
         </div>
 
@@ -62,6 +68,11 @@
               [(ngModel)]="form.registerationStartDate"
               required
               [disabled]="submitting()"
+              (ngModelChange)="clearFieldError('registerationStartDate')"
+            />
+            <app-field-error
+              [message]="fieldError('registerationStartDate')"
+              errorId="reg-start-error"
             />
           </div>
           <div class="input-group">
@@ -74,6 +85,11 @@
               [(ngModel)]="form.registerationEndDate"
               required
               [disabled]="submitting()"
+              (ngModelChange)="clearFieldError('registerationEndDate')"
+            />
+            <app-field-error
+              [message]="fieldError('registerationEndDate')"
+              errorId="reg-end-error"
             />
           </div>
         </div>
@@ -118,6 +134,7 @@
               </div>
             }
           </div>
+          <app-field-error [message]="fieldError('holidayDates')" errorId="holidays-error" />
         </div>
       </form>
 

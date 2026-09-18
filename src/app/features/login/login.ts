@@ -1,22 +1,25 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
-import { ApiError } from '../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers';
 import { AuthService } from '../../core/auth/auth.service';
 import { postLoginPath } from '../../core/auth/redirect.helpers';
 import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
+import { FieldErrorComponent } from '../../core/ui/field-error';
+import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { createEmptyLoginForm } from './dto/login-form.model';
 import { LoginQueryReason } from './enums/login-query-reason.enum';
 import { LoginService } from './login.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, InputText, Password, Checkbox, Button],
+  imports: [FormsModule, RouterLink, InputText, Password, Checkbox, Button, FieldErrorComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -25,6 +28,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
 
   protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
   protected readonly form = createEmptyLoginForm();
@@ -33,6 +37,18 @@ export class LoginComponent {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly infoMessage = signal<string | null>(null);
   protected readonly showForgotPanel = signal(false);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   constructor() {
     const reason = this.route.snapshot.queryParamMap.get('reason');
@@ -52,6 +68,8 @@ export class LoginComponent {
 
   protected onForgotLinkClick(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
+    this.errorMessage.set(null);
     this.showForgotPanel.set(true);
   }
 
@@ -60,6 +78,7 @@ export class LoginComponent {
     if (this.submitting()) {
       return;
     }
+    this.fields.clearAll();
     this.errorMessage.set(null);
     this.submitting.set(true);
 
@@ -85,7 +104,12 @@ export class LoginComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'البريد أو كلمة المرور غير صحيحة. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'البريد أو كلمة المرور غير صحيحة. حاول مرة أخرى.',
+          ),
         );
       },
     });
@@ -103,6 +127,7 @@ export class LoginComponent {
 
     this.errorMessage.set(null);
     this.infoMessage.set(null);
+    this.fields.clearAll();
     this.forgotSubmitting.set(true);
 
     this.loginService.requestPasswordReset(email).subscribe({
@@ -115,9 +140,12 @@ export class LoginComponent {
       error: (error: unknown) => {
         this.forgotSubmitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError
-            ? error.message
-            : 'تعذّر إرسال رابط الاستعادة. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إرسال رابط الاستعادة. حاول مرة أخرى.',
+          ),
         );
       },
     });

@@ -196,9 +196,14 @@
               rows="3"
               required
               [(ngModel)]="rejectionReason"
+              (ngModelChange)="clearFieldError('rejectionReason')"
               placeholder="مثال: لا يستوفي شروط المركز"
               [disabled]="actingId() !== null"
             ></textarea>
+            <app-field-error
+              [message]="fieldError('rejectionReason')"
+              errorId="f-rejection-reason-error"
+            />
           </div>
           @if (rejectError(); as error) {
             <p class="form-error" role="alert">{{ error }}</p>

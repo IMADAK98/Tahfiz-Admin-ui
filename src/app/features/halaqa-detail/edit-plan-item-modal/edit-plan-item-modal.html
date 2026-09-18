@@ -33,6 +33,7 @@
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('type')" errorId="edit-item-type-error" />
           </div>
 
           <fieldset class="dir-fieldset brand-dir">
@@ -51,6 +52,7 @@
             }
           </fieldset>
         </div>
+        <app-field-error [message]="fieldError('direction')" errorId="edit-item-direction-error" />
 
         <div class="plan-item-range-grid">
           <div class="input-group">
@@ -66,6 +68,10 @@
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error
+              [message]="fieldError('fromSurahNumber', 'fromSurah')"
+              errorId="edit-from-surah-error"
+            />
           </div>
           <div class="input-group">
             <label for="edit-from-ayah">من آية</label>
@@ -79,6 +85,7 @@
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('fromAyah')" errorId="edit-from-ayah-error" />
           </div>
           <div class="input-group">
             <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
@@ -122,6 +129,7 @@
               [fluid]="true"
               appendTo="body"
             />
+            <app-field-error [message]="fieldError('amountType')" errorId="edit-amount-type-error" />
           </div>
           <div class="input-group">
             <label for="edit-amount-value">القيمة</label>
@@ -134,6 +142,7 @@
               (ngModelChange)="patchForm({ amountValue: +$event })"
               name="amountValue"
             />
+            <app-field-error [message]="fieldError('amountValue')" errorId="edit-amount-value-error" />
           </div>
         </div>
       </form>

@@ -3,9 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ActiveTeacher } from '../../../core/api/models/teacher.model';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { HALQA_CATEGORY_OPTIONS, HALQA_PERIOD_OPTIONS } from '../../halaqat/enums';
 import {
@@ -18,7 +20,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-halaqa-modal',
-  imports: [FormsModule, Select],
+  imports: [FormsModule, Select, FieldErrorComponent],
   templateUrl: './edit-halaqa-modal.html',
   styleUrl: './edit-halaqa-modal.scss',
 })
@@ -48,6 +50,18 @@ export class EditHalaqaModalComponent {
   protected readonly teachers = signal<ActiveTeacher[]>([]);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
   protected readonly pickersLoading = signal(false);
 
   constructor() {
@@ -57,6 +71,7 @@ export class EditHalaqaModalComponent {
         return;
       }
       this.form.set(createEditHalaqaForm(detail));
+      this.fields.clearAll();
       this.errorMessage.set(null);
       this.loadTeachers();
     });
@@ -83,6 +98,7 @@ export class EditHalaqaModalComponent {
     }
 
     this.errorMessage.set(null);
+    this.fields.clearAll();
     const validationKey = this.detailService.validateEditForm(this.form());
     if (validationKey) {
       this.errorMessage.set(this.translate.instant(validationKey));
@@ -98,12 +114,15 @@ export class EditHalaqaModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+        this.errorMessage.set(
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            error instanceof ApiError ? error.message : '',
+          ),
+        );
       },
-    });
-  }
-
-  private loadTeachers(): void {
     const centerId = this.auth.getClaims()?.centerId;
     if (!centerId) {
       this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.centerUnknown));

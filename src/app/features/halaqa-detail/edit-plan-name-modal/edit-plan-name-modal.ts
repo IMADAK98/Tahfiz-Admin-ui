@@ -2,14 +2,16 @@ import { Component, effect, inject, input, output, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
 import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-plan-name-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, FieldErrorComponent],
   templateUrl: './edit-plan-name-modal.html',
 })
 export class EditPlanNameModalComponent {
@@ -26,6 +28,18 @@ export class EditPlanNameModalComponent {
   protected readonly name = signal('');
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   constructor() {
     effect(() => {
@@ -33,6 +47,7 @@ export class EditPlanNameModalComponent {
         return;
       }
       this.name.set(this.planName());
+      this.fields.clearAll();
       this.errorMessage.set(null);
     });
   }
@@ -63,6 +78,7 @@ export class EditPlanNameModalComponent {
     }
 
     this.submitting.set(true);
+    this.fields.clearAll();
     this.detailService.updatePlanName(planId, trimmed).subscribe({
       next: () => {
         this.submitting.set(false);
@@ -71,7 +87,14 @@ export class EditPlanNameModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+        this.errorMessage.set(
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            error instanceof ApiError ? error.message : '',
+          ),
+        );
       },
     });
   }

@@ -2,7 +2,9 @@ import { Component, computed, effect, inject, input, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { HalaqaStudentViewModel, StudyPlanViewModel } from '../dto';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
@@ -10,7 +12,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-assign-plan-students-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, FieldErrorComponent],
   templateUrl: './assign-plan-students-modal.html',
 })
 export class AssignPlanStudentsModalComponent {
@@ -27,6 +29,11 @@ export class AssignPlanStudentsModalComponent {
   protected readonly selectedStudentIds = signal<number[]>([]);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
 
   protected readonly availableStudents = computed(() => {
     const assignedIds = new Set((this.plan()?.students ?? []).map((student) => student.id));
@@ -39,6 +46,7 @@ export class AssignPlanStudentsModalComponent {
         return;
       }
       this.selectedStudentIds.set([]);
+      this.fields.clearAll();
       this.errorMessage.set(null);
     });
   }
@@ -60,6 +68,7 @@ export class AssignPlanStudentsModalComponent {
     this.selectedStudentIds.update((ids) =>
       checked ? [...ids, studentId] : ids.filter((id) => id !== studentId),
     );
+    this.fields.clear('studentIds');
   }
 
   protected isStudentSelected(studentId: number): boolean {
@@ -78,6 +87,7 @@ export class AssignPlanStudentsModalComponent {
     }
 
     this.submitting.set(true);
+    this.fields.clearAll();
     this.detailService.assignStudentsToPlan(plan.id, this.selectedStudentIds()).subscribe({
       next: () => {
         this.submitting.set(false);
@@ -86,7 +96,14 @@ export class AssignPlanStudentsModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+        this.errorMessage.set(
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            error instanceof ApiError ? error.message : '',
+          ),
+        );
       },
     });
   }

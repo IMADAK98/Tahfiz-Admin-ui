@@ -25,10 +25,11 @@
             type="text"
             placeholder="مثال: خطة الحفظ الأسبوعية"
             [ngModel]="planName()"
-            (ngModelChange)="planName.set($event)"
+            (ngModelChange)="planName.set($event); clearFieldError('name')"
             name="planName"
             required
           />
+          <app-field-error [message]="fieldError('name')" errorId="create-plan-name-error" />
         </div>
 
         <div>
@@ -49,6 +50,7 @@
                 </li>
               }
             </ul>
+            <app-field-error [message]="fieldError('studentIds')" errorId="create-plan-students-error" />
           } @else {
             <p class="hint">لا يوجد طلاب مسجّلون في الحلقة بعد.</p>
           }
@@ -76,6 +78,7 @@
                     [fluid]="true"
                     appendTo="body"
                   />
+                  <app-field-error [message]="itemField(index, 'type')" [errorId]="'type-error-' + index" />
                 </div>
                 <fieldset class="dir-fieldset brand-dir">
                   <legend>الاتجاه</legend>
@@ -92,6 +95,10 @@
                     </label>
                   }
                 </fieldset>
+                <app-field-error
+                  [message]="itemField(index, 'direction')"
+                  [errorId]="'direction-error-' + index"
+                />
                 @if (items().length > 1) {
                   <button
                     type="button"
@@ -118,6 +125,10 @@
                     [fluid]="true"
                     appendTo="body"
                   />
+                  <app-field-error
+                    [message]="itemField(index, 'fromSurah')"
+                    [errorId]="'fromSurah-error-' + index"
+                  />
                 </div>
                 <div class="input-group">
                   <label [attr.for]="'fromAyah-' + index">من آية</label>
@@ -130,6 +141,10 @@
                     [disabled]="!(ayahsBySurah()[item.fromSurah]?.length)"
                     [fluid]="true"
                     appendTo="body"
+                  />
+                  <app-field-error
+                    [message]="itemField(index, 'fromAyah')"
+                    [errorId]="'fromAyah-error-' + index"
                   />
                 </div>
               </div>
@@ -148,6 +163,10 @@
                     [fluid]="true"
                     appendTo="body"
                   />
+                  <app-field-error
+                    [message]="itemField(index, 'amountType')"
+                    [errorId]="'amountType-error-' + index"
+                  />
                 </div>
                 <div class="input-group">
                   <label>القيمة</label>
@@ -158,6 +177,10 @@
                     [ngModel]="item.amountValue"
                     (ngModelChange)="updateItem(index, { amountValue: +$event })"
                     [name]="'amountValue-' + index"
+                  />
+                  <app-field-error
+                    [message]="itemField(index, 'amountValue')"
+                    [errorId]="'amountValue-error-' + index"
                   />
                 </div>
               </div>

@@ -137,6 +137,10 @@
                     [placeholder]="'reEnrollment.reject.reasonPlaceholder' | translate"
                     [disabled]="isActingOn(request)"
                   ></textarea>
+                  <app-field-error
+                    [message]="fieldError('rejectionReason')"
+                    [errorId]="'reject-reason-error-' + request.id"
+                  />
                 </div>
                 @if (rejectError(request.id); as error) {
                   <p class="form-error" role="alert">{{ error }}</p>

@@ -12,6 +12,7 @@ import { TahfizPreset } from '../styles/primeng-theme';
 import { API_BASE_URL } from './core/config/api-config';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { errorToastInterceptor } from './core/http/error-toast.interceptor';
+import { httpErrorToApiInterceptor } from './core/http/http-error-to-api.interceptor';
 import { environment } from '../environments/environment';
 
 function initTranslations(translate: TranslateService) {
@@ -22,7 +23,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorToastInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([httpErrorToApiInterceptor, authInterceptor, errorToastInterceptor]),
+    ),
     provideTranslateService({
       lang: 'ar',
       fallbackLang: 'ar',

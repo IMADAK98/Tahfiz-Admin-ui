@@ -41,7 +41,9 @@
                 [(ngModel)]="form.fullName"
                 placeholder="مثال: عبدالله بن سعد الدوسري"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('name')"
               />
+              <app-field-error [message]="fieldError('name')" errorId="sf-name-error" />
             </div>
             <div class="input-group">
               <label for="sf-email">البريد الإلكتروني</label>
@@ -56,7 +58,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('email')"
               />
+              <app-field-error [message]="fieldError('email')" errorId="sf-email-error" />
             </div>
             <div class="input-group">
               <label for="sf-phone">رقم الجوال</label>
@@ -71,7 +75,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('phone')"
               />
+              <app-field-error [message]="fieldError('phone')" errorId="sf-phone-error" />
             </div>
             <div class="input-group">
               <label for="sf-parent-phone">جوال ولي الأمر</label>
@@ -86,7 +92,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('parentPhone')"
               />
+              <app-field-error [message]="fieldError('parentPhone')" errorId="sf-parent-phone-error" />
             </div>
             <div class="input-group">
               <label for="sf-id">رقم الهوية</label>
@@ -102,6 +110,11 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('identificationNumber')"
+              />
+              <app-field-error
+                [message]="fieldError('identificationNumber')"
+                errorId="sf-id-error"
               />
             </div>
             <div class="input-group">
@@ -118,7 +131,9 @@
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('passportNumber')"
               />
+              <app-field-error [message]="fieldError('passportNumber')" errorId="sf-passport-error" />
             </div>
             <div class="input-group">
               <label for="sf-address">العنوان</label>
@@ -131,7 +146,9 @@
                 [(ngModel)]="form.address"
                 placeholder="الحي، المدينة"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('address')"
               />
+              <app-field-error [message]="fieldError('address')" errorId="sf-address-error" />
             </div>
             <div class="input-group">
               <label for="sf-birthdate">تاريخ الميلاد</label>
@@ -143,7 +160,9 @@
                 required
                 [(ngModel)]="form.birthDate"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('birthDate')"
               />
+              <app-field-error [message]="fieldError('birthDate')" errorId="sf-birthdate-error" />
             </div>
             <div class="input-group">
               <label for="sf-stage">المرحلة الدراسية</label>
@@ -159,7 +178,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('educationStage')"
               />
+              <app-field-error [message]="fieldError('educationStage')" errorId="sf-stage-error" />
             </div>
           </div>
 
@@ -179,7 +200,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('isHafiz')"
               />
+              <app-field-error [message]="fieldError('isHafiz')" errorId="sf-is-hafiz-error" />
             </div>
             <div class="input-group">
               <label for="sf-hifz-quality">جودة الحفظ</label>
@@ -195,7 +218,9 @@
                 required
                 [fluid]="true"
                 appendTo="body"
+                (ngModelChange)="clearFieldError('hifzQuality')"
               />
+              <app-field-error [message]="fieldError('hifzQuality')" errorId="sf-hifz-quality-error" />
             </div>
             <div class="input-group">
               <label for="sf-surah-from">من سورة (1–114)</label>
@@ -209,7 +234,9 @@
                 required
                 [(ngModel)]="form.surahFrom"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('surahFrom')"
               />
+              <app-field-error [message]="fieldError('surahFrom')" errorId="sf-surah-from-error" />
             </div>
             <div class="input-group">
               <label for="sf-surah-to">إلى سورة (1–114)</label>
@@ -223,7 +250,9 @@
                 required
                 [(ngModel)]="form.surahTo"
                 [disabled]="submitting()"
+                (ngModelChange)="clearFieldError('surahTo')"
               />
+              <app-field-error [message]="fieldError('surahTo')" errorId="sf-surah-to-error" />
             </div>
           </div>
         </div>

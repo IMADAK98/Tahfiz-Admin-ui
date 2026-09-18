@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { SKIP_GLOBAL_ERROR_TOAST } from '../http/skip-global-error-toast.token';
 import { apiErrorFromBody } from './api-error';
-import { envelopeOk, unwrapEnvelope } from './envelope.helpers';
+import { catchHttpAsApiError, envelopeOk, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import {
   CreatePendingStudentRequest,
@@ -55,6 +55,7 @@ export class StudentSignupApiService {
           // data may be null — caller shows success toast / panel
           return res.body?.data ?? null;
         }),
+        catchHttpAsApiError(),
       );
   }
 }

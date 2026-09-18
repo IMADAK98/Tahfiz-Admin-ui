@@ -6,8 +6,8 @@ import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
-import { ApiError } from '../../core/api/api-error';
-import { fieldErrorsFromUnknown } from '../../core/api/error-message.helpers';
+import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
+import { TOAST_I18N } from '../../core/ui/toast-messages';
 import {
   CenterSignupFormModel,
   createEmptyCenterSignupForm,
@@ -35,22 +35,16 @@ export class CenterSignupComponent {
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly fieldErrors = signal<Record<string, string>>({});
+  private readonly fields = createFieldErrorBag();
   protected readonly showSuccess = signal(false);
 
   protected fieldError(fieldName: string): string | undefined {
-    return this.fieldErrors()[fieldName];
+    return this.fields.get(fieldName);
   }
 
   protected clearFieldError(fieldName: string): void {
-    const current = this.fieldErrors();
-    if (!(fieldName in current)) {
-      return;
-    }
-    const next = { ...current };
-    delete next[fieldName];
-    this.fieldErrors.set(next);
-    if (Object.keys(next).length === 0) {
+    this.fields.clear(fieldName);
+    if (!this.fields.hasAny()) {
       this.errorMessage.set(null);
     }
   }
@@ -70,7 +64,7 @@ export class CenterSignupComponent {
 
   onSubmit(): void {
     this.form.adminBirthDate = this.adminBirthDate ? toIsoDate(this.adminBirthDate) : '';
-    this.fieldErrors.set({});
+    this.fields.clearAll();
     const validationError = validateCenterSignupForm(this.form);
     if (validationError) {
       this.errorMessage.set(validationError);
@@ -87,14 +81,13 @@ export class CenterSignupComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        const fields = fieldErrorsFromUnknown(error);
-        this.fieldErrors.set(fields);
-        if (Object.keys(fields).length > 0) {
-          this.errorMessage.set(this.translate.instant('centerSignup.fieldErrorsBanner'));
-          return;
-        }
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر إرسال الطلب. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر إرسال الطلب. حاول مرة أخرى.',
+          ),
         );
       },
     });

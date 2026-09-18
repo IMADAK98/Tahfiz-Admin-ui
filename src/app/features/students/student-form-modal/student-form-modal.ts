@@ -1,9 +1,11 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
-import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, HIFZ_QUALITY_OPTIONS, STUDENT_YES_NO_OPTIONS } from '../enums';
 import { StudentFormModel, createEmptyStudentForm } from '../dto';
@@ -11,13 +13,14 @@ import { StudentsService } from '../students.service';
 
 @Component({
   selector: 'app-student-form-modal',
-  imports: [FormsModule, Button, Select],
+  imports: [FormsModule, Button, Select, FieldErrorComponent],
   templateUrl: './student-form-modal.html',
   styleUrl: './student-form-modal.scss',
 })
 export class StudentFormModalComponent {
   private readonly studentsService = inject(StudentsService);
   private readonly toastMessage = inject(ToastMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly visible = input.required<boolean>();
   readonly saved = output<void>();
@@ -30,6 +33,18 @@ export class StudentFormModalComponent {
   protected readonly form: StudentFormModel = createEmptyStudentForm();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   constructor() {
     effect(() => {
@@ -37,6 +52,7 @@ export class StudentFormModalComponent {
         return;
       }
       Object.assign(this.form, createEmptyStudentForm());
+      this.fields.clearAll();
       this.errorMessage.set(null);
     });
   }
@@ -56,6 +72,7 @@ export class StudentFormModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    this.fields.clearAll();
     this.errorMessage.set(null);
 
     const validationError = this.studentsService.validate(this.form);
@@ -74,7 +91,12 @@ export class StudentFormModalComponent {
       error: (error: unknown) => {
         this.submitting.set(false);
         this.errorMessage.set(
-          error instanceof ApiError ? error.message : 'تعذّر تسجيل الطالب. حاول مرة أخرى.',
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            'تعذّر تسجيل الطالب. حاول مرة أخرى.',
+          ),
         );
       },
     });

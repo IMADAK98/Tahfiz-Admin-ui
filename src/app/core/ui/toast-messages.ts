@@ -35,6 +35,7 @@ export const TOAST_I18N = {
     sessionExpired: 'errors.sessionExpired',
     requestFailedTitle: 'toast.error.requestFailedTitle',
     requestFailedWithMessage: 'toast.error.requestFailed',
+    fieldErrorsBanner: 'errors.fieldErrorsBanner',
   },
 } as const;
 

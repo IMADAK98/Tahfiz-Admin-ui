@@ -3,9 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
+import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { QuranApiService } from '../../../core/api/quran-api.service';
 import { SurahApiRecord } from '../../../core/api/models/study-plan.model';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import {
   PlanItemFormModel,
@@ -24,7 +26,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-plan-item-modal',
-  imports: [FormsModule, Select],
+  imports: [FormsModule, Select, FieldErrorComponent],
   templateUrl: './edit-plan-item-modal.html',
 })
 export class EditPlanItemModalComponent {
@@ -62,6 +64,18 @@ export class EditPlanItemModalComponent {
   protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private readonly fields = createFieldErrorBag();
+
+  protected fieldError(...fieldNames: string[]): string | undefined {
+    return this.fields.get(...fieldNames);
+  }
+
+  protected clearFieldError(...fieldNames: string[]): void {
+    this.fields.clear(...fieldNames);
+    if (!this.fields.hasAny()) {
+      this.errorMessage.set(null);
+    }
+  }
 
   protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
@@ -72,6 +86,7 @@ export class EditPlanItemModalComponent {
         return;
       }
       this.form.set(createPlanItemFormFromView(item));
+      this.fields.clearAll();
       this.errorMessage.set(null);
       this.loadSurahs();
       this.loadAyahs(item.fromSurahNumber);
@@ -93,6 +108,16 @@ export class EditPlanItemModalComponent {
 
   protected patchForm(patch: Partial<PlanItemFormModel>): void {
     this.form.update((current) => ({ ...current, ...patch }));
+    const nestNames: string[] = [];
+    if ('type' in patch) nestNames.push('type');
+    if ('direction' in patch) nestNames.push('direction');
+    if ('fromSurah' in patch) nestNames.push('fromSurahNumber', 'fromSurah');
+    if ('fromAyah' in patch) nestNames.push('fromAyah');
+    if ('amountType' in patch) nestNames.push('amountType');
+    if ('amountValue' in patch) nestNames.push('amountValue');
+    if (nestNames.length) {
+      this.clearFieldError(...nestNames);
+    }
   }
 
   protected onFromSurahChange(fromSurah: number): void {
@@ -108,6 +133,7 @@ export class EditPlanItemModalComponent {
     }
 
     this.errorMessage.set(null);
+    this.fields.clearAll();
     const validationKey = validatePlanItemForm(this.form());
     if (validationKey) {
       this.errorMessage.set(this.translate.instant(validationKey));
@@ -123,7 +149,14 @@ export class EditPlanItemModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(error instanceof ApiError ? error.message : '');
+        this.errorMessage.set(
+          nestSubmitBanner(
+            error,
+            this.fields,
+            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
+            error instanceof ApiError ? error.message : '',
+          ),
+        );
       },
     });
   }
