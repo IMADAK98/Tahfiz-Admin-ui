@@ -214,16 +214,6 @@
   color: var(--color-muted, #5a6b62);
 }
 
-.pr-report__note {
-  font-size: 0.8125rem;
-  color: var(--color-muted, #5a6b62);
-  margin: 0;
-  padding: var(--space-3, 12px) var(--space-4, 16px);
-  background: var(--color-surface, #f3eee3);
-  border-radius: var(--radius-sm, 8px);
-  border: 1px solid var(--color-border, #ddd5c6);
-}
-
 .pr-report__empty {
   text-align: center;
   padding: var(--space-7, 48px) var(--space-5, 24px);
