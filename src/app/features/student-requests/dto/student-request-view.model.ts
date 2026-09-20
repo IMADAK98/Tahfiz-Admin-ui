@@ -72,7 +72,7 @@ export function mapStudentRequest(record: StudentRequestApiRecord): StudentReque
     appliedToCenterId: record.appliedToCenterId != null ? coerceStudentId(record.appliedToCenterId) : null,
     termId: record.termId != null ? coerceStudentId(record.termId) : null,
     existingUserId: record.existingUserId != null ? coerceStudentId(record.existingUserId) : null,
-    status: record.status,
+    status: record.status ?? 'PENDING',
     rejectionReason: optionalNullable(record.rejectionReason),
     createdAt: optionalNullable(record.createdAt),
   };

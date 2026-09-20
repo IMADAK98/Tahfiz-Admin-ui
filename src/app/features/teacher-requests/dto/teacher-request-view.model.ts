@@ -29,6 +29,6 @@ export function mapTeacherRequest(record: TeacherRequestApiRecord): TeacherReque
     tajweedLevel: record.tajweedLevel ?? null,
     ageGroups: record.teachingAgeGroup ?? [],
     workPeriods: record.availableWorkPeriod ?? [],
-    status: record.status,
+    status: record.status ?? 'PENDING',
   };
 }

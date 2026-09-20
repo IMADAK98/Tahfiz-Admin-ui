@@ -8,11 +8,9 @@ import { mapTeacherRequest, TeacherRequestViewModel } from './dto';
 export class TeacherRequestsService {
   private readonly requestApi = inject(TeacherRequestApiService);
 
-  /** GET /admin/teacher-requests summary says "all pending"; filter defensively anyway. */
+  /** GET /admin/teacher-requests is already pending-only — rows often omit `status`. */
   loadPending(): Observable<TeacherRequestViewModel[]> {
-    return this.requestApi
-      .list()
-      .pipe(map((records) => records.filter((record) => record.status === 'PENDING').map(mapTeacherRequest)));
+    return this.requestApi.list().pipe(map((records) => records.map(mapTeacherRequest)));
   }
 
   approve(id: number): Observable<void> {

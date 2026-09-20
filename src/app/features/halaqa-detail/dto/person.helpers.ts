@@ -49,3 +49,17 @@ export function todayIsoDate(): string {
     day: '2-digit',
   }).format(new Date());
 }
+
+/** Term-day student list is empty on Fri/Sat — use last Sun–Thu. */
+export function rosterQueryDate(today = todayIsoDate()): string {
+  const [year, month, day] = today.split('-').map(Number);
+  const utcMs = Date.UTC(year, month - 1, day);
+  const weekday = new Date(utcMs).getUTCDay();
+  const daysBack = weekday === 5 ? 1 : weekday === 6 ? 2 : 0;
+  if (!daysBack) {
+    return today;
+  }
+  const shifted = new Date(utcMs);
+  shifted.setUTCDate(shifted.getUTCDate() - daysBack);
+  return shifted.toISOString().slice(0, 10);
+}

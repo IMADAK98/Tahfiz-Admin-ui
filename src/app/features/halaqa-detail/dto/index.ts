@@ -2,6 +2,7 @@ export {
   ayahNumbersOf,
   buildSurahNameMap,
   formatFromRange,
+  mapHalqaRoster,
   mapHalqaStudent,
   mapHalaqaDetail,
   mapStudyPlanDetails,
@@ -29,4 +30,4 @@ export {
   validatePlanItemForm,
   type PlanItemFormModel,
 } from './plan-item-form.model';
-export { coerceId, personDisplayName, personInitial, todayIsoDate } from './person.helpers';
+export { coerceId, personDisplayName, personInitial, rosterQueryDate, todayIsoDate } from './person.helpers';

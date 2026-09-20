@@ -26,7 +26,8 @@ export interface HalqaApiRecord {
   teachers?: HalqaPersonRef[];
   students?: HalqaPersonRef[];
   enrollments?: Array<{
-    user?: { id?: number | string; name?: string };
+    isActive?: boolean;
+    user?: { id?: number | string; name?: string; firstName?: string; lastName?: string };
   }>;
 }
 

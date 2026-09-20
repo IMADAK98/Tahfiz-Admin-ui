@@ -71,6 +71,20 @@ export function mapHalqaStudent(record: HalqaStudentApiRecord): HalaqaStudentVie
   };
 }
 
+/** Roster from GET /halqa/:id — enrollments, not the term-day date filter. */
+export function mapHalqaRoster(record: HalqaApiRecord): HalaqaStudentViewModel[] {
+  if (record.students?.length) {
+    return record.students
+      .map((student) => mapHalqaStudent(student))
+      .filter((student) => student.id > 0);
+  }
+
+  return (record.enrollments ?? [])
+    .filter((enrollment) => enrollment.isActive !== false && enrollment.user)
+    .map((enrollment) => mapHalqaStudent(enrollment.user ?? {}))
+    .filter((student) => student.id > 0);
+}
+
 export function mapStudyPlanDetails(
   record: StudyPlanDetailsApiRecord,
   surahNames: Map<number, string>,
@@ -98,10 +112,12 @@ function mapStudyPlanItem(
   surahNames: Map<number, string>,
 ): StudyPlanItemViewModel {
   const fromSurahNumber = item.fromSurahNumber ?? item.fromSurah ?? 1;
-  const fromSurahName = item.fromSurahName ?? surahNames.get(fromSurahNumber) ?? `سورة ${fromSurahNumber}`;
+  const fromSurahName =
+    item.fromSurahName ?? surahNames.get(fromSurahNumber) ?? `سورة ${fromSurahNumber}`;
   const toSurahNumber = item.toSurahNumber ?? item.toSurah ?? null;
   const toSurahName =
-    item.toSurahName ?? (toSurahNumber ? (surahNames.get(toSurahNumber) ?? `سورة ${toSurahNumber}`) : null);
+    item.toSurahName ??
+    (toSurahNumber ? (surahNames.get(toSurahNumber) ?? `سورة ${toSurahNumber}`) : null);
 
   return {
     id: coerceId(item.id),

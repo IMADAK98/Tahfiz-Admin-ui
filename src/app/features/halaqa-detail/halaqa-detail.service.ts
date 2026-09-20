@@ -6,6 +6,7 @@ import { StudyPlanApiService } from '../../core/api/study-plan-api.service';
 import { CenterApiService } from '../../core/api/center-api.service';
 import { ActiveStudent } from '../../core/api/models/student.model';
 import { ActiveTeacher } from '../../core/api/models/teacher.model';
+import { HalqaApiRecord } from '../../core/api/models/halqa.model';
 import { CreateStudyPlanPayload } from '../../core/api/models/study-plan.model';
 import { coercePersonList } from '../halaqat/dto';
 import {
@@ -17,10 +18,11 @@ import {
   buildSurahNameMap,
   buildUpdateHalqaPayload,
   buildUpdatePlanItemPayload,
+  mapHalqaRoster,
   mapHalqaStudent,
   mapHalaqaDetail,
   mapStudyPlanDetails,
-  todayIsoDate,
+  rosterQueryDate,
   validateEditHalaqaForm,
 } from './dto';
 import { PlanItemFormModel } from './dto';
@@ -39,26 +41,26 @@ export class HalaqaDetailService {
   private readonly centerApi = inject(CenterApiService);
 
   loadPage(halqaId: number): Observable<HalaqaDetailPageData> {
-    const date = todayIsoDate();
     return forkJoin({
-      detail: this.halqaApi.getById(halqaId).pipe(map(mapHalaqaDetail)),
-      students: this.halqaApi
-        .getStudentsByHalqaId(halqaId, date)
-        .pipe(map((records) => records.map(mapHalqaStudent))),
+      record: this.halqaApi.getById(halqaId),
       surahs: this.quranApi.getSurahs().pipe(map(buildSurahNameMap)),
       planSummaries: this.halqaApi.getStudyPlans(halqaId),
     }).pipe(
-      switchMap(({ detail, students, surahs, planSummaries }) => {
-        if (!planSummaries.length) {
-          return of({ detail, students, plans: [] as StudyPlanViewModel[] });
-        }
-        return forkJoin(
-          planSummaries.map((summary) =>
-            this.studyPlanApi.getDetails(Number(summary.id)).pipe(
-              map((details) => mapStudyPlanDetails(details, surahs)),
-            ),
-          ),
-        ).pipe(map((plans) => ({ detail, students, plans })));
+      switchMap(({ record, surahs, planSummaries }) => {
+        const detail = mapHalaqaDetail(record);
+        const plans$ = !planSummaries.length
+          ? of([] as StudyPlanViewModel[])
+          : forkJoin(
+              planSummaries.map((summary) =>
+                this.studyPlanApi.getDetails(Number(summary.id)).pipe(
+                  map((details) => mapStudyPlanDetails(details, surahs)),
+                ),
+              ),
+            );
+        return forkJoin({
+          students: this.resolveRoster(halqaId, record),
+          plans: plans$,
+        }).pipe(map(({ students, plans }) => ({ detail, students, plans })));
       }),
     );
   }
@@ -167,8 +169,23 @@ export class HalaqaDetailService {
   }
 
   reloadStudents(halqaId: number): Observable<HalaqaStudentViewModel[]> {
+    return this.halqaApi.getById(halqaId).pipe(switchMap((record) => this.resolveRoster(halqaId, record)));
+  }
+
+  /**
+   * ponytail: admin roster is GET /halqa/:id enrollments. by-halqa-id?date= is term-day
+   * scoped and returns [] on Fri/off days — keep it only as fallback.
+   */
+  private resolveRoster(
+    halqaId: number,
+    record: HalqaApiRecord,
+  ): Observable<HalaqaStudentViewModel[]> {
+    const fromDetail = mapHalqaRoster(record);
+    if (fromDetail.length) {
+      return of(fromDetail);
+    }
     return this.halqaApi
-      .getStudentsByHalqaId(halqaId, todayIsoDate())
+      .getStudentsByHalqaId(halqaId, rosterQueryDate())
       .pipe(map((records) => records.map(mapHalqaStudent)));
   }
 }
