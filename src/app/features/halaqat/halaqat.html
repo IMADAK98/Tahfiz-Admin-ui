@@ -34,7 +34,7 @@
     </div>
   } @else {
     <div class="toolbar">
-      <div class="toolbar-filters">
+      <div class="toolbar-filters" [formGroup]="filters">
         <div class="filter-field">
           <label for="halaqa-search">بحث</label>
           <input
@@ -42,7 +42,7 @@
             id="halaqa-search"
             type="search"
             placeholder="ابحث باسم الحلقة أو المعلّم…"
-            [(ngModel)]="filters.search"
+            formControlName="search"
           />
         </div>
         <div class="filter-field">
@@ -52,7 +52,7 @@
             [options]="categoryFilterOptions"
             optionLabel="label"
             optionValue="value"
-            [(ngModel)]="filters.category"
+            formControlName="category"
             appendTo="body"
           />
         </div>
@@ -63,7 +63,7 @@
             [options]="periodFilterOptions"
             optionLabel="label"
             optionValue="value"
-            [(ngModel)]="filters.period"
+            formControlName="period"
             appendTo="body"
           />
         </div>

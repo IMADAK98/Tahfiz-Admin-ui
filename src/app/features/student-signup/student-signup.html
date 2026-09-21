@@ -66,9 +66,8 @@
 
           <form
             class="signup-form"
-            #htmlForm
-            #signupForm="ngForm"
-            (ngSubmit)="onSubmit(htmlForm, signupForm)"
+            [formGroup]="form"
+            (ngSubmit)="onSubmit()"
             novalidate
             aria-label="نموذج تسجيل طالب"
           >
@@ -83,7 +82,7 @@
                     class="input"
                     id="s-name"
                     name="name"
-                    [(ngModel)]="name"
+                    formControlName="name"
                     required
                     autocomplete="name"
                     placeholder="مثال: عبدالله بن سعد الدوسري"
@@ -91,7 +90,6 @@
                     [disabled]="submitting()"
                     [attr.aria-invalid]="fieldError('name') ? true : null"
                     [attr.aria-describedby]="fieldError('name') ? 's-name-error' : null"
-                    (ngModelChange)="clearFieldError('name')"
                   />
                   <app-field-error [message]="fieldError('name')" errorId="s-name-error" />
                 </div>
@@ -103,10 +101,9 @@
                     id="s-dob"
                     name="birthDate"
                     type="date"
-                    [(ngModel)]="birthDate"
+                    formControlName="birthDate"
                     required
                     [disabled]="submitting()"
-                    (ngModelChange)="clearFieldError('birthDate')"
                   />
                   <app-field-error [message]="fieldError('birthDate')" errorId="s-dob-error" />
                 </div>
@@ -119,7 +116,7 @@
                     id="s-email"
                     name="email"
                     type="email"
-                    [(ngModel)]="email"
+                    formControlName="email"
                     required
                     autocomplete="email"
                     dir="ltr"
@@ -128,7 +125,6 @@
                     [disabled]="submitting()"
                     [attr.aria-invalid]="fieldError('email') ? true : null"
                     [attr.aria-describedby]="fieldError('email') ? 's-email-error' : null"
-                    (ngModelChange)="clearFieldError('email')"
                   />
                   <app-field-error [message]="fieldError('email')" errorId="s-email-error" />
                 </div>
@@ -141,7 +137,7 @@
                     id="s-phone"
                     name="phone"
                     type="tel"
-                    [(ngModel)]="phone"
+                    formControlName="phone"
                     required
                     autocomplete="tel"
                     dir="ltr"
@@ -150,7 +146,6 @@
                     [disabled]="submitting()"
                     [attr.aria-invalid]="fieldError('phone') ? true : null"
                     [attr.aria-describedby]="fieldError('phone') ? 's-phone-error' : null"
-                    (ngModelChange)="clearFieldError('phone')"
                   />
                   <app-field-error [message]="fieldError('phone')" errorId="s-phone-error" />
                 </div>
@@ -162,14 +157,13 @@
                     class="input"
                     id="s-address"
                     name="address"
-                    [(ngModel)]="address"
+                    formControlName="address"
                     required
                     autocomplete="street-address"
                     fluid
                     [disabled]="submitting()"
                     [attr.aria-invalid]="fieldError('address') ? true : null"
                     [attr.aria-describedby]="fieldError('address') ? 's-address-error' : null"
-                    (ngModelChange)="clearFieldError('address')"
                   />
                   <app-field-error [message]="fieldError('address')" errorId="s-address-error" />
                 </div>
@@ -179,7 +173,7 @@
                   <p-select
                     inputId="s-edu"
                     name="educationStage"
-                    [(ngModel)]="educationStage"
+                    formControlName="educationStage"
                     [options]="educationOptions"
                     optionLabel="labelAr"
                     optionValue="value"
@@ -187,7 +181,6 @@
                     [disabled]="submitting()"
                     required
                     fluid
-                    (ngModelChange)="clearFieldError('educationStage')"
                   />
                   <app-field-error [message]="fieldError('educationStage')" errorId="s-edu-error" />
                 </div>
@@ -196,7 +189,7 @@
               <div class="id-block" style="margin-top: var(--space-4)">
                 <label class="check-row">
                   <p-checkbox
-                    [(ngModel)]="usePassport"
+                    formControlName="usePassport"
                     name="usePassport"
                     [binary]="true"
                     inputId="usePassport"
@@ -206,7 +199,7 @@
                   <span>استخدام جواز السفر بدل الهوية</span>
                 </label>
 
-                @if (!usePassport) {
+                @if (!usingPassport()) {
                   <div class="input-group">
                     <label for="s-nid">رقم الهوية الوطنية <span class="req">*</span></label>
                     <input
@@ -214,7 +207,7 @@
                       class="input"
                       id="s-nid"
                       name="identificationNumber"
-                      [(ngModel)]="identificationNumber"
+                      formControlName="identificationNumber"
                       inputmode="numeric"
                       maxlength="10"
                       required
@@ -226,7 +219,6 @@
                       [attr.aria-describedby]="
                         fieldError('identificationNumber') ? 's-nid-error' : null
                       "
-                      (ngModelChange)="clearFieldError('identificationNumber')"
                     />
                     <app-field-error
                       [message]="fieldError('identificationNumber')"
@@ -241,7 +233,7 @@
                       class="input"
                       id="s-pass"
                       name="passportNumber"
-                      [(ngModel)]="passportNumber"
+                      formControlName="passportNumber"
                       maxlength="10"
                       required
                       autocomplete="off"
@@ -250,7 +242,6 @@
                       [disabled]="submitting()"
                       [attr.aria-invalid]="fieldError('passportNumber') ? true : null"
                       [attr.aria-describedby]="fieldError('passportNumber') ? 's-pass-error' : null"
-                      (ngModelChange)="clearFieldError('passportNumber')"
                     />
                     <app-field-error [message]="fieldError('passportNumber')" errorId="s-pass-error" />
                   </div>
@@ -266,7 +257,7 @@
                     class="input"
                     id="g-name"
                     name="parentName"
-                    [(ngModel)]="parentName"
+                    formControlName="parentName"
                     placeholder="سعد الدوسري"
                     fluid
                     [disabled]="submitting()"
@@ -280,7 +271,7 @@
                     id="g-phone"
                     name="parentPhone"
                     type="tel"
-                    [(ngModel)]="parentPhone"
+                    formControlName="parentPhone"
                     required
                     dir="ltr"
                     placeholder="05XXXXXXXX"
@@ -288,7 +279,6 @@
                     [disabled]="submitting()"
                     [attr.aria-invalid]="fieldError('parentPhone') ? true : null"
                     [attr.aria-describedby]="fieldError('parentPhone') ? 'g-phone-error' : null"
-                    (ngModelChange)="clearFieldError('parentPhone')"
                   />
                   <app-field-error [message]="fieldError('parentPhone')" errorId="g-phone-error" />
                 </div>
@@ -298,7 +288,7 @@
                 <p-button
                   [type]="'button'"
                   label="التالي: حالة الحفظ ←"
-                  (onClick)="goStep2(htmlForm, signupForm)"
+                  (onClick)="goStep2()"
                   [disabled]="submitting()"
                 />
                 <p-button
@@ -322,8 +312,7 @@
                       type="radio"
                       name="memorization"
                       value="none"
-                      [(ngModel)]="memorization"
-                      (ngModelChange)="onMemorizationChange()"
+                      formControlName="memorization"
                       [disabled]="submitting()"
                     />
                     لم يسبق له الحفظ
@@ -333,8 +322,7 @@
                       type="radio"
                       name="memorization"
                       value="partial"
-                      [(ngModel)]="memorization"
-                      (ngModelChange)="onMemorizationChange()"
+                      formControlName="memorization"
                       [disabled]="submitting()"
                     />
                     حفظ جزئي
@@ -344,8 +332,7 @@
                       type="radio"
                       name="memorization"
                       value="khatm"
-                      [(ngModel)]="memorization"
-                      (ngModelChange)="onMemorizationChange()"
+                      formControlName="memorization"
                       [disabled]="submitting()"
                     />
                     خاتم (أتمّ القرآن)
@@ -357,7 +344,7 @@
                 />
               </div>
 
-              @if (memorization === 'partial') {
+              @if (memorizationLevel() === 'partial') {
                 <div class="input-group" style="margin-top: var(--space-4)">
                   <label for="mem-detail">تفاصيل الحفظ الجزئي</label>
                   <input
@@ -365,7 +352,7 @@
                     class="input"
                     id="mem-detail"
                     name="memDetail"
-                    [(ngModel)]="memDetail"
+                    formControlName="memDetail"
                     placeholder="مثال: حتى سورة الكهف / 10 أجزاء"
                     fluid
                     [disabled]="submitting()"
@@ -382,10 +369,9 @@
                       type="number"
                       min="1"
                       max="114"
-                      [(ngModel)]="surahFrom"
+                      formControlName="surahFrom"
                       required
                       [disabled]="submitting()"
-                      (ngModelChange)="clearFieldError('surahFrom')"
                     />
                     <app-field-error [message]="fieldError('surahFrom')" errorId="surahFrom-error" />
                   </div>
@@ -398,10 +384,9 @@
                       type="number"
                       min="1"
                       max="114"
-                      [(ngModel)]="surahTo"
+                      formControlName="surahTo"
                       required
                       [disabled]="submitting()"
-                      (ngModelChange)="clearFieldError('surahTo')"
                     />
                     <app-field-error [message]="fieldError('surahTo')" errorId="surahTo-error" />
                   </div>

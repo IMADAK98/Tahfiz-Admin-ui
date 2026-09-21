@@ -27,8 +27,7 @@
           optionLabel="name"
           optionValue="id"
           placeholder="اختر الحلقة"
-          [ngModel]="selectedHalqaId()"
-          (ngModelChange)="onHalqaChange($event)"
+          [formControl]="halqaControl"
           styleClass="w-full"
         />
       </div>
@@ -74,8 +73,7 @@
           pInputText
           class="w-full"
           placeholder="اسم الطالب…"
-          [ngModel]="studentQuery()"
-          (ngModelChange)="onStudentQuery($event)"
+          [formControl]="searchControl"
         />
       </div>
     </div>
@@ -114,8 +112,7 @@
             id="pr-day"
             type="date"
             class="pr-report__date-input"
-            [ngModel]="dateContext()"
-            (ngModelChange)="onDayChange($event)"
+            [formControl]="dateControl"
           />
         </div>
       }
@@ -126,8 +123,7 @@
             id="pr-month"
             type="month"
             class="pr-report__date-input"
-            [ngModel]="dateContext()"
-            (ngModelChange)="onMonthChange($event)"
+            [formControl]="dateControl"
           />
         </div>
       }

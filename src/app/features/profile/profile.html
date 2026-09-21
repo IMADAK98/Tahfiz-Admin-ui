@@ -1,0 +1,24 @@
+<section class="profile-page">
+  @if (loading()) {
+    <p class="profile-muted">جاري تحميل الملف الشخصي…</p>
+  } @else if (profile(); as view) {
+    <dl class="profile-facts" aria-label="بيانات الحساب">
+      <div>
+        <dt>الاسم</dt>
+        <dd>{{ view.name }}</dd>
+      </div>
+      <div>
+        <dt>البريد</dt>
+        <dd>{{ view.email }}</dd>
+      </div>
+      <div>
+        <dt>الهاتف</dt>
+        <dd>{{ view.phone }}</dd>
+      </div>
+      <div>
+        <dt>الدور</dt>
+        <dd>{{ view.roleLabel }}</dd>
+      </div>
+    </dl>
+  }
+</section>

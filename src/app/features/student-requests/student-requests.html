@@ -195,8 +195,7 @@
               name="rejectionReason"
               rows="3"
               required
-              [(ngModel)]="rejectionReason"
-              (ngModelChange)="clearFieldError('rejectionReason')"
+              [formControl]="rejectionReason"
               placeholder="مثال: لا يستوفي شروط المركز"
               [disabled]="actingId() !== null"
             ></textarea>

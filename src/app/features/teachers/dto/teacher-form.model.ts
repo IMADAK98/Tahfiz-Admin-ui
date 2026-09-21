@@ -69,32 +69,33 @@ export function mapTeacherDetailToForm(detail: TeacherDetailViewModel): TeacherF
   };
 }
 
-export function validateTeacherForm(form: TeacherFormModel, mode: TeacherFormMode): string | null {
+export function validateTeacherForm(form: TeacherFormModel, mode: TeacherFormMode): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.fullName.trim()) {
-    return 'الاسم الكامل مطلوب';
+    errors[mode === 'add' ? 'teacherName' : 'name'] = 'الاسم الكامل مطلوب';
   }
   if (!form.email.trim()) {
-    return 'البريد الإلكتروني مطلوب';
+    errors['email'] = 'البريد الإلكتروني مطلوب';
   }
   if (!form.phone.trim()) {
-    return 'رقم الجوال مطلوب';
+    errors['phone'] = 'رقم الجوال مطلوب';
   }
   if (mode === 'add') {
     if (!form.nationality.trim()) {
-      return 'الجنسية مطلوبة';
+      errors['nationality'] = 'الجنسية مطلوبة';
     }
     if (!form.address.trim()) {
-      return 'العنوان مطلوب';
+      errors['address'] = 'العنوان مطلوب';
     }
     if (!form.birthDate.trim()) {
-      return 'تاريخ الميلاد مطلوب';
+      errors['birthDate'] = 'تاريخ الميلاد مطلوب';
     }
   }
   if (!form.qualification) {
-    return 'اختر المؤهل الأكاديمي';
+    errors['qualification'] = 'اختر المؤهل الأكاديمي';
   }
   if (!form.hasCertificate) {
-    return 'اختر حالة شهادة مكنون';
+    errors['hasCertificate'] = 'اختر حالة شهادة مكنون';
   }
   // CreatePendingTeacherRequestDto requires numberOfMemorizedJuz >= 1; UpdateTeacherProfileDto allows 0.
   const minJuz = mode === 'add' ? 1 : 0;
@@ -103,24 +104,24 @@ export function validateTeacherForm(form: TeacherFormModel, mode: TeacherFormMod
     form.numberOfMemorizedJuz < minJuz ||
     form.numberOfMemorizedJuz > 30
   ) {
-    return `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
+    errors['numberOfMemorizedJuz'] = `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
   }
   if (!form.hasSanadInHifz) {
-    return 'اختر حالة السند';
+    errors['hasSanadInHifz'] = 'اختر حالة السند';
   }
   if (!form.hasIjazahInHifz) {
-    return 'اختر حالة الإجازة';
+    errors['hasIjazahInHifz'] = 'اختر حالة الإجازة';
   }
   if (!form.tajweedLevel) {
-    return 'اختر مستوى التجويد';
+    errors['tajweedLevel'] = 'اختر مستوى التجويد';
   }
   if (!form.ageGroups.length) {
-    return 'اختر فئة عمرية واحدة على الأقل';
+    errors['teachingAgeGroup'] = 'اختر فئة عمرية واحدة على الأقل';
   }
   if (!form.workPeriods.length) {
-    return 'اختر فترة عمل واحدة على الأقل';
+    errors['availableWorkPeriod'] = 'اختر فترة عمل واحدة على الأقل';
   }
-  return null;
+  return errors;
 }
 
 function boolToYesNo(value: boolean | null | undefined): YesNo {

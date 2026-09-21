@@ -17,7 +17,7 @@
         <p class="login-error" role="alert">{{ errorMessage() }}</p>
       }
 
-      <form class="login-form" (ngSubmit)="onSubmit($event)" aria-label="نموذج تسجيل الدخول">
+      <form [formGroup]="form" class="login-form" (ngSubmit)="onSubmit($event)" aria-label="نموذج تسجيل الدخول">
         <div class="input-group login-field">
           <label for="email">البريد الإلكتروني</label>
           <input
@@ -25,8 +25,7 @@
             id="email"
             name="email"
             type="email"
-            [(ngModel)]="form.email"
-            (ngModelChange)="clearFieldError('email')"
+            formControlName="email"
             placeholder="admin@center.example"
             autocomplete="username"
             required
@@ -46,8 +45,7 @@
           <p-password
             inputId="password"
             name="password"
-            [(ngModel)]="form.password"
-            (ngModelChange)="clearFieldError('password')"
+            formControlName="password"
             placeholder="••••••••"
             [feedback]="false"
             [toggleMask]="true"
@@ -64,7 +62,7 @@
 
         <div class="row-between">
           <div class="remember-row">
-            <p-checkbox [(ngModel)]="form.rememberMe" name="remember" [binary]="true" inputId="remember" />
+            <p-checkbox formControlName="rememberMe" name="remember" [binary]="true" inputId="remember" />
             <label for="remember">تذكّرني</label>
           </div>
           <a href="#forgot-panel" class="forgot-link" (click)="onForgotLinkClick($event)">نسيت كلمة المرور؟</a>
@@ -81,7 +79,7 @@
       </form>
 
       @if (showForgotPanel()) {
-        <section class="forgot-panel" aria-labelledby="forgot-title">
+        <section class="forgot-panel" aria-labelledby="forgot-title" [formGroup]="form">
           <h2 id="forgot-title">استعادة كلمة المرور</h2>
           <p>أدخل بريدك وسنرسل رابط إعادة التعيين.</p>
           <div class="input-group login-field">
@@ -91,8 +89,7 @@
               id="reset-email"
               name="resetEmail"
               type="email"
-              [(ngModel)]="form.resetEmail"
-              (ngModelChange)="clearFieldError('email')"
+              formControlName="resetEmail"
               placeholder="admin@center.example"
               autocomplete="email"
               fluid

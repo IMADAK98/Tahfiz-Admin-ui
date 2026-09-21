@@ -23,6 +23,53 @@ export interface StudentSignupFormValues {
   token: string;
 }
 
+/** Nest DTO keys so step/submit messages land under inputs. */
+export function validateStudentSignupForm(
+  form: StudentSignupFormValues,
+  step: 1 | 2,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (step === 1) {
+    if (!form.name.trim()) {
+      errors['name'] = 'الاسم الكامل مطلوب';
+    }
+    if (!form.email.trim()) {
+      errors['email'] = 'البريد الإلكتروني مطلوب';
+    }
+    if (!form.phone.trim()) {
+      errors['phone'] = 'رقم الجوال مطلوب';
+    }
+    if (!form.birthDate.trim()) {
+      errors['birthDate'] = 'تاريخ الميلاد مطلوب';
+    }
+    if (!form.address.trim()) {
+      errors['address'] = 'العنوان مطلوب';
+    }
+    if (!form.educationStage) {
+      errors['educationStage'] = 'اختر المرحلة الدراسية';
+    }
+    if (form.usePassport) {
+      if (!form.passportNumber.trim()) {
+        errors['passportNumber'] = 'رقم الجواز مطلوب';
+      }
+    } else if (!form.identificationNumber.trim()) {
+      errors['identificationNumber'] = 'رقم الهوية مطلوب';
+    }
+    if (!form.parentPhone.trim()) {
+      errors['parentPhone'] = 'جوال ولي الأمر مطلوب';
+    }
+    return errors;
+  }
+
+  if (!form.surahFrom || form.surahFrom < 1 || form.surahFrom > 114) {
+    errors['surahFrom'] = 'أدخل سورة البداية (1 إلى 114)';
+  }
+  if (!form.surahTo || form.surahTo < 1 || form.surahTo > 114) {
+    errors['surahTo'] = 'أدخل سورة النهاية (1 إلى 114)';
+  }
+  return errors;
+}
+
 /** Build Nest payload. Unused ID field sent as empty string (OpenAPI requires both keys). */
 export function buildPendingStudentPayload(form: StudentSignupFormValues): CreatePendingStudentRequest {
   const identificationNumber = form.usePassport ? '' : form.identificationNumber.trim();

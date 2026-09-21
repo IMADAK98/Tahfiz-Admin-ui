@@ -178,6 +178,13 @@
   font-weight: 600;
 }
 
+.field-req::after,
+.input-group > label:not(.field-req):not(:has(.req)):has(+ [required])::after {
+  content: ' *';
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
 .input-group {
   display: flex;
   flex-direction: column;

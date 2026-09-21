@@ -45,17 +45,18 @@ export function createPlanItemFormFromView(item: StudyPlanItemViewModel): PlanIt
   };
 }
 
-export function validatePlanItemForm(form: PlanItemFormModel): string | null {
+export function validatePlanItemForm(form: PlanItemFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.fromSurah || form.fromSurah < 1) {
-    return HALAQA_DETAIL_I18N.validation.fromSurah;
+    errors['fromSurah'] = HALAQA_DETAIL_I18N.validation.fromSurah;
   }
   if (!form.fromAyah || form.fromAyah < 1) {
-    return HALAQA_DETAIL_I18N.validation.fromAyah;
+    errors['fromAyah'] = HALAQA_DETAIL_I18N.validation.fromAyah;
   }
   if (!form.amountValue || form.amountValue < 1) {
-    return HALAQA_DETAIL_I18N.validation.amount;
+    errors['amountValue'] = HALAQA_DETAIL_I18N.validation.amount;
   }
-  return null;
+  return errors;
 }
 
 export function buildCreatePlanItemPayload(form: PlanItemFormModel): CreateStudyPlanItemPayload {

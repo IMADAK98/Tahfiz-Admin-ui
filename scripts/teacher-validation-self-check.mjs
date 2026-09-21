@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /** ponytail: smallest check mirroring teachers/dto/teacher-form.model.ts + teacher-detail-view.model.ts logic. */
 
@@ -16,30 +19,31 @@ function yesNoToBool(value) {
 }
 
 function validateTeacherForm(form, mode) {
-  if (!form.fullName.trim()) return 'الاسم الكامل مطلوب';
-  if (!form.email.trim()) return 'البريد الإلكتروني مطلوب';
-  if (!form.phone.trim()) return 'رقم الجوال مطلوب';
+  const errors = {};
+  if (!form.fullName.trim()) errors[mode === 'add' ? 'teacherName' : 'name'] = 'الاسم الكامل مطلوب';
+  if (!form.email.trim()) errors.email = 'البريد الإلكتروني مطلوب';
+  if (!form.phone.trim()) errors.phone = 'رقم الجوال مطلوب';
   if (mode === 'add') {
-    if (!form.nationality.trim()) return 'الجنسية مطلوبة';
-    if (!form.address.trim()) return 'العنوان مطلوب';
-    if (!form.birthDate.trim()) return 'تاريخ الميلاد مطلوب';
+    if (!form.nationality.trim()) errors.nationality = 'الجنسية مطلوبة';
+    if (!form.address.trim()) errors.address = 'العنوان مطلوب';
+    if (!form.birthDate.trim()) errors.birthDate = 'تاريخ الميلاد مطلوب';
   }
-  if (!form.qualification) return 'اختر المؤهل الأكاديمي';
-  if (!form.hasCertificate) return 'اختر حالة شهادة مكنون';
+  if (!form.qualification) errors.qualification = 'اختر المؤهل الأكاديمي';
+  if (!form.hasCertificate) errors.hasCertificate = 'اختر حالة شهادة مكنون';
   const minJuz = mode === 'add' ? 1 : 0;
   if (
     form.numberOfMemorizedJuz === null ||
     form.numberOfMemorizedJuz < minJuz ||
     form.numberOfMemorizedJuz > 30
   ) {
-    return `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
+    errors.numberOfMemorizedJuz = `أدخل عدد الأجزاء المحفوظة (${minJuz} إلى 30)`;
   }
-  if (!form.hasSanadInHifz) return 'اختر حالة السند';
-  if (!form.hasIjazahInHifz) return 'اختر حالة الإجازة';
-  if (!form.tajweedLevel) return 'اختر مستوى التجويد';
-  if (!form.ageGroups.length) return 'اختر فئة عمرية واحدة على الأقل';
-  if (!form.workPeriods.length) return 'اختر فترة عمل واحدة على الأقل';
-  return null;
+  if (!form.hasSanadInHifz) errors.hasSanadInHifz = 'اختر حالة السند';
+  if (!form.hasIjazahInHifz) errors.hasIjazahInHifz = 'اختر حالة الإجازة';
+  if (!form.tajweedLevel) errors.tajweedLevel = 'اختر مستوى التجويد';
+  if (!form.ageGroups.length) errors.teachingAgeGroup = 'اختر فئة عمرية واحدة على الأقل';
+  if (!form.workPeriods.length) errors.availableWorkPeriod = 'اختر فترة عمل واحدة على الأقل';
+  return errors;
 }
 
 const validAddForm = {
@@ -59,26 +63,29 @@ const validAddForm = {
   workPeriods: ['AFTER_ASR'],
 };
 
-assert.equal(validateTeacherForm(validAddForm, 'add'), null);
+assert.deepEqual(validateTeacherForm(validAddForm, 'add'), {});
 assert.equal(
-  validateTeacherForm({ ...validAddForm, nationality: '' }, 'add'),
+  validateTeacherForm({ ...validAddForm, nationality: '' }, 'add').nationality,
   'الجنسية مطلوبة',
 );
-assert.equal(validateTeacherForm({ ...validAddForm, nationality: '' }, 'edit'), null);
+assert.equal(validateTeacherForm({ ...validAddForm, nationality: '' }, 'edit').nationality, undefined);
 assert.equal(
-  validateTeacherForm({ ...validAddForm, ageGroups: [] }, 'add'),
+  validateTeacherForm({ ...validAddForm, ageGroups: [] }, 'add').teachingAgeGroup,
   'اختر فئة عمرية واحدة على الأقل',
 );
 assert.equal(
-  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 31 }, 'add'),
+  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 31 }, 'add').numberOfMemorizedJuz,
   'أدخل عدد الأجزاء المحفوظة (1 إلى 30)',
 );
 // CreatePendingTeacherRequestDto requires numberOfMemorizedJuz >= 1 (not 0 like update).
 assert.equal(
-  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'add'),
+  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'add').numberOfMemorizedJuz,
   'أدخل عدد الأجزاء المحفوظة (1 إلى 30)',
 );
-assert.equal(validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'edit'), null);
+assert.equal(
+  validateTeacherForm({ ...validAddForm, numberOfMemorizedJuz: 0 }, 'edit').numberOfMemorizedJuz,
+  undefined,
+);
 
 assert.equal(coerceTeacherId('27'), 27);
 assert.equal(coerceTeacherId(27), 27);
@@ -87,5 +94,14 @@ assert.equal(coerceTeacherId('not-a-number'), 0);
 assert.equal(yesNoToBool('true'), true);
 assert.equal(yesNoToBool('false'), false);
 assert.equal(yesNoToBool(''), false);
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const modalTs = readFileSync(
+  join(root, 'src/app/features/teachers/teacher-form-modal/teacher-form-modal.ts'),
+  'utf8',
+);
+if (!modalTs.includes('fields.applyMap(this.teachersService.validate')) {
+  throw new Error('teacher form must apply client validation under fields');
+}
 
 console.log('teacher-validation-self-check: ok');

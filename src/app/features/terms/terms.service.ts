@@ -24,14 +24,14 @@ export class TermsService {
     return this.termApi.getTermsByCenterId(centerId);
   }
 
-  validateForm(form: CreateTermFormModel): string | null {
+  validateForm(form: CreateTermFormModel): Record<string, string> {
     return validateCreateTermForm(form);
   }
 
   createTerm(form: CreateTermFormModel, centerId: number): Observable<ActiveTerm> {
-    const validationError = validateCreateTermForm(form);
-    if (validationError) {
-      throw new Error(validationError);
+    const errors = validateCreateTermForm(form);
+    if (Object.keys(errors).length) {
+      throw new Error(Object.values(errors)[0]);
     }
     return this.termApi.createTerm(buildCreateTermPayload(form, centerId));
   }

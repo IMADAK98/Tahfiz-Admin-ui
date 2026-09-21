@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { extractHttpErrorMessage } from '../../core/api/error-message.helpers';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
@@ -18,7 +18,7 @@ import { CenterRequestsService } from './center-requests.service';
 
 @Component({
   selector: 'app-center-requests',
-  imports: [FormsModule, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, FieldErrorComponent],
   templateUrl: './center-requests.html',
   styleUrl: './center-requests.scss',
 })
@@ -38,7 +38,7 @@ export class CenterRequestsComponent {
 
   protected readonly activeApproveRequest = signal<CenterRequestViewModel | null>(null);
   protected readonly activeRejectRequest = signal<CenterRequestViewModel | null>(null);
-  protected rejectionReason = '';
+  protected readonly rejectionReason = new FormControl('', { nonNullable: true });
   protected readonly rejectError = signal<string | null>(null);
   protected readonly actingId = signal<number | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -52,6 +52,7 @@ export class CenterRequestsComponent {
   }
 
   constructor() {
+    this.rejectionReason.valueChanges.subscribe(() => this.clearFieldError('rejectionReason'));
     this.reload();
   }
 
@@ -114,7 +115,7 @@ export class CenterRequestsComponent {
     if (this.actingId() !== null || !isPendingCenterRequest(request.status)) {
       return;
     }
-    this.rejectionReason = '';
+    this.rejectionReason.setValue('');
     this.rejectError.set(null);
     this.fields.clearAll();
     this.activeRejectRequest.set(request);
@@ -132,15 +133,15 @@ export class CenterRequestsComponent {
       return;
     }
 
-    if (!this.rejectionReason.trim()) {
-      this.rejectError.set('سبب الرفض مطلوب');
+    if (!this.rejectionReason.value.trim()) {
+      this.fields.applyMap({ rejectionReason: 'سبب الرفض مطلوب' });
       return;
     }
 
     this.fields.clearAll();
     this.rejectError.set(null);
     this.actingId.set(request.id);
-    this.requestsService.reject(request.id, this.rejectionReason).subscribe({
+    this.requestsService.reject(request.id, this.rejectionReason.value).subscribe({
       next: () => {
         this.actingId.set(null);
         this.activeRejectRequest.set(null);

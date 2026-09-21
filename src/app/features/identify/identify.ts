@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
@@ -16,7 +17,7 @@ import { IdentifyService } from './identify.service';
 
 @Component({
   selector: 'app-identify',
-  imports: [FormsModule, RouterLink, Button, Checkbox, InputText, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, InputText, FieldErrorComponent],
   templateUrl: './identify.html',
   styleUrl: './identify.scss',
 })
@@ -26,6 +27,7 @@ export class IdentifyComponent implements OnInit {
   private readonly identify = inject(IdentifyService);
   private readonly toast = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly IdentifyTokenStatus = IdentifyTokenStatus;
   protected readonly tokenStatus = signal<IdentifyTokenStatus>(IdentifyTokenStatus.Loading);
@@ -49,9 +51,27 @@ export class IdentifyComponent implements OnInit {
 
   protected token = '';
   protected termHint = '';
-  protected usePassport = false;
-  protected identification = '';
-  protected passportNumber = '';
+  protected readonly form = this.fb.group({
+    usePassport: [false],
+    identification: [''],
+    passportNumber: [''],
+  });
+
+  constructor() {
+    for (const name of Object.keys(this.form.controls)) {
+      this.form.get(name)?.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        if (name === 'usePassport') {
+          this.onIdModeChange();
+          return;
+        }
+        this.clearFieldError(name);
+      });
+    }
+  }
+
+  protected usingPassport(): boolean {
+    return !!this.form.controls['usePassport'].value;
+  }
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -76,21 +96,27 @@ export class IdentifyComponent implements OnInit {
   }
 
   onIdModeChange(): void {
-    if (this.usePassport) {
-      this.identification = '';
+    if (this.usingPassport()) {
+      this.form.controls['identification'].setValue('', { emitEvent: false });
       this.clearFieldError('identification');
     } else {
-      this.passportNumber = '';
+      this.form.controls['passportNumber'].setValue('', { emitEvent: false });
       this.clearFieldError('passportNumber');
     }
   }
 
-  onSubmit(htmlForm: HTMLFormElement, form: NgForm): void {
+  onSubmit(): void {
     if (this.tokenStatus() !== IdentifyTokenStatus.Valid) {
       return;
     }
-    if (form.invalid || !htmlForm.checkValidity()) {
-      htmlForm.reportValidity();
+    const value = this.form.getRawValue();
+    const idOk = value.usePassport ? String(value.passportNumber).trim() : String(value.identification).trim();
+    if (!idOk) {
+      this.fields.applyMap(
+        value.usePassport
+          ? { passportNumber: 'رقم جواز السفر مطلوب' }
+          : { identification: 'رقم الهوية مطلوب' },
+      );
       return;
     }
 
@@ -101,9 +127,9 @@ export class IdentifyComponent implements OnInit {
 
     this.identify
       .lookup({
-        usePassport: this.usePassport,
-        identification: this.identification,
-        passportNumber: this.passportNumber,
+        usePassport: !!value.usePassport,
+        identification: String(value.identification),
+        passportNumber: String(value.passportNumber),
       })
       .subscribe({
         next: (student) => {

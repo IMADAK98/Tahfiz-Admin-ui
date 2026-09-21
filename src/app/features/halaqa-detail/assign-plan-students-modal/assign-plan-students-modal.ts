@@ -1,5 +1,5 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
@@ -12,7 +12,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-assign-plan-students-modal',
-  imports: [FormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent],
   templateUrl: './assign-plan-students-modal.html',
 })
 export class AssignPlanStudentsModalComponent {
@@ -26,7 +26,7 @@ export class AssignPlanStudentsModalComponent {
   readonly assigned = output<void>();
   readonly closed = output<void>();
 
-  protected readonly selectedStudentIds = signal<number[]>([]);
+  protected readonly selectedStudentIds = new FormControl<number[]>([], { nonNullable: true });
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -45,9 +45,11 @@ export class AssignPlanStudentsModalComponent {
       if (!this.visible()) {
         return;
       }
-      this.selectedStudentIds.set([]);
-      this.fields.clearAll();
-      this.errorMessage.set(null);
+      untracked(() => {
+        this.selectedStudentIds.setValue([]);
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+      });
     });
   }
 
@@ -65,14 +67,15 @@ export class AssignPlanStudentsModalComponent {
   }
 
   protected toggleStudent(studentId: number, checked: boolean): void {
-    this.selectedStudentIds.update((ids) =>
+    const ids = this.selectedStudentIds.value;
+    this.selectedStudentIds.setValue(
       checked ? [...ids, studentId] : ids.filter((id) => id !== studentId),
     );
     this.fields.clear('studentIds');
   }
 
   protected isStudentSelected(studentId: number): boolean {
-    return this.selectedStudentIds().includes(studentId);
+    return this.selectedStudentIds.value.includes(studentId);
   }
 
   protected onSubmit(event: Event): void {
@@ -81,14 +84,16 @@ export class AssignPlanStudentsModalComponent {
     if (!plan) {
       return;
     }
-    if (!this.selectedStudentIds().length) {
-      this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.pickStudent));
+    if (!this.selectedStudentIds.value.length) {
+      this.fields.applyMap({
+        studentIds: this.translate.instant(HALAQA_DETAIL_I18N.validation.pickStudent),
+      });
       return;
     }
 
     this.submitting.set(true);
     this.fields.clearAll();
-    this.detailService.assignStudentsToPlan(plan.id, this.selectedStudentIds()).subscribe({
+    this.detailService.assignStudentsToPlan(plan.id, this.selectedStudentIds.value).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);

@@ -108,10 +108,18 @@
         <div aria-hidden="true"></div>
       }
       <div class="topbar-actions">
-        <div class="user-chip">
+        <p-menu #userMenu [model]="userMenuItems()" [popup]="true" appendTo="body" />
+        <button
+          type="button"
+          class="user-chip"
+          (click)="userMenu.toggle($event)"
+          aria-haspopup="true"
+          aria-label="قائمة الحساب"
+        >
           <span>{{ displayName() }}</span>
           <span class="user-avatar" aria-hidden="true">{{ avatarInitial() }}</span>
-        </div>
+          <i class="pi pi-angle-down user-chip-caret" aria-hidden="true"></i>
+        </button>
       </div>
     </header>
     <div class="content">

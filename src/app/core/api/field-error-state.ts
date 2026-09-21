@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { signal, untracked, WritableSignal } from '@angular/core';
 import { ApiError } from './api-error';
 import { fieldErrorsFromUnknown } from './error-message.helpers';
 
@@ -37,17 +37,22 @@ export class FieldErrorBag {
   }
 
   clearAll(): void {
-    if (!this.hasAny()) {
+    // ponytail: untracked so modal open-effects that call clearAll() don't re-run on applyMap().
+    if (!untracked(() => this.hasAny())) {
       return;
     }
     this.fieldErrors.set({});
   }
 
+  /** Replace the bag. Returns true when at least one field message is present. */
+  applyMap(fields: Record<string, string>): boolean {
+    this.fieldErrors.set({ ...fields });
+    return Object.keys(fields).length > 0;
+  }
+
   /** Returns true when Nest `errors[]` produced at least one field message. */
   apply(error: unknown): boolean {
-    const fields = fieldErrorsFromUnknown(error);
-    this.fieldErrors.set(fields);
-    return Object.keys(fields).length > 0;
+    return this.applyMap(fieldErrorsFromUnknown(error));
   }
 }
 

@@ -25,8 +25,7 @@
         optionLabel="name"
         optionValue="id"
         placeholder="اختر الحلقة"
-        [ngModel]="selectedHalqaId()"
-        (ngModelChange)="onHalqaChange($event)"
+        [formControl]="halqaControl"
         styleClass="w-full"
       />
     </div>
@@ -64,8 +63,7 @@
         pInputText
         class="w-full"
         placeholder="اسم الطالب…"
-        [ngModel]="studentQuery()"
-        (ngModelChange)="onStudentQuery($event)"
+        [formControl]="searchControl"
       />
     </div>
   </div>

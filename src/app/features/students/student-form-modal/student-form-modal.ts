@@ -1,9 +1,11 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -13,7 +15,7 @@ import { StudentsService } from '../students.service';
 
 @Component({
   selector: 'app-student-form-modal',
-  imports: [FormsModule, Button, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, Select, FieldErrorComponent],
   templateUrl: './student-form-modal.html',
   styleUrl: './student-form-modal.scss',
 })
@@ -21,6 +23,7 @@ export class StudentFormModalComponent {
   private readonly studentsService = inject(StudentsService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly saved = output<void>();
@@ -30,7 +33,7 @@ export class StudentFormModalComponent {
   protected readonly hifzQualityOptions = [...HIFZ_QUALITY_OPTIONS];
   protected readonly yesNoOptions = [...STUDENT_YES_NO_OPTIONS];
 
-  protected readonly form: StudentFormModel = createEmptyStudentForm();
+  protected readonly form = formGroupOf(this.fb, createEmptyStudentForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -47,13 +50,22 @@ export class StudentFormModalComponent {
   }
 
   constructor() {
+    const nestKey: Record<string, string> = { fullName: 'name' };
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(nestKey[name] ?? name);
+      });
+    }
+
     effect(() => {
       if (!this.visible()) {
         return;
       }
-      Object.assign(this.form, createEmptyStudentForm());
-      this.fields.clearAll();
-      this.errorMessage.set(null);
+      untracked(() => {
+        this.form.reset(createEmptyStudentForm());
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+      });
     });
   }
 
@@ -75,14 +87,13 @@ export class StudentFormModalComponent {
     this.fields.clearAll();
     this.errorMessage.set(null);
 
-    const validationError = this.studentsService.validate(this.form);
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    const value = this.form.getRawValue() as StudentFormModel;
+    if (this.fields.applyMap(this.studentsService.validate(value))) {
       return;
     }
 
     this.submitting.set(true);
-    this.studentsService.createStudent(this.form).subscribe({
+    this.studentsService.createStudent(value).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.studentCreated);

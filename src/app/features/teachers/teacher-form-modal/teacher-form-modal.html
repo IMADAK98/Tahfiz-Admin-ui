@@ -22,7 +22,7 @@
         </p-button>
       </div>
 
-      <form (ngSubmit)="onSubmit($event)">
+      <form [formGroup]="form" (ngSubmit)="onSubmit($event)">
         <div class="modal-body teacher-form-body">
           @if (errorMessage()) {
             <p class="form-error" role="alert">{{ errorMessage() }}</p>
@@ -38,10 +38,9 @@
                 name="fullName"
                 type="text"
                 required
-                [(ngModel)]="form.fullName"
+                formControlName="fullName"
                 placeholder="مثال: محمد العتيبي"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError(nameField())"
               />
               <app-field-error [message]="fieldError(nameField())" errorId="tf-name-error" />
             </div>
@@ -53,12 +52,11 @@
                 name="email"
                 type="email"
                 required
-                [(ngModel)]="form.email"
+                formControlName="email"
                 placeholder="name@example.com"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('email')"
               />
               <app-field-error [message]="fieldError('email')" errorId="tf-email-error" />
             </div>
@@ -70,12 +68,11 @@
                 name="phone"
                 type="tel"
                 required
-                [(ngModel)]="form.phone"
+                formControlName="phone"
                 placeholder="05XXXXXXXX"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('phone')"
               />
               <app-field-error [message]="fieldError('phone')" errorId="tf-phone-error" />
             </div>
@@ -88,10 +85,9 @@
                   name="nationality"
                   type="text"
                   required
-                  [(ngModel)]="form.nationality"
+                  formControlName="nationality"
                   placeholder="مثال: سعودي"
                   [disabled]="submitting()"
-                  (ngModelChange)="clearFieldError('nationality')"
                 />
                 <app-field-error [message]="fieldError('nationality')" errorId="tf-nationality-error" />
               </div>
@@ -103,10 +99,9 @@
                   name="address"
                   type="text"
                   required
-                  [(ngModel)]="form.address"
+                  formControlName="address"
                   placeholder="الحي، المدينة"
                   [disabled]="submitting()"
-                  (ngModelChange)="clearFieldError('address')"
                 />
                 <app-field-error [message]="fieldError('address')" errorId="tf-address-error" />
               </div>
@@ -118,9 +113,8 @@
                   name="birthDate"
                   type="date"
                   required
-                  [(ngModel)]="form.birthDate"
+                  formControlName="birthDate"
                   [disabled]="submitting()"
-                  (ngModelChange)="clearFieldError('birthDate')"
                 />
                 <app-field-error [message]="fieldError('birthDate')" errorId="tf-birthdate-error" />
               </div>
@@ -134,7 +128,7 @@
               <p-select
                 inputId="tf-academic"
                 name="qualification"
-                [(ngModel)]="form.qualification"
+                formControlName="qualification"
                 [options]="qualificationOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -143,7 +137,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('qualification')"
               />
               <app-field-error [message]="fieldError('qualification')" errorId="tf-academic-error" />
             </div>
@@ -152,7 +145,7 @@
               <p-select
                 inputId="tf-maknoon"
                 name="hasCertificate"
-                [(ngModel)]="form.hasCertificate"
+                formControlName="hasCertificate"
                 [options]="yesNoOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -161,7 +154,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('hasCertificate')"
               />
               <app-field-error [message]="fieldError('hasCertificate')" errorId="tf-maknoon-error" />
             </div>
@@ -175,9 +167,8 @@
                 [attr.min]="isAdd ? 1 : 0"
                 max="30"
                 required
-                [(ngModel)]="form.numberOfMemorizedJuz"
+                formControlName="numberOfMemorizedJuz"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('numberOfMemorizedJuz')"
               />
               <app-field-error
                 [message]="fieldError('numberOfMemorizedJuz')"
@@ -189,7 +180,7 @@
               <p-select
                 inputId="tf-sanad"
                 name="hasSanadInHifz"
-                [(ngModel)]="form.hasSanadInHifz"
+                formControlName="hasSanadInHifz"
                 [options]="yesNoOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -198,7 +189,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('hasSanadInHifz')"
               />
               <app-field-error [message]="fieldError('hasSanadInHifz')" errorId="tf-sanad-error" />
             </div>
@@ -207,7 +197,7 @@
               <p-select
                 inputId="tf-ijazah"
                 name="hasIjazahInHifz"
-                [(ngModel)]="form.hasIjazahInHifz"
+                formControlName="hasIjazahInHifz"
                 [options]="yesNoOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -216,7 +206,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('hasIjazahInHifz')"
               />
               <app-field-error [message]="fieldError('hasIjazahInHifz')" errorId="tf-ijazah-error" />
             </div>
@@ -231,9 +220,8 @@
                     type="radio"
                     name="tajweedLevel"
                     [value]="option.value"
-                    [(ngModel)]="form.tajweedLevel"
+                    formControlName="tajweedLevel"
                     [disabled]="submitting()"
-                    (ngModelChange)="clearFieldError('tajweedLevel')"
                   />
                   {{ option.label }}
                 </label>

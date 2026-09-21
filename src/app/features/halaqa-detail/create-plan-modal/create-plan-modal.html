@@ -12,7 +12,7 @@
         <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
       </div>
 
-      <form class="modal-body plan-item-form" (submit)="onSubmit($event)">
+      <form [formGroup]="form" class="modal-body plan-item-form" (submit)="onSubmit($event)">
         @if (errorMessage(); as message) {
           <p class="form-error" role="alert">{{ message }}</p>
         }
@@ -24,9 +24,7 @@
             id="create-plan-name"
             type="text"
             placeholder="مثال: خطة الحفظ الأسبوعية"
-            [ngModel]="planName()"
-            (ngModelChange)="planName.set($event); clearFieldError('name')"
-            name="planName"
+            formControlName="planName"
             required
           />
           <app-field-error [message]="fieldError('name')" errorId="create-plan-name-error" />
@@ -61,9 +59,9 @@
           <button type="button" class="btn btn-secondary btn-sm" (click)="addItem()">+ إضافة عنصر</button>
         </div>
 
-        <ul class="plan-edit-items">
-          @for (item of items(); track $index; let index = $index) {
-            <li class="plan-edit-item">
+        <ul class="plan-edit-items" formArrayName="items">
+          @for (row of itemRows.controls; track row; let index = $index) {
+            <li class="plan-edit-item" [formGroupName]="index">
               <div class="plan-edit-item-top">
                 <div class="input-group">
                   <label [attr.for]="'type-' + index">النوع</label>
@@ -72,9 +70,7 @@
                     [options]="itemTypeOptions"
                     optionLabel="label"
                     optionValue="value"
-                    [ngModel]="item.type"
-                    (ngModelChange)="updateItem(index, { type: $event })"
-                    [name]="'type-' + index"
+                    formControlName="type"
                     [fluid]="true"
                     appendTo="body"
                   />
@@ -84,13 +80,7 @@
                   <legend>الاتجاه</legend>
                   @for (option of directionOptions; track option.value) {
                     <label class="dir-opt">
-                      <input
-                        type="radio"
-                        [name]="'direction-' + index"
-                        [value]="option.value"
-                        [checked]="item.direction === option.value"
-                        (change)="updateItem(index, { direction: option.value })"
-                      />
+                      <input type="radio" [value]="option.value" formControlName="direction" />
                       {{ option.label }}
                     </label>
                   }
@@ -99,7 +89,7 @@
                   [message]="itemField(index, 'direction')"
                   [errorId]="'direction-error-' + index"
                 />
-                @if (items().length > 1) {
+                @if (itemRows.length > 1) {
                   <button
                     type="button"
                     class="btn btn-ghost btn-sm plan-edit-remove"
@@ -118,9 +108,8 @@
                     [options]="surahOptions()"
                     optionLabel="label"
                     optionValue="number"
-                    [ngModel]="item.fromSurah"
-                    (ngModelChange)="onFromSurahChange(index, $event)"
-                    [name]="'fromSurah-' + index"
+                    formControlName="fromSurah"
+                    (onChange)="onFromSurahChange(index, $event.value)"
                     [disabled]="surahsLoading()"
                     [fluid]="true"
                     appendTo="body"
@@ -134,11 +123,9 @@
                   <label [attr.for]="'fromAyah-' + index">من آية</label>
                   <p-select
                     [inputId]="'fromAyah-' + index"
-                    [options]="ayahsBySurah()[item.fromSurah] ?? []"
-                    [ngModel]="item.fromAyah"
-                    (ngModelChange)="updateItem(index, { fromAyah: $event })"
-                    [name]="'fromAyah-' + index"
-                    [disabled]="!(ayahsBySurah()[item.fromSurah]?.length)"
+                    [options]="ayahsBySurah()[itemModel(index).fromSurah] ?? []"
+                    formControlName="fromAyah"
+                    [disabled]="!(ayahsBySurah()[itemModel(index).fromSurah]?.length)"
                     [fluid]="true"
                     appendTo="body"
                   />
@@ -157,9 +144,7 @@
                     [options]="amountTypeOptions"
                     optionLabel="label"
                     optionValue="value"
-                    [ngModel]="item.amountType"
-                    (ngModelChange)="updateItem(index, { amountType: $event })"
-                    [name]="'amountType-' + index"
+                    formControlName="amountType"
                     [fluid]="true"
                     appendTo="body"
                   />
@@ -170,14 +155,7 @@
                 </div>
                 <div class="input-group">
                   <label>القيمة</label>
-                  <input
-                    class="input"
-                    type="number"
-                    min="1"
-                    [ngModel]="item.amountValue"
-                    (ngModelChange)="updateItem(index, { amountValue: +$event })"
-                    [name]="'amountValue-' + index"
-                  />
+                  <input class="input" type="number" min="1" formControlName="amountValue" />
                   <app-field-error
                     [message]="itemField(index, 'amountValue')"
                     [errorId]="'amountValue-error-' + index"

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
 import { ApiError } from '../../core/api/api-error';
@@ -14,7 +14,7 @@ import { StudentRequestsService } from './student-requests.service';
 
 @Component({
   selector: 'app-student-requests',
-  imports: [FormsModule, RouterLink, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, Button, FieldErrorComponent],
   templateUrl: './student-requests.html',
   styleUrl: './student-requests.scss',
 })
@@ -33,7 +33,7 @@ export class StudentRequestsComponent {
 
   protected readonly activeApproveRequest = signal<StudentRequestViewModel | null>(null);
   protected readonly activeRejectRequest = signal<StudentRequestViewModel | null>(null);
-  protected rejectionReason = '';
+  protected readonly rejectionReason = new FormControl('', { nonNullable: true });
   protected readonly rejectError = signal<string | null>(null);
   protected readonly actingId = signal<number | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -47,6 +47,7 @@ export class StudentRequestsComponent {
   }
 
   constructor() {
+    this.rejectionReason.valueChanges.subscribe(() => this.clearFieldError('rejectionReason'));
     this.reload();
   }
 
@@ -126,7 +127,7 @@ export class StudentRequestsComponent {
     if (this.actingId() !== null) {
       return;
     }
-    this.rejectionReason = '';
+    this.rejectionReason.setValue('');
     this.rejectError.set(null);
     this.fields.clearAll();
     this.activeRejectRequest.set(request);
@@ -144,15 +145,15 @@ export class StudentRequestsComponent {
       return;
     }
 
-    if (!this.rejectionReason.trim()) {
-      this.rejectError.set('سبب الرفض مطلوب');
+    if (!this.rejectionReason.value.trim()) {
+      this.fields.applyMap({ rejectionReason: 'سبب الرفض مطلوب' });
       return;
     }
 
     this.fields.clearAll();
     this.rejectError.set(null);
     this.actingId.set(request.id);
-    this.requestsService.reject(request.id, this.rejectionReason).subscribe({
+    this.requestsService.reject(request.id, this.rejectionReason.value).subscribe({
       next: () => {
         this.actingId.set(null);
         this.activeRejectRequest.set(null);

@@ -1,11 +1,13 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, DestroyRef, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { QuranApiService } from '../../../core/api/quran-api.service';
 import { SurahApiRecord } from '../../../core/api/models/study-plan.model';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -27,7 +29,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-create-plan-modal',
-  imports: [FormsModule, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Select, FieldErrorComponent],
   templateUrl: './create-plan-modal.html',
 })
 export class CreatePlanModalComponent {
@@ -35,6 +37,8 @@ export class CreatePlanModalComponent {
   private readonly quranApi = inject(QuranApiService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly visible = input.required<boolean>();
   readonly halqaId = input.required<number>();
@@ -45,14 +49,20 @@ export class CreatePlanModalComponent {
   protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
   protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
-  protected readonly planName = signal('');
-  protected readonly selectedStudentIds = signal<number[]>([]);
-  protected readonly items = signal<PlanItemFormModel[]>([createEmptyPlanItemForm()]);
+  protected readonly form = this.fb.group({
+    planName: [''],
+    studentIds: this.fb.control<number[]>([], { nonNullable: true }),
+    items: this.fb.array([this.itemGroup(createEmptyPlanItemForm())]),
+  });
   protected readonly surahs = signal<SurahApiRecord[]>([]);
   protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
+
+  protected get itemRows(): FormArray {
+    return this.form.controls['items'] as FormArray;
+  }
 
   protected fieldError(...fieldNames: string[]): string | undefined {
     return this.fields.get(...fieldNames);
@@ -75,17 +85,30 @@ export class CreatePlanModalComponent {
   protected clearItemField(index: number, nestName: string): void {
     this.clearFieldError(`studyPlanItems.${index}.${nestName}`, `studyPlanItems[${index}].${nestName}`);
   }
+
+  protected itemModel(index: number): PlanItemFormModel {
+    return this.itemRows.at(index).getRawValue() as PlanItemFormModel;
+  }
+
   protected readonly surahsLoading = signal(false);
 
   protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
   constructor() {
+    this.form.controls['planName'].valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.clearFieldError('name');
+    });
+    this.form.controls['studentIds'].valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.clearFieldError('studentIds');
+    });
     effect(() => {
       if (!this.visible()) {
         return;
       }
-      this.resetForm();
-      this.loadSurahs();
+      untracked(() => {
+        this.resetForm();
+        this.loadSurahs();
+      });
     });
   }
 
@@ -103,37 +126,31 @@ export class CreatePlanModalComponent {
   }
 
   protected toggleStudent(studentId: number, checked: boolean): void {
-    this.selectedStudentIds.update((ids) =>
+    const ids = this.form.controls['studentIds'].value ?? [];
+    this.form.controls['studentIds'].setValue(
       checked ? [...ids, studentId] : ids.filter((id) => id !== studentId),
     );
-    this.clearFieldError('studentIds');
   }
 
   protected isStudentSelected(studentId: number): boolean {
-    return this.selectedStudentIds().includes(studentId);
+    return (this.form.controls['studentIds'].value ?? []).includes(studentId);
   }
 
   protected addItem(): void {
     const item = createEmptyPlanItemForm();
-    this.items.update((current) => [...current, item]);
+    this.itemRows.push(this.itemGroup(item));
     this.loadAyahs(item.fromSurah);
   }
 
   protected removeItem(index: number): void {
-    this.items.update((current) => (current.length <= 1 ? current : current.filter((_, i) => i !== index)));
-  }
-
-  protected updateItem(index: number, patch: Partial<PlanItemFormModel>): void {
-    this.items.update((current) =>
-      current.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    );
-    for (const key of Object.keys(patch) as (keyof PlanItemFormModel)[]) {
-      this.clearItemField(index, String(key));
+    if (this.itemRows.length <= 1) {
+      return;
     }
+    this.itemRows.removeAt(index);
   }
 
   protected onFromSurahChange(index: number, fromSurah: number): void {
-    this.updateItem(index, { fromSurah, fromAyah: 1 });
+    this.itemRows.at(index).patchValue({ fromAyah: 1 });
     this.loadAyahs(fromSurah);
   }
 
@@ -142,26 +159,27 @@ export class CreatePlanModalComponent {
     this.fields.clearAll();
     this.errorMessage.set(null);
 
-    const name = this.planName().trim();
+    const name = String(this.form.controls['planName'].value ?? '').trim();
+    const items = this.itemRows.getRawValue() as PlanItemFormModel[];
+    const errors: Record<string, string> = {};
     if (!name) {
-      this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.planName));
-      return;
+      errors['name'] = this.translate.instant(HALAQA_DETAIL_I18N.validation.planName);
     }
-
-    for (const item of this.items()) {
-      const validationKey = validatePlanItemForm(item);
-      if (validationKey) {
-        this.errorMessage.set(this.translate.instant(validationKey));
-        return;
+    items.forEach((item, index) => {
+      for (const [field, key] of Object.entries(validatePlanItemForm(item))) {
+        errors[`studyPlanItems.${index}.${field}`] = this.translate.instant(key);
       }
+    });
+    if (this.fields.applyMap(errors)) {
+      return;
     }
 
     this.submitting.set(true);
     const payload = this.detailService.buildCreatePlanPayload(
       this.halqaId(),
       name,
-      this.selectedStudentIds(),
-      this.items(),
+      this.form.controls['studentIds'].value ?? [],
+      items,
     );
 
     this.detailService.createPlan(payload).subscribe({
@@ -184,10 +202,23 @@ export class CreatePlanModalComponent {
     });
   }
 
+  private itemGroup(value: PlanItemFormModel): FormGroup {
+    const group = formGroupOf(this.fb, value);
+    for (const name of Object.keys(group.controls)) {
+      group.controls[name].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        const index = this.itemRows.controls.indexOf(group);
+        if (index >= 0) {
+          this.clearItemField(index, name);
+        }
+      });
+    }
+    return group;
+  }
+
   private resetForm(): void {
-    this.planName.set('');
-    this.selectedStudentIds.set([]);
-    this.items.set([createEmptyPlanItemForm()]);
+    this.form.patchValue({ planName: '', studentIds: [] });
+    this.itemRows.clear();
+    this.itemRows.push(this.itemGroup(createEmptyPlanItemForm()));
     this.fields.clearAll();
     this.errorMessage.set(null);
   }
@@ -198,7 +229,7 @@ export class CreatePlanModalComponent {
       next: (surahs) => {
         this.surahs.set(surahs);
         this.surahsLoading.set(false);
-        for (const item of this.items()) {
+        for (const item of this.itemRows.getRawValue() as PlanItemFormModel[]) {
           this.loadAyahs(item.fromSurah);
         }
       },

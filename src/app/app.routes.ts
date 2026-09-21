@@ -53,6 +53,10 @@ export const routes: Routes = [
       },
       { path: 'dashboard', redirectTo: '', pathMatch: 'full' },
       {
+        path: 'profile',
+        loadComponent: () => import('./features/profile/profile').then((m) => m.ProfileComponent),
+      },
+      {
         path: 'terms',
         loadComponent: () => import('./features/terms/terms').then((m) => m.TermsComponent),
       },

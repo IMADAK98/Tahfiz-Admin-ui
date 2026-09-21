@@ -57,13 +57,12 @@
 
         <form
           class="identify-form"
-          #htmlForm
-          #identifyForm="ngForm"
-          (ngSubmit)="onSubmit(htmlForm, identifyForm)"
+          [formGroup]="form"
+          (ngSubmit)="onSubmit()"
           novalidate
           aria-label="نموذج التحقق من الهوية"
         >
-          @if (!usePassport) {
+          @if (!usingPassport()) {
             <div class="input-group">
               <label for="nid">رقم الهوية الوطنية <span class="req">*</span></label>
               <input
@@ -71,7 +70,7 @@
                 class="input"
                 id="nid"
                 name="identification"
-                [(ngModel)]="identification"
+                formControlName="identification"
                 inputmode="numeric"
                 maxlength="10"
                 required
@@ -82,7 +81,6 @@
                 [disabled]="submitting()"
                 [attr.aria-invalid]="fieldError('identification') ? true : null"
                 [attr.aria-describedby]="fieldError('identification') ? 'nid-error' : null"
-                (ngModelChange)="clearFieldError('identification')"
               />
               <app-field-error [message]="fieldError('identification')" errorId="nid-error" />
             </div>
@@ -94,7 +92,7 @@
                 class="input"
                 id="passport"
                 name="passportNumber"
-                [(ngModel)]="passportNumber"
+                formControlName="passportNumber"
                 maxlength="10"
                 required
                 autocomplete="off"
@@ -104,7 +102,6 @@
                 [disabled]="submitting()"
                 [attr.aria-invalid]="fieldError('passportNumber') ? true : null"
                 [attr.aria-describedby]="fieldError('passportNumber') ? 'passport-error' : null"
-                (ngModelChange)="clearFieldError('passportNumber')"
               />
               <app-field-error [message]="fieldError('passportNumber')" errorId="passport-error" />
             </div>
@@ -112,7 +109,7 @@
 
           <label class="check-row">
             <p-checkbox
-              [(ngModel)]="usePassport"
+              formControlName="usePassport"
               name="usePassport"
               [binary]="true"
               inputId="passportToggle"

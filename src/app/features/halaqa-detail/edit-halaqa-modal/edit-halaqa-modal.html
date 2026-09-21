@@ -12,7 +12,7 @@
         <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
       </div>
 
-      <form class="modal-body" (submit)="onSubmit($event)">
+      <form [formGroup]="form" class="modal-body" (submit)="onSubmit($event)">
         @if (errorMessage(); as message) {
           <p class="form-error" role="alert">{{ message }}</p>
         }
@@ -27,8 +27,7 @@
               optionLabel="label"
               optionValue="value"
               placeholder="اختر الفئة"
-              [ngModel]="form().category"
-              (ngModelChange)="form.update((current) => ({ ...current, category: $event })); clearFieldError('category')"
+              formControlName="category"
               required
               [fluid]="true"
               appendTo="body"
@@ -44,8 +43,7 @@
               optionLabel="label"
               optionValue="value"
               placeholder="اختر الفترة"
-              [ngModel]="form().period"
-              (ngModelChange)="form.update((current) => ({ ...current, period: $event })); clearFieldError('periods')"
+              formControlName="period"
               required
               [fluid]="true"
               appendTo="body"
@@ -60,10 +58,10 @@
             <div class="field-readonly" id="edit-status">
               <span
                 class="badge"
-                [class.badge-success]="form().isActive"
-                [class.badge-neutral]="!form().isActive"
+                [class.badge-success]="model().isActive"
+                [class.badge-neutral]="!model().isActive"
               >
-                {{ form().isActive ? 'نشطة' : 'متوقفة' }}
+                {{ model().isActive ? 'نشطة' : 'متوقفة' }}
               </span>
             </div>
           </div>
@@ -76,8 +74,7 @@
               optionLabel="name"
               optionValue="id"
               placeholder="اختر المعلّم"
-              [ngModel]="form().teacherId"
-              (ngModelChange)="form.update((current) => ({ ...current, teacherId: $event })); clearFieldError('teacherId')"
+              formControlName="teacherId"
               required
               [disabled]="pickersLoading()"
               [fluid]="true"
@@ -94,9 +91,7 @@
             id="edit-student-limit"
             type="number"
             min="1"
-            [ngModel]="form().studentLimit"
-            (ngModelChange)="form.update((current) => ({ ...current, studentLimit: $event })); clearFieldError('studentLimit')"
-            name="studentLimit"
+            formControlName="studentLimit"
             required
           />
           <app-field-error [message]="fieldError('studentLimit')" errorId="edit-student-limit-error" />

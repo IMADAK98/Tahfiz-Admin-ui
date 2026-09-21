@@ -12,7 +12,7 @@
         <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
       </div>
 
-      <form class="modal-body plan-item-form" (submit)="onSubmit($event)">
+      <form [formGroup]="form" class="modal-body plan-item-form" (submit)="onSubmit($event)">
         @if (errorMessage(); as message) {
           <p class="form-error" role="alert">{{ message }}</p>
         }
@@ -24,12 +24,10 @@
             <label for="edit-item-type">النوع</label>
             <p-select
               inputId="edit-item-type"
-              name="type"
               [options]="itemTypeOptions"
               optionLabel="label"
               optionValue="value"
-              [ngModel]="form().type"
-              (ngModelChange)="patchForm({ type: $event })"
+              formControlName="type"
               [fluid]="true"
               appendTo="body"
             />
@@ -40,13 +38,7 @@
             <legend>الاتجاه</legend>
             @for (option of directionOptions; track option.value) {
               <label class="dir-opt">
-                <input
-                  type="radio"
-                  name="item-direction"
-                  [value]="option.value"
-                  [checked]="form().direction === option.value"
-                  (change)="patchForm({ direction: option.value })"
-                />
+                <input type="radio" [value]="option.value" formControlName="direction" />
                 {{ option.label }}
               </label>
             }
@@ -59,12 +51,11 @@
             <label for="edit-from-surah">من سورة</label>
             <p-select
               inputId="edit-from-surah"
-              name="fromSurah"
               [options]="surahOptions()"
               optionLabel="label"
               optionValue="number"
-              [ngModel]="form().fromSurah"
-              (ngModelChange)="onFromSurahChange($event)"
+              formControlName="fromSurah"
+              (onChange)="onFromSurahChange($event.value)"
               [fluid]="true"
               appendTo="body"
             />
@@ -77,11 +68,9 @@
             <label for="edit-from-ayah">من آية</label>
             <p-select
               inputId="edit-from-ayah"
-              name="fromAyah"
-              [options]="ayahsBySurah()[form().fromSurah] ?? []"
-              [ngModel]="form().fromAyah"
-              (ngModelChange)="patchForm({ fromAyah: $event })"
-              [disabled]="!(ayahsBySurah()[form().fromSurah]?.length)"
+              [options]="ayahsBySurah()[model().fromSurah] ?? []"
+              formControlName="fromAyah"
+              [disabled]="!(ayahsBySurah()[model().fromSurah]?.length)"
               [fluid]="true"
               appendTo="body"
             />
@@ -91,27 +80,18 @@
             <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
             <p-select
               inputId="edit-to-surah"
-              name="toSurah"
               [options]="surahOptions()"
               optionLabel="label"
               optionValue="number"
-              [ngModel]="form().toSurah"
+              formControlName="toSurah"
               placeholder="—"
-              [disabled]="true"
               [fluid]="true"
               appendTo="body"
             />
           </div>
           <div class="input-group">
             <label for="edit-to-ayah">إلى آية <span class="hint-inline">(عرض فقط)</span></label>
-            <input
-              class="input"
-              id="edit-to-ayah"
-              type="text"
-              [ngModel]="form().toAyah ?? '—'"
-              name="toAyah"
-              readonly
-            />
+            <input class="input" id="edit-to-ayah" type="text" [value]="model().toAyah ?? '—'" readonly />
           </div>
         </div>
 
@@ -120,12 +100,10 @@
             <label for="edit-amount-type">نوع المقدار</label>
             <p-select
               inputId="edit-amount-type"
-              name="amountType"
               [options]="amountTypeOptions"
               optionLabel="label"
               optionValue="value"
-              [ngModel]="form().amountType"
-              (ngModelChange)="patchForm({ amountType: $event })"
+              formControlName="amountType"
               [fluid]="true"
               appendTo="body"
             />
@@ -138,9 +116,7 @@
               id="edit-amount-value"
               type="number"
               min="1"
-              [ngModel]="form().amountValue"
-              (ngModelChange)="patchForm({ amountValue: +$event })"
-              name="amountValue"
+              formControlName="amountValue"
             />
             <app-field-error [message]="fieldError('amountValue')" errorId="edit-amount-value-error" />
           </div>

@@ -1,10 +1,12 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { AuthService } from '../../../core/auth/auth.service';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -27,7 +29,7 @@ import { TeachersService } from '../teachers.service';
 
 @Component({
   selector: 'app-teacher-form-modal',
-  imports: [FormsModule, Button, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, Select, FieldErrorComponent],
   templateUrl: './teacher-form-modal.html',
   styleUrl: './teacher-form-modal.scss',
 })
@@ -36,6 +38,7 @@ export class TeacherFormModalComponent {
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly mode = input.required<TeacherFormMode>();
@@ -49,7 +52,7 @@ export class TeacherFormModalComponent {
   protected readonly workPeriodOptions = TEACHER_WORK_PERIOD_OPTIONS;
   protected readonly yesNoOptions = [...TEACHER_YES_NO_OPTIONS];
 
-  protected readonly form: TeacherFormModel = createEmptyTeacherForm();
+  protected readonly form = formGroupOf(this.fb, createEmptyTeacherForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -71,14 +74,27 @@ export class TeacherFormModalComponent {
   }
 
   constructor() {
+    const nestKey: Record<string, string> = {
+      fullName: this.nameField(),
+      ageGroups: 'teachingAgeGroup',
+      workPeriods: 'availableWorkPeriod',
+    };
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(name === 'fullName' ? this.nameField() : (nestKey[name] ?? name));
+      });
+    }
+
     effect(() => {
       if (!this.visible()) {
         return;
       }
       const teacher = this.teacher();
-      Object.assign(this.form, teacher ? mapTeacherDetailToForm(teacher) : createEmptyTeacherForm());
-      this.fields.clearAll();
-      this.errorMessage.set(null);
+      untracked(() => {
+        this.form.reset(teacher ? mapTeacherDetailToForm(teacher) : createEmptyTeacherForm());
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+      });
     });
   }
 
@@ -90,24 +106,30 @@ export class TeacherFormModalComponent {
     return this.isAdd ? 'إضافة معلّم' : 'تعديل المعلّم';
   }
 
+  private model(): TeacherFormModel {
+    return this.form.getRawValue() as TeacherFormModel;
+  }
+
   protected isAgeGroupChecked(value: TeacherAgeGroup): boolean {
-    return this.form.ageGroups.includes(value);
+    return this.model().ageGroups.includes(value);
   }
 
   protected toggleAgeGroup(value: TeacherAgeGroup, checked: boolean): void {
-    this.form.ageGroups =
-      checked ? [...this.form.ageGroups, value] : this.form.ageGroups.filter((item) => item !== value);
-    this.clearFieldError('teachingAgeGroup');
+    const ageGroups = this.model().ageGroups;
+    this.form.controls['ageGroups'].setValue(
+      checked ? [...ageGroups, value] : ageGroups.filter((item) => item !== value),
+    );
   }
 
   protected isWorkPeriodChecked(value: TeacherWorkPeriod): boolean {
-    return this.form.workPeriods.includes(value);
+    return this.model().workPeriods.includes(value);
   }
 
   protected toggleWorkPeriod(value: TeacherWorkPeriod, checked: boolean): void {
-    this.form.workPeriods =
-      checked ? [...this.form.workPeriods, value] : this.form.workPeriods.filter((item) => item !== value);
-    this.clearFieldError('availableWorkPeriod');
+    const workPeriods = this.model().workPeriods;
+    this.form.controls['workPeriods'].setValue(
+      checked ? [...workPeriods, value] : workPeriods.filter((item) => item !== value),
+    );
   }
 
   protected onBackdropClick(event: MouseEvent): void {
@@ -142,14 +164,13 @@ export class TeacherFormModalComponent {
       return;
     }
 
-    const validationError = this.teachersService.validate(this.form, 'add');
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    const value = this.model();
+    if (this.fields.applyMap(this.teachersService.validate(value, 'add'))) {
       return;
     }
 
     this.submitting.set(true);
-    this.teachersService.createTeacher(this.form, centerId).subscribe({
+    this.teachersService.createTeacher(value, centerId).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.teacherCreated);
@@ -176,14 +197,13 @@ export class TeacherFormModalComponent {
       return;
     }
 
-    const validationError = this.teachersService.validate(this.form, 'edit');
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    const value = this.model();
+    if (this.fields.applyMap(this.teachersService.validate(value, 'edit'))) {
       return;
     }
 
     this.submitting.set(true);
-    this.teachersService.updateTeacher(profileId, this.form).subscribe({
+    this.teachersService.updateTeacher(profileId, value).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.teacherUpdated);

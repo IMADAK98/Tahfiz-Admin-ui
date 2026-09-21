@@ -1,9 +1,11 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ActiveTeacher } from '../../../core/api/models/teacher.model';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
@@ -20,7 +22,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-halaqa-modal',
-  imports: [FormsModule, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Select, FieldErrorComponent],
   templateUrl: './edit-halaqa-modal.html',
   styleUrl: './edit-halaqa-modal.scss',
 })
@@ -29,6 +31,7 @@ export class EditHalaqaModalComponent {
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly detail = input.required<HalaqaDetailViewModel | null>();
@@ -37,7 +40,7 @@ export class EditHalaqaModalComponent {
 
   protected readonly categoryOptions = [...HALQA_CATEGORY_OPTIONS];
   protected readonly periodOptions = [...HALQA_PERIOD_OPTIONS];
-  protected readonly form = signal<EditHalaqaFormModel>(createEditHalaqaForm({
+  protected readonly form = formGroupOf(this.fb, createEditHalaqaForm({
     id: 0,
     name: '',
     category: null,
@@ -64,16 +67,28 @@ export class EditHalaqaModalComponent {
   }
   protected readonly pickersLoading = signal(false);
 
+  protected model(): EditHalaqaFormModel {
+    return this.form.getRawValue() as EditHalaqaFormModel;
+  }
+
   constructor() {
+    const nestKey: Record<string, string> = { period: 'periods' };
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(nestKey[name] ?? name);
+      });
+    }
     effect(() => {
       const detail = this.detail();
       if (!this.visible() || !detail) {
         return;
       }
-      this.form.set(createEditHalaqaForm(detail));
-      this.fields.clearAll();
-      this.errorMessage.set(null);
-      this.loadTeachers();
+      untracked(() => {
+        this.form.reset(createEditHalaqaForm(detail));
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+        this.loadTeachers();
+      });
     });
   }
 
@@ -99,14 +114,17 @@ export class EditHalaqaModalComponent {
 
     this.errorMessage.set(null);
     this.fields.clearAll();
-    const validationKey = this.detailService.validateEditForm(this.form());
-    if (validationKey) {
-      this.errorMessage.set(this.translate.instant(validationKey));
+    const raw = this.detailService.validateEditForm(this.model());
+    const mapped: Record<string, string> = {};
+    for (const [field, key] of Object.entries(raw)) {
+      mapped[field] = this.translate.instant(key);
+    }
+    if (this.fields.applyMap(mapped)) {
       return;
     }
 
     this.submitting.set(true);
-    this.detailService.updateHalqa(detail, this.form()).subscribe({
+    this.detailService.updateHalqa(detail, this.model()).subscribe({
       next: (updated) => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);

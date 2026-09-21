@@ -21,20 +21,21 @@ export function createEditHalaqaForm(detail: HalaqaDetailViewModel): EditHalaqaF
   };
 }
 
-export function validateEditHalaqaForm(form: EditHalaqaFormModel): string | null {
+export function validateEditHalaqaForm(form: EditHalaqaFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.category) {
-    return HALAQA_DETAIL_I18N.validation.pickCategory;
+    errors['category'] = HALAQA_DETAIL_I18N.validation.pickCategory;
   }
   if (!form.period) {
-    return HALAQA_DETAIL_I18N.validation.pickPeriod;
+    errors['periods'] = HALAQA_DETAIL_I18N.validation.pickPeriod;
   }
   if (!form.teacherId) {
-    return HALAQA_DETAIL_I18N.validation.pickTeacher;
+    errors['teacherId'] = HALAQA_DETAIL_I18N.validation.pickTeacher;
   }
   if (!form.studentLimit || form.studentLimit < 1) {
-    return HALAQA_DETAIL_I18N.validation.studentLimit;
+    errors['studentLimit'] = HALAQA_DETAIL_I18N.validation.studentLimit;
   }
-  return null;
+  return errors;
 }
 
 export function buildUpdateHalqaPayload(

@@ -16,9 +16,7 @@
             class="input"
             id="plan-name-input"
             type="text"
-            [ngModel]="name()"
-            (ngModelChange)="name.set($event); clearFieldError('name')"
-            name="planName"
+            [formControl]="name"
             required
           />
           <app-field-error [message]="fieldError('name')" errorId="plan-name-input-error" />

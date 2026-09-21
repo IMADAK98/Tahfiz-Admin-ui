@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../core/api/api-error';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
@@ -21,7 +21,7 @@ type ConfirmKind = 'approve' | 'reject';
 
 @Component({
   selector: 'app-re-enrollment',
-  imports: [RouterLink, FormsModule, TranslatePipe, FieldErrorComponent],
+  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, FieldErrorComponent],
   templateUrl: './re-enrollment.html',
   styleUrl: './re-enrollment.scss',
 })
@@ -38,10 +38,10 @@ export class ReEnrollmentComponent {
   protected readonly requests = signal<ReEnrollmentRequestView[]>([]);
   protected readonly expandedCards = signal<Record<number, boolean>>({});
   protected readonly activeConfirm = signal<{ requestId: number; kind: ConfirmKind } | null>(null);
-  protected readonly rejectReasons = signal<Record<number, string>>({});
   protected readonly rejectErrors = signal<Record<number, string | null>>({});
   protected readonly actingRequestId = signal<number | null>(null);
   private readonly fields = createFieldErrorBag();
+  private readonly rejectControls = new Map<number, FormControl<string>>();
 
   protected fieldError(...fieldNames: string[]): string | undefined {
     return this.fields.get(...fieldNames);
@@ -142,14 +142,21 @@ export class ReEnrollmentComponent {
     return confirm?.requestId === requestId && confirm.kind === kind;
   }
 
-  protected rejectReason(requestId: number): string {
-    return this.rejectReasons()[requestId] ?? '';
+  protected rejectControl(requestId: number): FormControl<string> {
+    let control = this.rejectControls.get(requestId);
+    if (!control) {
+      control = new FormControl('', { nonNullable: true });
+      control.valueChanges.subscribe(() => {
+        this.fields.clear('rejectionReason');
+        this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
+      });
+      this.rejectControls.set(requestId, control);
+    }
+    return control;
   }
 
-  protected setRejectReason(requestId: number, value: string): void {
-    this.rejectReasons.update((current) => ({ ...current, [requestId]: value }));
-    this.fields.clear('rejectionReason');
-    this.rejectErrors.update((current) => ({ ...current, [requestId]: null }));
+  protected rejectReason(requestId: number): string {
+    return this.rejectControl(requestId).value;
   }
 
   protected canSubmitReject(requestId: number): boolean {
@@ -188,9 +195,7 @@ export class ReEnrollmentComponent {
     const form: RejectReEnrollmentFormModel = {
       rejectionReason: this.rejectReason(request.id),
     };
-    const validationError = validateRejectForm(form);
-    if (validationError) {
-      this.rejectErrors.update((current) => ({ ...current, [request.id]: validationError }));
+    if (this.fields.applyMap(validateRejectForm(form))) {
       return;
     }
 
@@ -200,7 +205,7 @@ export class ReEnrollmentComponent {
       next: () => {
         this.actingRequestId.set(null);
         this.activeConfirm.set(null);
-        this.rejectReasons.update((current) => ({ ...current, [request.id]: '' }));
+        this.rejectControl(request.id).setValue('');
         this.toastMessage.notifySuccess(TOAST_I18N.success.reEnrollmentRejected);
         this.reload();
       },

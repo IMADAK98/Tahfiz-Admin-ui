@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /** ponytail: smallest check mirroring students + student-requests mapping/validation. */
 
@@ -32,26 +35,33 @@ function unwrapActiveStudentsPayload(data) {
 }
 
 function validateStudentForm(form) {
-  if (!form.fullName.trim()) return 'الاسم الكامل مطلوب';
-  if (!form.email.trim()) return 'البريد الإلكتروني مطلوب';
-  if (!form.phone.trim()) return 'رقم الجوال مطلوب';
-  if (!form.educationStage) return 'اختر المرحلة الدراسية';
-  if (!form.identificationNumber.trim()) return 'رقم الهوية مطلوب';
-  if (form.identificationNumber.trim().length > 10) return 'رقم الهوية يجب ألا يتجاوز 10 خانات';
-  if (!form.passportNumber.trim()) return 'رقم الجواز مطلوب';
-  if (form.passportNumber.trim().length > 10) return 'رقم الجواز يجب ألا يتجاوز 10 خانات';
-  if (!form.address.trim()) return 'العنوان مطلوب';
-  if (!form.birthDate.trim()) return 'تاريخ الميلاد مطلوب';
-  if (!form.parentPhone.trim()) return 'جوال ولي الأمر مطلوب';
+  const errors = {};
+  if (!form.fullName.trim()) errors.name = 'الاسم الكامل مطلوب';
+  if (!form.email.trim()) errors.email = 'البريد الإلكتروني مطلوب';
+  if (!form.phone.trim()) errors.phone = 'رقم الجوال مطلوب';
+  if (!form.educationStage) errors.educationStage = 'اختر المرحلة الدراسية';
+  const identificationNumber = form.identificationNumber.trim();
+  if (!identificationNumber) errors.identificationNumber = 'رقم الهوية مطلوب';
+  else if (identificationNumber.length > 10) {
+    errors.identificationNumber = 'رقم الهوية يجب ألا يتجاوز 10 خانات';
+  }
+  const passportNumber = form.passportNumber.trim();
+  if (!passportNumber) errors.passportNumber = 'رقم الجواز مطلوب';
+  else if (passportNumber.length > 10) {
+    errors.passportNumber = 'رقم الجواز يجب ألا يتجاوز 10 خانات';
+  }
+  if (!form.address.trim()) errors.address = 'العنوان مطلوب';
+  if (!form.birthDate.trim()) errors.birthDate = 'تاريخ الميلاد مطلوب';
+  if (!form.parentPhone.trim()) errors.parentPhone = 'جوال ولي الأمر مطلوب';
   if (form.surahFrom === null || form.surahFrom < 1 || form.surahFrom > 114) {
-    return 'أدخل سورة البداية (1 إلى 114)';
+    errors.surahFrom = 'أدخل سورة البداية (1 إلى 114)';
   }
   if (form.surahTo === null || form.surahTo < 1 || form.surahTo > 114) {
-    return 'أدخل سورة النهاية (1 إلى 114)';
+    errors.surahTo = 'أدخل سورة النهاية (1 إلى 114)';
   }
-  if (!form.hifzQuality) return 'اختر جودة الحفظ';
-  if (!form.isHafiz) return 'اختر حالة الحفظ';
-  return null;
+  if (!form.hifzQuality) errors.hifzQuality = 'اختر جودة الحفظ';
+  if (!form.isHafiz) errors.isHafiz = 'اختر حالة الحفظ';
+  return errors;
 }
 
 function toIsoDateTime(dateInput) {
@@ -130,10 +140,16 @@ const validForm = {
   isHafiz: 'false',
 };
 
-assert.equal(validateStudentForm(validForm), null);
-assert.equal(validateStudentForm({ ...validForm, educationStage: '' }), 'اختر المرحلة الدراسية');
-assert.equal(validateStudentForm({ ...validForm, surahFrom: 0 }), 'أدخل سورة البداية (1 إلى 114)');
-assert.equal(validateStudentForm({ ...validForm, parentPhone: '' }), 'جوال ولي الأمر مطلوب');
+assert.deepEqual(validateStudentForm(validForm), {});
+assert.equal(validateStudentForm({ ...validForm, educationStage: '' }).educationStage, 'اختر المرحلة الدراسية');
+assert.equal(validateStudentForm({ ...validForm, surahFrom: 0 }).surahFrom, 'أدخل سورة البداية (1 إلى 114)');
+assert.equal(validateStudentForm({ ...validForm, parentPhone: '' }).parentPhone, 'جوال ولي الأمر مطلوب');
+
+const emptyName = validateStudentForm({ ...validForm, fullName: '  ', email: '', phone: '' });
+assert.equal(emptyName.name, 'الاسم الكامل مطلوب');
+assert.equal(emptyName.email, 'البريد الإلكتروني مطلوب');
+assert.equal(emptyName.phone, 'رقم الجوال مطلوب');
+assert.equal('fullName' in emptyName, false);
 
 const payload = buildCreateManualStudentPayload(validForm);
 assert.equal('centerId' in payload, false);
@@ -153,5 +169,25 @@ assert.equal(mapped.surahFrom, 12);
 assert.equal(mapped.surahTo, 18);
 
 assert.equal(''.trim() ? null : 'سبب الرفض مطلوب', 'سبب الرفض مطلوب');
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const modalTs = readFileSync(
+  join(root, 'src/app/features/students/student-form-modal/student-form-modal.ts'),
+  'utf8',
+);
+if (!modalTs.includes('fields.applyMap(')) {
+  throw new Error('student form must apply client validation under fields');
+}
+if (!modalTs.includes('untracked(')) {
+  throw new Error('student modal open-reset must untrack so submit applyMap does not wipe the form');
+}
+if (modalTs.includes('errorMessage.set(validationError)')) {
+  throw new Error('student form must not dump client validation onto the top banner');
+}
+
+const componentsScss = readFileSync(join(root, 'src/styles/_components.scss'), 'utf8');
+if (!componentsScss.includes(':has(+ [required])::after')) {
+  throw new Error('required labels must get a * from shared CSS, not per-form markup');
+}
 
 console.log('student-validation-self-check: ok');

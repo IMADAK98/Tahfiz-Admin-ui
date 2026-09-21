@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { bearerHeaders } from './http-auth.helpers';
 import { apiErrorFromBody } from './api-error';
-import { catchHttpAsApiError, envelopeOk, mapEnvelopeResponse } from './envelope.helpers';
+import { catchHttpAsApiError, envelopeOk, mapEnvelopeResponse, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { AuthTokens, LoginRequest, RefreshRequest } from './models/auth.model';
 import { RequestPasswordResetBody, ResetPasswordBody } from './password-reset.model';
@@ -39,6 +39,15 @@ export class AuthApiService {
         headers: bearerHeaders(accessToken),
       })
       .pipe(map(() => undefined));
+  }
+
+  getProfile(): Observable<unknown> {
+    return this.http
+      .get<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/profile`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
   /** Web: email a reset link (enumeration-safe 200). */

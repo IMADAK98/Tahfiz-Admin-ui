@@ -8,12 +8,6 @@
   font-weight: 600;
 }
 
-.field-req::after {
-  content: ' *';
-  color: var(--color-danger);
-  font-weight: 700;
-}
-
 .chips {
   display: flex;
   flex-wrap: wrap;

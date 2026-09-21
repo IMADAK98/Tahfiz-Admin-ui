@@ -15,7 +15,7 @@
             <p class="signup-error" role="alert">{{ errorMessage() }}</p>
           }
 
-          <form
+          <form [formGroup]="form"
             class="signup-form"
             (ngSubmit)="onSubmit()"
             novalidate
@@ -29,8 +29,7 @@
                 pInputText
                 id="adminName"
                 name="adminName"
-                [(ngModel)]="form.adminName"
-                (ngModelChange)="clearFieldError('adminName')"
+                formControlName="adminName"
                 autocomplete="name"
                 fluid
                 [disabled]="submitting()"
@@ -45,18 +44,18 @@
             <div class="id-block">
               <div class="remember-row">
                 <p-checkbox
-                  [(ngModel)]="usePassport"
+                  [formControl]="usePassport"
                   name="noNationalId"
                   [binary]="true"
                   inputId="noNationalId"
-                  (ngModelChange)="onIdModeChange()"
+                  (onChange)="onIdModeChange()"
                   [disabled]="submitting()"
                 />
                 <label for="noNationalId">لا يوجد رقم هوية</label>
               </div>
               <p class="hint">اختر رقم الهوية الوطنية أو جواز السفر — أحدهما مطلوب.</p>
 
-              @if (form.identityDocumentType === IdentityDocumentType.NationalId) {
+              @if (model().identityDocumentType === IdentityDocumentType.NationalId) {
                 <div class="input-group">
                   <label for="adminIdentificationNumber">
                     رقم الهوية الوطنية <span class="req">*</span>
@@ -65,8 +64,7 @@
                     pInputText
                     id="adminIdentificationNumber"
                     name="adminIdentificationNumber"
-                    [(ngModel)]="form.adminIdentificationNumber"
-                    (ngModelChange)="clearFieldError('adminIdentificationNumber')"
+                    formControlName="adminIdentificationNumber"
                     inputmode="numeric"
                     autocomplete="off"
                     fluid
@@ -95,8 +93,7 @@
                     pInputText
                     id="adminPassportNumber"
                     name="adminPassportNumber"
-                    [(ngModel)]="form.adminPassportNumber"
-                    (ngModelChange)="clearFieldError('adminPassportNumber')"
+                    formControlName="adminPassportNumber"
                     autocomplete="off"
                     fluid
                     [disabled]="submitting()"
@@ -121,8 +118,7 @@
                 id="adminEmail"
                 name="adminEmail"
                 type="email"
-                [(ngModel)]="form.adminEmail"
-                (ngModelChange)="clearFieldError('adminEmail')"
+                formControlName="adminEmail"
                 autocomplete="email"
                 dir="ltr"
                 fluid
@@ -142,8 +138,7 @@
                 id="adminPhone"
                 name="adminPhone"
                 type="tel"
-                [(ngModel)]="form.adminPhone"
-                (ngModelChange)="clearFieldError('adminPhone')"
+                formControlName="adminPhone"
                 autocomplete="tel"
                 dir="ltr"
                 fluid
@@ -161,8 +156,7 @@
               <p-datepicker
                 inputId="adminBirthDate"
                 name="adminBirthDate"
-                [(ngModel)]="adminBirthDate"
-                (ngModelChange)="clearFieldError('adminBirthDate')"
+                [formControl]="adminBirthDate"
                 dateFormat="yy-mm-dd"
                 [showIcon]="true"
                 [maxDate]="today"
@@ -181,8 +175,7 @@
                 pInputText
                 id="adminAddress"
                 name="adminAddress"
-                [(ngModel)]="form.adminAddress"
-                (ngModelChange)="clearFieldError('adminAddress')"
+                formControlName="adminAddress"
                 autocomplete="street-address"
                 fluid
                 [disabled]="submitting()"
@@ -200,8 +193,7 @@
                 pInputText
                 id="adminNationality"
                 name="adminNationality"
-                [(ngModel)]="form.adminNationality"
-                (ngModelChange)="clearFieldError('adminNationality')"
+                formControlName="adminNationality"
                 fluid
                 [disabled]="submitting()"
                 [attr.aria-invalid]="fieldError('adminNationality') ? true : null"
@@ -222,8 +214,7 @@
                 pInputText
                 id="centerName"
                 name="centerName"
-                [(ngModel)]="form.centerName"
-                (ngModelChange)="clearFieldError('centerName')"
+                formControlName="centerName"
                 fluid
                 [disabled]="submitting()"
                 [attr.aria-invalid]="fieldError('centerName') ? true : null"
@@ -240,8 +231,7 @@
                 pInputText
                 id="centerAddress"
                 name="centerAddress"
-                [(ngModel)]="form.centerAddress"
-                (ngModelChange)="clearFieldError('centerAddress')"
+                formControlName="centerAddress"
                 fluid
                 [disabled]="submitting()"
                 [attr.aria-invalid]="fieldError('centerAddress') ? true : null"

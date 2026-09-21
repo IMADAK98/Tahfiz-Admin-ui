@@ -6,7 +6,7 @@
         <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()" [disabled]="submitting()">×</button>
       </div>
 
-      <form id="dawra-form" class="modal-body" (ngSubmit)="onSubmit($event)">
+      <form [formGroup]="form" id="dawra-form" class="modal-body" (ngSubmit)="onSubmit($event)">
         @if (errorMessage()) {
           <p class="form-error" role="alert">{{ errorMessage() }}</p>
         }
@@ -18,10 +18,9 @@
             id="dawra-name"
             name="name"
             type="text"
-            [(ngModel)]="form.name"
+            formControlName="name"
             required
             [disabled]="submitting()"
-            (ngModelChange)="clearFieldError('name')"
           />
           <app-field-error [message]="fieldError('name')" errorId="dawra-name-error" />
         </div>
@@ -34,10 +33,9 @@
               id="start"
               name="startDate"
               type="date"
-              [(ngModel)]="form.startDate"
+              formControlName="startDate"
               required
               [disabled]="submitting()"
-              (ngModelChange)="clearFieldError('startDate')"
             />
             <app-field-error [message]="fieldError('startDate')" errorId="start-error" />
           </div>
@@ -48,10 +46,9 @@
               id="end"
               name="endDate"
               type="date"
-              [(ngModel)]="form.endDate"
+              formControlName="endDate"
               required
               [disabled]="submitting()"
-              (ngModelChange)="clearFieldError('endDate')"
             />
             <app-field-error [message]="fieldError('endDate')" errorId="end-error" />
           </div>
@@ -65,10 +62,9 @@
               id="reg-start"
               name="registerationStartDate"
               type="date"
-              [(ngModel)]="form.registerationStartDate"
+              formControlName="registerationStartDate"
               required
               [disabled]="submitting()"
-              (ngModelChange)="clearFieldError('registerationStartDate')"
             />
             <app-field-error
               [message]="fieldError('registerationStartDate')"
@@ -82,10 +78,9 @@
               id="reg-end"
               name="registerationEndDate"
               type="date"
-              [(ngModel)]="form.registerationEndDate"
+              formControlName="registerationEndDate"
               required
               [disabled]="submitting()"
-              (ngModelChange)="clearFieldError('registerationEndDate')"
             />
             <app-field-error
               [message]="fieldError('registerationEndDate')"
@@ -110,9 +105,9 @@
                   class="input"
                   type="date"
                   name="pendingHolidayDate"
-                  [(ngModel)]="form.pendingHolidayDate"
-                  [min]="form.startDate"
-                  [max]="form.endDate"
+                  formControlName="pendingHolidayDate"
+                  [min]="model().startDate"
+                  [max]="model().endDate"
                   aria-label="تاريخ إجازة"
                   [disabled]="submitting()"
                 />
@@ -121,9 +116,9 @@
                 </button>
               </div>
             }
-            @if (form.holidayDates.length) {
+            @if (model().holidayDates.length) {
               <div class="chip-list" aria-label="الإجازات المحددة">
-                @for (holiday of form.holidayDates; track holiday) {
+                @for (holiday of model().holidayDates; track holiday) {
                   <span class="holiday-chip">
                     {{ formatHolidayLabel(holiday) }}
                     <button type="button" aria-label="حذف" (click)="removeHoliday(holiday)" [disabled]="submitting()">

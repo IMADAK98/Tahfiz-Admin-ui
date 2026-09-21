@@ -1,15 +1,19 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function validateCreateHalaqaForm(form) {
-  if (!form.name.trim()) return 'اسم الحلقة مطلوب';
-  if (!form.category) return 'اختر الفئة';
-  if (!form.period) return 'اختر الفترة';
-  if (!form.teacherId) return 'اختر المعلّم';
-  if (!form.studentIds.length) return 'اختر طالباً واحداً على الأقل';
+  const errors = {};
+  if (!form.name.trim()) errors.name = 'اسم الحلقة مطلوب';
+  if (!form.category) errors.category = 'اختر الفئة';
+  if (!form.period) errors.periods = 'اختر الفترة';
+  if (!form.teacherId) errors.teacherId = 'اختر المعلّم';
+  if (!form.studentIds.length) errors.studentsIds = 'اختر طالباً واحداً على الأقل';
   if (form.studentLimit !== null && form.studentLimit < 1) {
-    return 'عدد الطلاب المستهدف يجب أن يكون 1 على الأقل';
+    errors.studentLimit = 'عدد الطلاب المستهدف يجب أن يكون 1 على الأقل';
   }
-  return null;
+  return errors;
 }
 
 const valid = {
@@ -21,9 +25,21 @@ const valid = {
   studentIds: [26],
 };
 
-assert.equal(validateCreateHalaqaForm(valid), null);
-assert.equal(validateCreateHalaqaForm({ ...valid, name: '  ' }), 'اسم الحلقة مطلوب');
-assert.equal(validateCreateHalaqaForm({ ...valid, teacherId: null }), 'اختر المعلّم');
-assert.equal(validateCreateHalaqaForm({ ...valid, studentIds: [] }), 'اختر طالباً واحداً على الأقل');
+assert.deepEqual(validateCreateHalaqaForm(valid), {});
+assert.equal(validateCreateHalaqaForm({ ...valid, name: '  ' }).name, 'اسم الحلقة مطلوب');
+assert.equal(validateCreateHalaqaForm({ ...valid, teacherId: null }).teacherId, 'اختر المعلّم');
+assert.equal(
+  validateCreateHalaqaForm({ ...valid, studentIds: [] }).studentsIds,
+  'اختر طالباً واحداً على الأقل',
+);
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const modalTs = readFileSync(
+  join(root, 'src/app/features/halaqat/create-halaqa-modal/create-halaqa-modal.ts'),
+  'utf8',
+);
+if (!modalTs.includes('fields.applyMap(validationError)')) {
+  throw new Error('halaqa form must apply client validation under fields');
+}
 
 console.log('halaqa-validation-self-check: ok');

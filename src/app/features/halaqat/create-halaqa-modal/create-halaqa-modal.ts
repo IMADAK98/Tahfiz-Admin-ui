@@ -1,9 +1,11 @@
 import { Component, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -17,7 +19,7 @@ import { HalaqatService } from '../halaqat.service';
 
 @Component({
   selector: 'app-create-halaqa-modal',
-  imports: [FormsModule, TranslatePipe, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, Select, FieldErrorComponent],
   templateUrl: './create-halaqa-modal.html',
   styleUrl: './create-halaqa-modal.scss',
 })
@@ -26,6 +28,7 @@ export class CreateHalaqaModalComponent {
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly activeTerm = input.required<ActiveTerm | null>();
@@ -34,7 +37,7 @@ export class CreateHalaqaModalComponent {
 
   protected readonly categoryOptions = HALQA_CATEGORY_OPTIONS;
   protected readonly periodOptions = HALQA_PERIOD_OPTIONS;
-  protected readonly form: CreateHalaqaFormModel = createEmptyCreateHalaqaForm();
+  protected readonly form = formGroupOf(this.fb, createEmptyCreateHalaqaForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -48,6 +51,10 @@ export class CreateHalaqaModalComponent {
     if (!this.fields.hasAny()) {
       this.errorMessage.set(null);
     }
+  }
+
+  protected model(): CreateHalaqaFormModel {
+    return this.form.getRawValue() as CreateHalaqaFormModel;
   }
   protected readonly teachers = signal<ActiveTeacher[]>([]);
   protected readonly students = signal<ActiveStudent[]>([]);
@@ -63,6 +70,11 @@ export class CreateHalaqaModalComponent {
   });
 
   constructor() {
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(name === 'period' ? 'periods' : name === 'studentIds' ? 'studentsIds' : name);
+      });
+    }
     effect(() => {
       if (!this.visible()) {
         return;
@@ -76,7 +88,7 @@ export class CreateHalaqaModalComponent {
   }
 
   protected selectedTeacher(): ActiveTeacher | null {
-    const teacherId = this.form.teacherId;
+    const teacherId = this.model().teacherId;
     if (!teacherId) {
       return null;
     }
@@ -98,21 +110,21 @@ export class CreateHalaqaModalComponent {
   }
 
   protected onTeacherChange(teacherId: number | null): void {
-    this.form.teacherId = teacherId;
+    this.form.controls['teacherId'].setValue(teacherId);
     this.clearFieldError('teacherId');
   }
 
   protected clearTeacher(): void {
-    this.form.teacherId = null;
+    this.form.controls['teacherId'].setValue(null);
   }
 
   protected availableStudents(): ActiveStudent[] {
-    const selectedIds = new Set(this.form.studentIds);
+    const selectedIds = new Set(this.model().studentIds);
     return this.students().filter((student) => !selectedIds.has(student.id));
   }
 
   protected selectedStudents(): ActiveStudent[] {
-    const selectedIds = new Set(this.form.studentIds);
+    const selectedIds = new Set(this.model().studentIds);
     return this.students().filter((student) => selectedIds.has(student.id));
   }
 
@@ -120,8 +132,9 @@ export class CreateHalaqaModalComponent {
     if (studentId == null) {
       return;
     }
-    if (!this.form.studentIds.includes(studentId)) {
-      this.form.studentIds = [...this.form.studentIds, studentId];
+    const studentIds = this.model().studentIds;
+    if (!studentIds.includes(studentId)) {
+      this.form.controls['studentIds'].setValue([...studentIds, studentId]);
       this.clearFieldError('studentsIds');
     }
     const picker = this.studentPicker();
@@ -133,7 +146,7 @@ export class CreateHalaqaModalComponent {
   }
 
   protected removeStudent(studentId: number): void {
-    this.form.studentIds = this.form.studentIds.filter((id) => id !== studentId);
+    this.form.controls['studentIds'].setValue(this.model().studentIds.filter((id) => id !== studentId));
     this.clearFieldError('studentsIds');
   }
 
@@ -152,14 +165,13 @@ export class CreateHalaqaModalComponent {
       return;
     }
 
-    const validationError = this.halaqatService.validateForm(this.form);
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    const validationError = this.halaqatService.validateForm(this.model());
+    if (this.fields.applyMap(validationError)) {
       return;
     }
 
     this.submitting.set(true);
-    this.halaqatService.createHalaqa(this.form, term.id).subscribe({
+    this.halaqatService.createHalaqa(this.model(), term.id).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.halaqaCreated);
@@ -204,7 +216,7 @@ export class CreateHalaqaModalComponent {
   }
 
   private resetForm(): void {
-    Object.assign(this.form, createEmptyCreateHalaqaForm());
+    this.form.reset(createEmptyCreateHalaqaForm());
     this.studentPicker()?.clear();
     this.fields.clearAll();
     this.errorMessage.set(null);

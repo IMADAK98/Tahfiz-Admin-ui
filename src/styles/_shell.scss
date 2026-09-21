@@ -228,6 +228,37 @@
   font-weight: 600;
 }
 
+button.user-chip {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+
+  &:hover {
+    background: var(--color-surface-elevated);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+.user-chip-caret {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-inline-end: 4px;
+}
+
+.p-menu.p-menu-overlay {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lg);
+  min-width: 13rem;
+  opacity: 1 !important;
+}
+
 .user-avatar {
   width: 32px;
   height: 32px;

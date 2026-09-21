@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -41,7 +42,7 @@ const MONTH_AR = [
 
 @Component({
   selector: 'app-progress-report',
-  imports: [FormsModule, Button, InputText, Select],
+  imports: [ReactiveFormsModule, Button, InputText, Select],
   templateUrl: './progress-report.html',
   styleUrl: './progress-report.scss',
 })
@@ -61,6 +62,21 @@ export class ProgressReportComponent implements OnInit {
   protected readonly dateContext = signal(toIsoDate(startOfWeekSunday()));
   protected readonly studentQuery = signal('');
   protected readonly table = signal<ProgressReportResponse | null>(null);
+  protected readonly halqaControl = new FormControl<number | null>(null);
+  protected readonly searchControl = new FormControl('', { nonNullable: true });
+  protected readonly dateControl = new FormControl(toIsoDate(startOfWeekSunday()), { nonNullable: true });
+
+  constructor() {
+    this.halqaControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => this.onHalqaChange(id));
+    this.searchControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((query) => this.studentQuery.set(query));
+    this.dateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      if (!value) {
+        return;
+      }
+      this.dateContext.set(value);
+      this.reloadTable();
+    });
+  }
 
   protected readonly weekLabel = computed(() => {
     if (this.period() !== 'week') {
@@ -150,8 +166,7 @@ export class ProgressReportComponent implements OnInit {
         this.termName.set(term?.name ?? null);
         this.halqaOptions.set(halqas);
         if (halqas.length > 0) {
-          this.selectedHalqaId.set(halqas[0].id);
-          this.reloadTable();
+          this.halqaControl.setValue(halqas[0].id);
         }
         this.bootstrapping.set(false);
       },
@@ -179,7 +194,9 @@ export class ProgressReportComponent implements OnInit {
     const prev = this.period();
     const prevCtx = this.dateContext();
     this.period.set(next);
-    this.dateContext.set(migrateDateContext(prev, prevCtx, next));
+    const nextContext = migrateDateContext(prev, prevCtx, next);
+    this.dateContext.set(nextContext);
+    this.dateControl.setValue(nextContext, { emitEvent: false });
     this.reloadTable();
   }
 
@@ -191,26 +208,6 @@ export class ProgressReportComponent implements OnInit {
   nextWeek(): void {
     this.dateContext.set(addDays(this.dateContext(), 7));
     this.reloadTable();
-  }
-
-  onDayChange(value: string): void {
-    if (!value) {
-      return;
-    }
-    this.dateContext.set(value);
-    this.reloadTable();
-  }
-
-  onMonthChange(value: string): void {
-    if (!value) {
-      return;
-    }
-    this.dateContext.set(value);
-    this.reloadTable();
-  }
-
-  onStudentQuery(value: string): void {
-    this.studentQuery.set(value);
   }
 
   exportCsv(): void {

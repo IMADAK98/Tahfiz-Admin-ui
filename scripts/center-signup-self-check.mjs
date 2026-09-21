@@ -1,6 +1,10 @@
 /** ponytail: XOR national-id vs passport payload builder (mock 17).
  *  Keep in sync with center-signup-form.model.ts buildPendingCenterPayload(). */
 
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const IdentityDocumentType = {
   NationalId: 'national_id',
   Passport: 'passport',
@@ -87,27 +91,42 @@ function toIsoDate(value) {
 }
 
 function validateCenterSignupForm(form) {
-  if (!form.adminName.trim()) return 'اسم المدير مطلوب';
+  const errors = {};
+  if (!form.adminName.trim()) errors.adminName = 'اسم المدير مطلوب';
   if (form.identityDocumentType === IdentityDocumentType.Passport) {
-    if (!form.adminPassportNumber.trim()) return 'رقم جواز السفر مطلوب';
+    if (!form.adminPassportNumber.trim()) errors.adminPassportNumber = 'رقم جواز السفر مطلوب';
   } else if (!form.adminIdentificationNumber.trim()) {
-    return 'رقم الهوية الوطنية مطلوب';
+    errors.adminIdentificationNumber = 'رقم الهوية الوطنية مطلوب';
   }
-  if (!form.adminEmail.trim()) return 'البريد الإلكتروني مطلوب';
-  if (!form.adminPhone.trim()) return 'رقم الجوال مطلوب';
-  if (!form.adminBirthDate) return 'تاريخ الميلاد مطلوب';
-  if (!form.adminAddress.trim()) return 'عنوان المدير مطلوب';
-  if (!form.adminNationality.trim()) return 'الجنسية مطلوبة';
-  if (!form.centerName.trim()) return 'اسم المركز مطلوب';
-  if (!form.centerAddress.trim()) return 'عنوان المركز مطلوب';
-  return null;
+  if (!form.adminEmail.trim()) errors.adminEmail = 'البريد الإلكتروني مطلوب';
+  if (!form.adminPhone.trim()) errors.adminPhone = 'رقم الجوال مطلوب';
+  if (!form.adminBirthDate) errors.adminBirthDate = 'تاريخ الميلاد مطلوب';
+  if (!form.adminAddress.trim()) errors.adminAddress = 'عنوان المدير مطلوب';
+  if (!form.adminNationality.trim()) errors.adminNationality = 'الجنسية مطلوبة';
+  if (!form.centerName.trim()) errors.centerName = 'اسم المركز مطلوب';
+  if (!form.centerAddress.trim()) errors.centerAddress = 'عنوان المركز مطلوب';
+  return errors;
 }
 
-if (validateCenterSignupForm({ ...base, adminName: '  ', identityDocumentType: IdentityDocumentType.NationalId }) !== 'اسم المدير مطلوب') {
-  throw new Error('expected admin name required');
+const emptyName = validateCenterSignupForm({
+  ...base,
+  adminName: '  ',
+  identityDocumentType: IdentityDocumentType.NationalId,
+});
+if (emptyName.adminName !== 'اسم المدير مطلوب') {
+  throw new Error('expected admin name required under adminName');
 }
 if (toIsoDate(new Date(2020, 0, 5)) !== '2020-01-05') {
   throw new Error('expected iso date');
+}
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const signupTs = readFileSync(join(root, 'src/app/features/center-signup/center-signup.ts'), 'utf8');
+if (!signupTs.includes('fields.applyMap(validateCenterSignupForm')) {
+  throw new Error('center signup must apply client validation under fields');
+}
+if (signupTs.includes('errorMessage.set(validationError)')) {
+  throw new Error('center signup must not dump client validation onto the top banner');
 }
 
 console.log('center-signup-self-check: ok');

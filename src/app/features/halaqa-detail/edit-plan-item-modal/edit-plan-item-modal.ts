@@ -1,11 +1,13 @@
-import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { QuranApiService } from '../../../core/api/quran-api.service';
 import { SurahApiRecord } from '../../../core/api/models/study-plan.model';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -24,9 +26,26 @@ import {
 } from '../enums';
 import { HalaqaDetailService } from '../halaqa-detail.service';
 
+const emptyPlanItemView: StudyPlanItemViewModel = {
+  id: 0,
+  type: 'HIFZ',
+  direction: 'NORMAL',
+  fromSurahNumber: 1,
+  fromSurahName: '',
+  fromAyah: 1,
+  toSurahNumber: null,
+  toSurahName: null,
+  toAyah: null,
+  amountType: 'LINE',
+  amountValue: 1,
+  rangeLabel: '',
+  amountLabel: '',
+  directionLabel: 'عادي',
+};
+
 @Component({
   selector: 'app-edit-plan-item-modal',
-  imports: [FormsModule, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Select, FieldErrorComponent],
   templateUrl: './edit-plan-item-modal.html',
 })
 export class EditPlanItemModalComponent {
@@ -34,6 +53,7 @@ export class EditPlanItemModalComponent {
   private readonly quranApi = inject(QuranApiService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly planName = input.required<string>();
@@ -44,22 +64,7 @@ export class EditPlanItemModalComponent {
   protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
   protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
-  protected readonly form = signal<PlanItemFormModel>(createPlanItemFormFromView({
-    id: 0,
-    type: 'HIFZ',
-    direction: 'NORMAL',
-    fromSurahNumber: 1,
-    fromSurahName: '',
-    fromAyah: 1,
-    toSurahNumber: null,
-    toSurahName: null,
-    toAyah: null,
-    amountType: 'LINE',
-    amountValue: 1,
-    rangeLabel: '',
-    amountLabel: '',
-    directionLabel: 'عادي',
-  }));
+  protected readonly form = formGroupOf(this.fb, createPlanItemFormFromView(emptyPlanItemView));
   protected readonly surahs = signal<SurahApiRecord[]>([]);
   protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
@@ -77,19 +82,35 @@ export class EditPlanItemModalComponent {
     }
   }
 
+  protected model(): PlanItemFormModel {
+    return this.form.getRawValue() as PlanItemFormModel;
+  }
+
   protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
   constructor() {
+    const nestNames: Record<string, string[]> = {
+      fromSurah: ['fromSurahNumber', 'fromSurah'],
+    };
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(...(nestNames[name] ?? [name]));
+      });
+    }
     effect(() => {
       const item = this.item();
       if (!this.visible() || !item) {
         return;
       }
-      this.form.set(createPlanItemFormFromView(item));
-      this.fields.clearAll();
-      this.errorMessage.set(null);
-      this.loadSurahs();
-      this.loadAyahs(item.fromSurahNumber);
+      untracked(() => {
+        this.form.reset(createPlanItemFormFromView(item));
+        this.form.controls['toSurah'].disable({ emitEvent: false });
+        this.form.controls['toAyah'].disable({ emitEvent: false });
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+        this.loadSurahs();
+        this.loadAyahs(item.fromSurahNumber);
+      });
     });
   }
 
@@ -106,22 +127,8 @@ export class EditPlanItemModalComponent {
     this.closed.emit();
   }
 
-  protected patchForm(patch: Partial<PlanItemFormModel>): void {
-    this.form.update((current) => ({ ...current, ...patch }));
-    const nestNames: string[] = [];
-    if ('type' in patch) nestNames.push('type');
-    if ('direction' in patch) nestNames.push('direction');
-    if ('fromSurah' in patch) nestNames.push('fromSurahNumber', 'fromSurah');
-    if ('fromAyah' in patch) nestNames.push('fromAyah');
-    if ('amountType' in patch) nestNames.push('amountType');
-    if ('amountValue' in patch) nestNames.push('amountValue');
-    if (nestNames.length) {
-      this.clearFieldError(...nestNames);
-    }
-  }
-
   protected onFromSurahChange(fromSurah: number): void {
-    this.patchForm({ fromSurah, fromAyah: 1 });
+    this.form.patchValue({ fromAyah: 1 });
     this.loadAyahs(fromSurah);
   }
 
@@ -134,14 +141,18 @@ export class EditPlanItemModalComponent {
 
     this.errorMessage.set(null);
     this.fields.clearAll();
-    const validationKey = validatePlanItemForm(this.form());
-    if (validationKey) {
-      this.errorMessage.set(this.translate.instant(validationKey));
+    const value = this.model();
+    const raw = validatePlanItemForm(value);
+    const mapped: Record<string, string> = {};
+    for (const [field, key] of Object.entries(raw)) {
+      mapped[field] = this.translate.instant(key);
+    }
+    if (this.fields.applyMap(mapped)) {
       return;
     }
 
     this.submitting.set(true);
-    this.detailService.updatePlanItem(item.id, this.form()).subscribe({
+    this.detailService.updatePlanItem(item.id, value).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);

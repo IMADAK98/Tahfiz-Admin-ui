@@ -84,14 +84,14 @@ export class HalaqaDetailService {
     );
   }
 
-  validateEditForm(form: EditHalaqaFormModel): string | null {
+  validateEditForm(form: EditHalaqaFormModel): Record<string, string> {
     return validateEditHalaqaForm(form);
   }
 
   updateHalqa(detail: HalaqaDetailViewModel, form: EditHalaqaFormModel): Observable<HalaqaDetailViewModel> {
-    const validationError = validateEditHalaqaForm(form);
-    if (validationError) {
-      throw new Error(validationError);
+    const errors = validateEditHalaqaForm(form);
+    if (Object.keys(errors).length) {
+      throw new Error(Object.values(errors)[0]);
     }
     return this.halqaApi
       .updateHalqa(detail.id, buildUpdateHalqaPayload(detail, form))

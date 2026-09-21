@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
 import { ApiError } from '../../core/api/api-error';
@@ -12,7 +12,7 @@ import { TeachersService } from './teachers.service';
 
 @Component({
   selector: 'app-teachers',
-  imports: [FormsModule, Button, TeacherFormModalComponent],
+  imports: [ReactiveFormsModule, Button, TeacherFormModalComponent],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
 })
@@ -27,7 +27,7 @@ export class TeachersComponent {
   protected readonly loadState = signal(TeachersLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
   protected readonly teachers = signal<ActiveTeacher[]>([]);
-  protected search = '';
+  protected readonly search = new FormControl('', { nonNullable: true });
 
   protected readonly showFormModal = signal(false);
   protected readonly formMode = signal<TeacherFormMode>('add');
@@ -39,7 +39,7 @@ export class TeachersComponent {
   }
 
   protected filteredTeachers(): ActiveTeacher[] {
-    return this.teachersService.filterTeachers(this.teachers(), this.search);
+    return this.teachersService.filterTeachers(this.teachers(), this.search.value);
   }
 
   protected countLabel(): string {

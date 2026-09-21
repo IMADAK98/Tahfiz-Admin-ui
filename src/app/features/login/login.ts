@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
@@ -11,15 +12,16 @@ import { canAccessAdmin, isTeacherRole } from '../../core/auth/auth-role.helpers
 import { AuthService } from '../../core/auth/auth.service';
 import { postLoginPath } from '../../core/auth/redirect.helpers';
 import { CENTER_SIGNUP_ROUTE } from '../../core/config/public-links';
+import { formGroupOf } from '../../core/forms/form-group-of';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
-import { createEmptyLoginForm } from './dto/login-form.model';
+import { LoginFormModel, createEmptyLoginForm } from './dto/login-form.model';
 import { LoginQueryReason } from './enums/login-query-reason.enum';
 import { LoginService } from './login.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, InputText, Password, Checkbox, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, InputText, Password, Checkbox, Button, FieldErrorComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -29,9 +31,10 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly centerSignupRoute = CENTER_SIGNUP_ROUTE;
-  protected readonly form = createEmptyLoginForm();
+  protected readonly form = formGroupOf(this.fb, createEmptyLoginForm());
   protected readonly submitting = signal(false);
   protected readonly forgotSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -51,6 +54,12 @@ export class LoginComponent {
   }
 
   constructor() {
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(name === 'resetEmail' ? 'email' : name);
+      });
+    }
+
     const reason = this.route.snapshot.queryParamMap.get('reason');
     if (reason === LoginQueryReason.Teacher) {
       this.infoMessage.set('استخدم تطبيق المعلم — لا يمكن الدخول إلى لوحة الإدارة من الويب.');
@@ -82,7 +91,7 @@ export class LoginComponent {
     this.errorMessage.set(null);
     this.submitting.set(true);
 
-    this.loginService.login(this.form).subscribe({
+    this.loginService.login(this.form.getRawValue() as LoginFormModel).subscribe({
       next: (claims) => {
         this.submitting.set(false);
 
@@ -119,7 +128,8 @@ export class LoginComponent {
     if (this.forgotSubmitting()) {
       return;
     }
-    const email = (this.form.resetEmail || this.form.email || '').trim();
+    const value = this.form.getRawValue() as LoginFormModel;
+    const email = (value.resetEmail || value.email || '').trim();
     if (!email) {
       this.errorMessage.set('أدخل البريد الإلكتروني أولاً.');
       return;

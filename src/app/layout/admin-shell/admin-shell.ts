@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { MenuItem } from 'primeng/api';
+import { Menu } from 'primeng/menu';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -16,6 +18,7 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
   '/admin/re-enrollment-requests': 'طلبات إعادة التسجيل',
   '/admin/reports/attendance': 'تقرير الحضور',
   '/admin/reports/progress': 'تقرير التقدّم',
+  '/admin/profile': 'الملف الشخصي',
 };
 
 const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
@@ -27,7 +30,7 @@ const SIDEBAR_COLLAPSED_KEY = 'tahfiz.admin.sidebarCollapsed';
 
 @Component({
   selector: 'app-admin-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Menu],
   templateUrl: './admin-shell.html',
 })
 export class AdminShellComponent {
@@ -41,6 +44,23 @@ export class AdminShellComponent {
   protected readonly pageSubtitle = signal<string | null>(null);
   protected readonly isDashboard = signal(false);
   protected readonly sidebarCollapsed = signal(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1');
+
+  protected userMenuItems(): MenuItem[] {
+    return [
+      {
+        label: 'الملف الشخصي',
+        icon: 'pi pi-user',
+        command: () => void this.router.navigate(['/admin/profile']),
+      },
+      { separator: true },
+      {
+        label: this.loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج',
+        icon: 'pi pi-sign-out',
+        disabled: this.loggingOut(),
+        command: () => this.logout(),
+      },
+    ];
+  }
 
   constructor() {
     const claims = this.auth.getClaims();

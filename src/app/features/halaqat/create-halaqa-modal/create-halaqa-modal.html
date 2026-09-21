@@ -14,7 +14,7 @@
         </button>
       </div>
 
-      <form id="halaqa-form" class="modal-body" (ngSubmit)="onSubmit($event)">
+      <form [formGroup]="form" id="halaqa-form" class="modal-body" (ngSubmit)="onSubmit($event)">
         @if (errorMessage()) {
           <p class="form-error" role="alert">{{ errorMessage() }}</p>
         }
@@ -26,11 +26,10 @@
             id="h-name"
             name="name"
             type="text"
-            [(ngModel)]="form.name"
+            formControlName="name"
             placeholder="مثال: حلقة الفجر"
             required
             [disabled]="submitting()"
-            (ngModelChange)="clearFieldError('name')"
           />
           <app-field-error [message]="fieldError('name')" errorId="h-name-error" />
         </div>
@@ -57,9 +56,8 @@
                   type="radio"
                   name="category"
                   [value]="option.value"
-                  [(ngModel)]="form.category"
+                  formControlName="category"
                   [disabled]="submitting()"
-                  (ngModelChange)="clearFieldError('category')"
                 />
                 {{ option.label }}
               </label>
@@ -77,9 +75,8 @@
                   type="radio"
                   name="period"
                   [value]="option.value"
-                  [(ngModel)]="form.period"
+                  formControlName="period"
                   [disabled]="submitting()"
-                  (ngModelChange)="clearFieldError('periods')"
                 />
                 {{ option.label }}
               </label>
@@ -98,9 +95,8 @@
               type="number"
               min="1"
               max="50"
-              [(ngModel)]="form.studentLimit"
+              formControlName="studentLimit"
               [disabled]="submitting()"
-              (ngModelChange)="clearFieldError('studentLimit')"
             />
             <app-field-error [message]="fieldError('studentLimit')" errorId="capacity-error" />
           </div>
@@ -122,8 +118,7 @@
                 appendTo="body"
                 required
                 [disabled]="submitting()"
-                [(ngModel)]="form.teacherId"
-                (ngModelChange)="onTeacherChange($event)"
+                formControlName="teacherId"
               />
               @if (selectedTeacher(); as teacher) {
                 <div class="chips" aria-live="polite">

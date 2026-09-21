@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
@@ -7,6 +8,7 @@ import { Checkbox } from 'primeng/checkbox';
 import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
 import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
+import { formGroupOf } from '../../core/forms/form-group-of';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import {
   CenterSignupFormModel,
@@ -19,19 +21,20 @@ import { CenterSignupService } from './center-signup.service';
 
 @Component({
   selector: 'app-center-signup',
-  imports: [FormsModule, RouterLink, Button, Checkbox, DatePicker, InputText],
+  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, DatePicker, InputText],
   templateUrl: './center-signup.html',
   styleUrl: './center-signup.scss',
 })
 export class CenterSignupComponent {
   private readonly signupApi = inject(CenterSignupService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly IdentityDocumentType = IdentityDocumentType;
   protected readonly today = new Date();
-  protected readonly form: CenterSignupFormModel = createEmptyCenterSignupForm();
-  protected usePassport = false;
-  protected adminBirthDate: Date | null = null;
+  protected readonly form = formGroupOf(this.fb, createEmptyCenterSignupForm());
+  protected readonly usePassport = new FormControl(false, { nonNullable: true });
+  protected readonly adminBirthDate = new FormControl<Date | null>(null);
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -49,32 +52,47 @@ export class CenterSignupComponent {
     }
   }
 
+  protected model(): CenterSignupFormModel {
+    return this.form.getRawValue() as CenterSignupFormModel;
+  }
+
+  constructor() {
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(name);
+      });
+    }
+    this.adminBirthDate.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.clearFieldError('adminBirthDate');
+    });
+  }
+
   onIdModeChange(): void {
-    this.form.identityDocumentType = this.usePassport
+    const identityDocumentType = this.usePassport.value
       ? IdentityDocumentType.Passport
       : IdentityDocumentType.NationalId;
-    if (this.form.identityDocumentType === IdentityDocumentType.Passport) {
-      this.form.adminIdentificationNumber = '';
+    this.form.patchValue({ identityDocumentType });
+    if (identityDocumentType === IdentityDocumentType.Passport) {
+      this.form.controls['adminIdentificationNumber'].setValue('');
       this.clearFieldError('adminIdentificationNumber');
     } else {
-      this.form.adminPassportNumber = '';
+      this.form.controls['adminPassportNumber'].setValue('');
       this.clearFieldError('adminPassportNumber');
     }
   }
 
   onSubmit(): void {
-    this.form.adminBirthDate = this.adminBirthDate ? toIsoDate(this.adminBirthDate) : '';
+    const birth = this.adminBirthDate.value;
+    this.form.controls['adminBirthDate'].setValue(birth ? toIsoDate(birth) : '');
     this.fields.clearAll();
-    const validationError = validateCenterSignupForm(this.form);
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    this.errorMessage.set(null);
+    const value = this.model();
+    if (this.fields.applyMap(validateCenterSignupForm(value))) {
       return;
     }
-
-    this.errorMessage.set(null);
     this.submitting.set(true);
 
-    this.signupApi.submitCenterSignup(this.form).subscribe({
+    this.signupApi.submitCenterSignup(value).subscribe({
       next: () => {
         this.submitting.set(false);
         this.showSuccess.set(true);

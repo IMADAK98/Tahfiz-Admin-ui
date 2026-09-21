@@ -40,53 +40,55 @@ export function createEmptyStudentForm(): StudentFormModel {
   };
 }
 
-export function validateStudentForm(form: StudentFormModel): string | null {
+/** Nest DTO keys so messages land on `<app-field-error>` (UI `fullName` → Nest `name`). */
+export function validateStudentForm(form: StudentFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.fullName.trim()) {
-    return 'الاسم الكامل مطلوب';
+    errors['name'] = 'الاسم الكامل مطلوب';
   }
   if (!form.email.trim()) {
-    return 'البريد الإلكتروني مطلوب';
+    errors['email'] = 'البريد الإلكتروني مطلوب';
   }
   if (!form.phone.trim()) {
-    return 'رقم الجوال مطلوب';
+    errors['phone'] = 'رقم الجوال مطلوب';
   }
   if (!form.educationStage) {
-    return 'اختر المرحلة الدراسية';
+    errors['educationStage'] = 'اختر المرحلة الدراسية';
   }
-  if (!form.identificationNumber.trim()) {
-    return 'رقم الهوية مطلوب';
+  const identificationNumber = form.identificationNumber.trim();
+  if (!identificationNumber) {
+    errors['identificationNumber'] = 'رقم الهوية مطلوب';
+  } else if (identificationNumber.length > 10) {
+    errors['identificationNumber'] = 'رقم الهوية يجب ألا يتجاوز 10 خانات';
   }
-  if (form.identificationNumber.trim().length > 10) {
-    return 'رقم الهوية يجب ألا يتجاوز 10 خانات';
-  }
-  if (!form.passportNumber.trim()) {
-    return 'رقم الجواز مطلوب';
-  }
-  if (form.passportNumber.trim().length > 10) {
-    return 'رقم الجواز يجب ألا يتجاوز 10 خانات';
+  const passportNumber = form.passportNumber.trim();
+  if (!passportNumber) {
+    errors['passportNumber'] = 'رقم الجواز مطلوب';
+  } else if (passportNumber.length > 10) {
+    errors['passportNumber'] = 'رقم الجواز يجب ألا يتجاوز 10 خانات';
   }
   if (!form.address.trim()) {
-    return 'العنوان مطلوب';
+    errors['address'] = 'العنوان مطلوب';
   }
   if (!form.birthDate.trim()) {
-    return 'تاريخ الميلاد مطلوب';
+    errors['birthDate'] = 'تاريخ الميلاد مطلوب';
   }
   if (!form.parentPhone.trim()) {
-    return 'جوال ولي الأمر مطلوب';
+    errors['parentPhone'] = 'جوال ولي الأمر مطلوب';
   }
   if (form.surahFrom === null || form.surahFrom < 1 || form.surahFrom > 114) {
-    return 'أدخل سورة البداية (1 إلى 114)';
+    errors['surahFrom'] = 'أدخل سورة البداية (1 إلى 114)';
   }
   if (form.surahTo === null || form.surahTo < 1 || form.surahTo > 114) {
-    return 'أدخل سورة النهاية (1 إلى 114)';
+    errors['surahTo'] = 'أدخل سورة النهاية (1 إلى 114)';
   }
   if (!form.hifzQuality) {
-    return 'اختر جودة الحفظ';
+    errors['hifzQuality'] = 'اختر جودة الحفظ';
   }
   if (!form.isHafiz) {
-    return 'اختر حالة الحفظ';
+    errors['isHafiz'] = 'اختر حالة الحفظ';
   }
-  return null;
+  return errors;
 }
 
 function yesNoToBool(value: YesNo): boolean {
@@ -101,7 +103,9 @@ function toIsoDateTime(dateInput: string): string {
   return `${dateInput}T00:00:00.000Z`;
 }
 
-export function buildCreateManualStudentPayload(form: StudentFormModel): CreateManualStudentPayload {
+export function buildCreateManualStudentPayload(
+  form: StudentFormModel,
+): CreateManualStudentPayload {
   return {
     name: form.fullName.trim(),
     email: form.email.trim(),

@@ -38,39 +38,41 @@ export function toIsoDate(value: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function validateCenterSignupForm(form: CenterSignupFormModel): string | null {
+/** Nest DTO keys so messages land under the input, not the top banner. */
+export function validateCenterSignupForm(form: CenterSignupFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.adminName.trim()) {
-    return 'اسم المدير مطلوب';
+    errors['adminName'] = 'اسم المدير مطلوب';
   }
   if (form.identityDocumentType === IdentityDocumentType.Passport) {
     if (!form.adminPassportNumber.trim()) {
-      return 'رقم جواز السفر مطلوب';
+      errors['adminPassportNumber'] = 'رقم جواز السفر مطلوب';
     }
   } else if (!form.adminIdentificationNumber.trim()) {
-    return 'رقم الهوية الوطنية مطلوب';
+    errors['adminIdentificationNumber'] = 'رقم الهوية الوطنية مطلوب';
   }
   if (!form.adminEmail.trim()) {
-    return 'البريد الإلكتروني مطلوب';
+    errors['adminEmail'] = 'البريد الإلكتروني مطلوب';
   }
   if (!form.adminPhone.trim()) {
-    return 'رقم الجوال مطلوب';
+    errors['adminPhone'] = 'رقم الجوال مطلوب';
   }
   if (!form.adminBirthDate) {
-    return 'تاريخ الميلاد مطلوب';
+    errors['adminBirthDate'] = 'تاريخ الميلاد مطلوب';
   }
   if (!form.adminAddress.trim()) {
-    return 'عنوان المدير مطلوب';
+    errors['adminAddress'] = 'عنوان المدير مطلوب';
   }
   if (!form.adminNationality.trim()) {
-    return 'الجنسية مطلوبة';
+    errors['adminNationality'] = 'الجنسية مطلوبة';
   }
   if (!form.centerName.trim()) {
-    return 'اسم المركز مطلوب';
+    errors['centerName'] = 'اسم المركز مطلوب';
   }
   if (!form.centerAddress.trim()) {
-    return 'عنوان المركز مطلوب';
+    errors['centerAddress'] = 'عنوان المركز مطلوب';
   }
-  return null;
+  return errors;
 }
 
 /** Build API payload — XOR national ID or passport per mock 17. */

@@ -27,7 +27,7 @@ export class TeachersService {
     return this.teacherApi.getByUserId(id).pipe(map(mapTeacherUserRecord));
   }
 
-  validate(form: TeacherFormModel, mode: TeacherFormMode): string | null {
+  validate(form: TeacherFormModel, mode: TeacherFormMode): Record<string, string> {
     return validateTeacherForm(form, mode);
   }
 

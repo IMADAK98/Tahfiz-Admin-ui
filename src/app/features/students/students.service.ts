@@ -18,7 +18,7 @@ export class StudentsService {
     });
   }
 
-  validate(form: StudentFormModel): string | null {
+  validate(form: StudentFormModel): Record<string, string> {
     return validateStudentForm(form);
   }
 

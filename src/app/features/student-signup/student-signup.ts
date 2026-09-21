@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
@@ -13,11 +14,15 @@ import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, EducationStage } from './enums/education-stage.enum';
 import { HifzQuality, MemorizationLevel, mapMemorizationToHifz } from './enums/hifz-quality.enum';
+import {
+  StudentSignupFormValues,
+  validateStudentSignupForm,
+} from './dto/student-signup-form.dto';
 import { StudentSignupService } from './student-signup.service';
 
 @Component({
   selector: 'app-student-signup',
-  imports: [FormsModule, RouterLink, Button, Checkbox, InputText, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, InputText, Select, FieldErrorComponent],
   templateUrl: './student-signup.html',
   styleUrl: './student-signup.scss',
 })
@@ -27,6 +32,7 @@ export class StudentSignupComponent implements OnInit {
   private readonly signup = inject(StudentSignupService);
   private readonly toast = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly educationOptions = [...EDUCATION_STAGE_OPTIONS];
   protected readonly EducationStage = EducationStage;
@@ -52,22 +58,48 @@ export class StudentSignupComponent implements OnInit {
   }
 
   protected token = '';
-  protected name = '';
-  protected email = '';
-  protected phone = '';
-  protected birthDate = '';
-  protected address = '';
-  protected educationStage: EducationStage | '' = EducationStage.ElementarySchool;
-  protected usePassport = false;
-  protected identificationNumber = '';
-  protected passportNumber = '';
-  protected parentName = '';
-  protected parentPhone = '';
-  protected memorization: MemorizationLevel = 'partial';
-  protected surahFrom: number | null = 1;
-  protected surahTo: number | null = 12;
-  protected hifzQuality: HifzQuality = HifzQuality.NonHafiz;
-  protected memDetail = '';
+  protected readonly form = this.fb.group({
+    name: [''],
+    email: [''],
+    phone: [''],
+    birthDate: [''],
+    address: [''],
+    educationStage: [EducationStage.ElementarySchool as EducationStage | ''],
+    usePassport: [false],
+    identificationNumber: [''],
+    passportNumber: [''],
+    parentName: [''],
+    parentPhone: [''],
+    memorization: ['partial' as MemorizationLevel],
+    surahFrom: this.fb.control<number | null>(1),
+    surahTo: this.fb.control<number | null>(12),
+    hifzQuality: [HifzQuality.NonHafiz],
+    memDetail: [''],
+  });
+
+  constructor() {
+    for (const name of Object.keys(this.form.controls)) {
+      this.form.get(name)?.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        if (name === 'memorization') {
+          this.onMemorizationChange();
+          return;
+        }
+        if (name === 'usePassport') {
+          this.onIdModeChange();
+          return;
+        }
+        this.clearFieldError(name);
+      });
+    }
+  }
+
+  protected usingPassport(): boolean {
+    return !!this.form.controls['usePassport'].value;
+  }
+
+  protected memorizationLevel(): MemorizationLevel {
+    return this.form.controls['memorization'].value as MemorizationLevel;
+  }
 
   ngOnInit(): void {
     const qp = this.route.snapshot.queryParamMap;
@@ -89,32 +121,32 @@ export class StudentSignupComponent implements OnInit {
   }
 
   onIdModeChange(): void {
-    if (this.usePassport) {
-      this.identificationNumber = '';
+    if (this.usingPassport()) {
+      this.form.controls['identificationNumber'].setValue('', { emitEvent: false });
       this.clearFieldError('identificationNumber');
     } else {
-      this.passportNumber = '';
+      this.form.controls['passportNumber'].setValue('', { emitEvent: false });
       this.clearFieldError('passportNumber');
     }
   }
 
   onMemorizationChange(): void {
-    const mapped = mapMemorizationToHifz(this.memorization);
-    this.hifzQuality = mapped.hifzQuality;
+    const memorization = this.form.controls['memorization'].value as MemorizationLevel;
+    const mapped = mapMemorizationToHifz(memorization);
+    this.form.controls['hifzQuality'].setValue(mapped.hifzQuality, { emitEvent: false });
     this.clearFieldError('hifzQuality', 'isHafiz');
-    if (this.memorization === 'khatm') {
-      this.surahFrom = 1;
-      this.surahTo = 114;
-    } else if (this.memorization === 'none') {
-      this.surahFrom = 1;
-      this.surahTo = 1;
+    if (memorization === 'khatm') {
+      this.form.patchValue({ surahFrom: 1, surahTo: 114 }, { emitEvent: false });
+    } else if (memorization === 'none') {
+      this.form.patchValue({ surahFrom: 1, surahTo: 1 }, { emitEvent: false });
     }
   }
 
-  goStep2(htmlForm: HTMLFormElement, form: NgForm): void {
+  goStep2(): void {
     this.errorMessage.set(null);
-    if (form.invalid || !htmlForm.checkValidity()) {
-      htmlForm.reportValidity();
+    this.form.markAllAsTouched();
+    const value = this.signupValue();
+    if (this.fields.applyMap(validateStudentSignupForm(value, 1))) {
       return;
     }
     if (!this.token || this.tokenStatus() !== 'valid') {
@@ -130,9 +162,9 @@ export class StudentSignupComponent implements OnInit {
     this.step.set(1);
   }
 
-  onSubmit(htmlForm: HTMLFormElement, form: NgForm): void {
-    if (form.invalid || !htmlForm.checkValidity()) {
-      htmlForm.reportValidity();
+  onSubmit(): void {
+    this.form.markAllAsTouched();
+    if (this.fields.applyMap(validateStudentSignupForm(this.signupValue(), 2))) {
       return;
     }
     if (!this.token || this.tokenStatus() !== 'valid') {
@@ -144,25 +176,26 @@ export class StudentSignupComponent implements OnInit {
     this.fields.clearAll();
     this.submitting.set(true);
     this.onMemorizationChange();
+    const latest = this.form.getRawValue();
 
     this.signup
       .submit({
-        name: this.name,
-        email: this.email,
-        phone: this.phone,
-        birthDate: this.birthDate,
-        address: this.address,
-        educationStage: this.educationStage,
-        usePassport: this.usePassport,
-        identificationNumber: this.identificationNumber,
-        passportNumber: this.passportNumber,
-        parentPhone: this.parentPhone,
-        parentName: this.parentName,
-        memorization: this.memorization,
-        surahFrom: this.surahFrom,
-        surahTo: this.surahTo,
-        hifzQuality: this.hifzQuality,
-        memDetail: this.memDetail,
+        name: String(latest.name),
+        email: String(latest.email),
+        phone: String(latest.phone),
+        birthDate: String(latest.birthDate),
+        address: String(latest.address),
+        educationStage: latest.educationStage as EducationStage,
+        usePassport: !!latest.usePassport,
+        identificationNumber: String(latest.identificationNumber),
+        passportNumber: String(latest.passportNumber),
+        parentPhone: String(latest.parentPhone),
+        parentName: String(latest.parentName),
+        memorization: latest.memorization as MemorizationLevel,
+        surahFrom: latest.surahFrom,
+        surahTo: latest.surahTo,
+        hifzQuality: latest.hifzQuality as HifzQuality,
+        memDetail: String(latest.memDetail),
         token: this.token,
       })
       .subscribe({
@@ -199,6 +232,29 @@ export class StudentSignupComponent implements OnInit {
       });
   }
 
+
+  private signupValue(): StudentSignupFormValues {
+    const value = this.form.getRawValue();
+    return {
+      name: String(value.name ?? ''),
+      email: String(value.email ?? ''),
+      phone: String(value.phone ?? ''),
+      birthDate: String(value.birthDate ?? ''),
+      address: String(value.address ?? ''),
+      educationStage: value.educationStage as EducationStage | '',
+      usePassport: !!value.usePassport,
+      identificationNumber: String(value.identificationNumber ?? ''),
+      passportNumber: String(value.passportNumber ?? ''),
+      parentPhone: String(value.parentPhone ?? ''),
+      parentName: String(value.parentName ?? ''),
+      memorization: value.memorization as MemorizationLevel,
+      surahFrom: value.surahFrom,
+      surahTo: value.surahTo,
+      hifzQuality: value.hifzQuality as HifzQuality,
+      memDetail: String(value.memDetail ?? ''),
+      token: this.token,
+    };
+  }
 
   goHome(): void {
     void this.router.navigateByUrl('/');

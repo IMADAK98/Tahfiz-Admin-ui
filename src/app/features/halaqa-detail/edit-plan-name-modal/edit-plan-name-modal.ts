@@ -1,5 +1,6 @@
-import { Component, effect, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
@@ -11,7 +12,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-plan-name-modal',
-  imports: [FormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent],
   templateUrl: './edit-plan-name-modal.html',
 })
 export class EditPlanNameModalComponent {
@@ -25,7 +26,7 @@ export class EditPlanNameModalComponent {
   readonly saved = output<void>();
   readonly closed = output<void>();
 
-  protected readonly name = signal('');
+  protected readonly name = new FormControl('', { nonNullable: true });
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -42,13 +43,17 @@ export class EditPlanNameModalComponent {
   }
 
   constructor() {
+    this.name.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.clearFieldError('name'));
     effect(() => {
       if (!this.visible()) {
         return;
       }
-      this.name.set(this.planName());
-      this.fields.clearAll();
-      this.errorMessage.set(null);
+      const planName = this.planName();
+      untracked(() => {
+        this.name.setValue(planName);
+        this.fields.clearAll();
+        this.errorMessage.set(null);
+      });
     });
   }
 
@@ -68,12 +73,14 @@ export class EditPlanNameModalComponent {
   protected onSubmit(event: Event): void {
     event.preventDefault();
     const planId = this.planId();
-    const trimmed = this.name().trim();
+    const trimmed = this.name.value.trim();
     if (!planId) {
       return;
     }
     if (!trimmed) {
-      this.errorMessage.set(this.translate.instant(HALAQA_DETAIL_I18N.validation.planName));
+      this.fields.applyMap({
+        name: this.translate.instant(HALAQA_DETAIL_I18N.validation.planName),
+      });
       return;
     }
 

@@ -31,7 +31,7 @@ assert.doesNotMatch(
   /<button[^>]*type="submit"/,
   'دخول must remain p-button, not a native submit button',
 );
-assert.match(ts, /this\.loginService\.login\(this\.form\)/);
+assert.match(ts, /this\.loginService\.login\(this\.form\.getRawValue\(\)/);
 assert.match(ts, /if \(this\.submitting\(\)\)/);
 assert.match(loginService, /form\.rememberMe/);
 assert.match(tokenStorage, /persist \? localStorage : sessionStorage/);

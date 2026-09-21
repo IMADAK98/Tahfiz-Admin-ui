@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { ApiError } from '../../core/api/api-error';
 import { ActiveStudent, RegistrationLinkResult } from '../../core/api/models/student.model';
@@ -13,7 +13,7 @@ import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-students',
-  imports: [FormsModule, Button, StudentFormModalComponent],
+  imports: [ReactiveFormsModule, Button, StudentFormModalComponent],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })
@@ -28,7 +28,7 @@ export class StudentsComponent {
   protected readonly loadState = signal(StudentsLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
   protected readonly students = signal<ActiveStudent[]>([]);
-  protected search = '';
+  protected readonly search = new FormControl('', { nonNullable: true });
 
   protected readonly showFormModal = signal(false);
   protected readonly detailStudent = signal<ActiveStudent | null>(null);
@@ -43,7 +43,7 @@ export class StudentsComponent {
   }
 
   protected filteredStudents(): ActiveStudent[] {
-    return this.studentsService.filterStudents(this.students(), this.search);
+    return this.studentsService.filterStudents(this.students(), this.search.value);
   }
 
   protected countLabel(): string {

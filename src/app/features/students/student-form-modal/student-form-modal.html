@@ -22,7 +22,7 @@
         </p-button>
       </div>
 
-      <form (ngSubmit)="onSubmit($event)">
+      <form [formGroup]="form" (ngSubmit)="onSubmit($event)">
         <div class="modal-body student-form-body">
           @if (errorMessage()) {
             <p class="form-error" role="alert">{{ errorMessage() }}</p>
@@ -38,10 +38,9 @@
                 name="fullName"
                 type="text"
                 required
-                [(ngModel)]="form.fullName"
+                formControlName="fullName"
                 placeholder="مثال: عبدالله بن سعد الدوسري"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('name')"
               />
               <app-field-error [message]="fieldError('name')" errorId="sf-name-error" />
             </div>
@@ -53,12 +52,11 @@
                 name="email"
                 type="email"
                 required
-                [(ngModel)]="form.email"
+                formControlName="email"
                 placeholder="name@example.com"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('email')"
               />
               <app-field-error [message]="fieldError('email')" errorId="sf-email-error" />
             </div>
@@ -70,12 +68,11 @@
                 name="phone"
                 type="tel"
                 required
-                [(ngModel)]="form.phone"
+                formControlName="phone"
                 placeholder="05XXXXXXXX"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('phone')"
               />
               <app-field-error [message]="fieldError('phone')" errorId="sf-phone-error" />
             </div>
@@ -87,14 +84,16 @@
                 name="parentPhone"
                 type="tel"
                 required
-                [(ngModel)]="form.parentPhone"
+                formControlName="parentPhone"
                 placeholder="05XXXXXXXX"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('parentPhone')"
               />
-              <app-field-error [message]="fieldError('parentPhone')" errorId="sf-parent-phone-error" />
+              <app-field-error
+                [message]="fieldError('parentPhone')"
+                errorId="sf-parent-phone-error"
+              />
             </div>
             <div class="input-group">
               <label for="sf-id">رقم الهوية</label>
@@ -105,12 +104,11 @@
                 type="text"
                 required
                 maxlength="10"
-                [(ngModel)]="form.identificationNumber"
+                formControlName="identificationNumber"
                 placeholder="10 أرقام"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('identificationNumber')"
               />
               <app-field-error
                 [message]="fieldError('identificationNumber')"
@@ -126,14 +124,16 @@
                 type="text"
                 required
                 maxlength="10"
-                [(ngModel)]="form.passportNumber"
+                formControlName="passportNumber"
                 placeholder="رقم الجواز"
                 dir="ltr"
                 style="text-align: right"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('passportNumber')"
               />
-              <app-field-error [message]="fieldError('passportNumber')" errorId="sf-passport-error" />
+              <app-field-error
+                [message]="fieldError('passportNumber')"
+                errorId="sf-passport-error"
+              />
             </div>
             <div class="input-group">
               <label for="sf-address">العنوان</label>
@@ -143,10 +143,9 @@
                 name="address"
                 type="text"
                 required
-                [(ngModel)]="form.address"
+                formControlName="address"
                 placeholder="الحي، المدينة"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('address')"
               />
               <app-field-error [message]="fieldError('address')" errorId="sf-address-error" />
             </div>
@@ -158,9 +157,8 @@
                 name="birthDate"
                 type="date"
                 required
-                [(ngModel)]="form.birthDate"
+                formControlName="birthDate"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('birthDate')"
               />
               <app-field-error [message]="fieldError('birthDate')" errorId="sf-birthdate-error" />
             </div>
@@ -169,7 +167,7 @@
               <p-select
                 inputId="sf-stage"
                 name="educationStage"
-                [(ngModel)]="form.educationStage"
+                formControlName="educationStage"
                 [options]="educationStageOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -178,7 +176,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('educationStage')"
               />
               <app-field-error [message]="fieldError('educationStage')" errorId="sf-stage-error" />
             </div>
@@ -191,7 +188,7 @@
               <p-select
                 inputId="sf-is-hafiz"
                 name="isHafiz"
-                [(ngModel)]="form.isHafiz"
+                formControlName="isHafiz"
                 [options]="yesNoOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -200,7 +197,6 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('isHafiz')"
               />
               <app-field-error [message]="fieldError('isHafiz')" errorId="sf-is-hafiz-error" />
             </div>
@@ -209,7 +205,7 @@
               <p-select
                 inputId="sf-hifz-quality"
                 name="hifzQuality"
-                [(ngModel)]="form.hifzQuality"
+                formControlName="hifzQuality"
                 [options]="hifzQualityOptions"
                 optionLabel="label"
                 optionValue="value"
@@ -218,9 +214,11 @@
                 required
                 [fluid]="true"
                 appendTo="body"
-                (ngModelChange)="clearFieldError('hifzQuality')"
               />
-              <app-field-error [message]="fieldError('hifzQuality')" errorId="sf-hifz-quality-error" />
+              <app-field-error
+                [message]="fieldError('hifzQuality')"
+                errorId="sf-hifz-quality-error"
+              />
             </div>
             <div class="input-group">
               <label for="sf-surah-from">من سورة (1–114)</label>
@@ -232,9 +230,8 @@
                 min="1"
                 max="114"
                 required
-                [(ngModel)]="form.surahFrom"
+                formControlName="surahFrom"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('surahFrom')"
               />
               <app-field-error [message]="fieldError('surahFrom')" errorId="sf-surah-from-error" />
             </div>
@@ -248,9 +245,8 @@
                 min="1"
                 max="114"
                 required
-                [(ngModel)]="form.surahTo"
+                formControlName="surahTo"
                 [disabled]="submitting()"
-                (ngModelChange)="clearFieldError('surahTo')"
               />
               <app-field-error [message]="fieldError('surahTo')" errorId="sf-surah-to-error" />
             </div>

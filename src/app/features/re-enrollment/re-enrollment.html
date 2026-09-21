@@ -131,8 +131,7 @@
                     class="input"
                     [id]="'reject-reason-' + request.id"
                     rows="3"
-                    [ngModel]="rejectReason(request.id)"
-                    (ngModelChange)="setRejectReason(request.id, $event)"
+                    [formControl]="rejectControl(request.id)"
                     [placeholder]="'reEnrollment.reject.reasonPlaceholder' | translate"
                     [disabled]="isActingOn(request)"
                   ></textarea>

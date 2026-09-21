@@ -1,17 +1,20 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Password } from 'primeng/password';
 import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { AuthService } from '../../core/auth/auth.service';
+import { formGroupOf } from '../../core/forms/form-group-of';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
+import { createEmptyResetPasswordForm } from './dto/reset-password-form.model';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [FormsModule, RouterLink, Password, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, Password, Button, FieldErrorComponent],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',
 })
@@ -20,11 +23,9 @@ export class ResetPasswordComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
-  protected readonly form = {
-    newPassword: '',
-    confirmPassword: '',
-  };
+  protected readonly form = formGroupOf(this.fb, createEmptyResetPasswordForm());
   protected readonly token = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -39,6 +40,15 @@ export class ResetPasswordComponent implements OnInit {
     if (!this.fields.hasAny()) {
       this.errorMessage.set(null);
     }
+  }
+
+  constructor() {
+    this.form.controls['newPassword'].valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.clearFieldError('newPassword');
+    });
+    this.form.controls['confirmPassword'].valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.clearFieldError('confirmPassword');
+    });
   }
 
   ngOnInit(): void {
@@ -65,18 +75,19 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     this.fields.clearAll();
-    const password = this.form.newPassword;
-    const confirm = this.form.confirmPassword;
+    this.errorMessage.set(null);
+    const password = String(this.form.controls['newPassword'].value ?? '');
+    const confirm = String(this.form.controls['confirmPassword'].value ?? '');
+    const errors: Record<string, string> = {};
     if (!password || password.length < 6) {
-      this.errorMessage.set('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.');
-      return;
+      errors['newPassword'] = 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.';
     }
     if (password !== confirm) {
-      this.errorMessage.set('كلمتا المرور غير متطابقتين.');
+      errors['confirmPassword'] = 'كلمتا المرور غير متطابقتين.';
+    }
+    if (this.fields.applyMap(errors)) {
       return;
     }
-
-    this.errorMessage.set(null);
     this.submitting.set(true);
 
     this.auth.resetPassword(token, password).subscribe({

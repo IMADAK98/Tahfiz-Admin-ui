@@ -1,23 +1,24 @@
 import { CreateHalaqaFormModel } from './create-halaqa-form.model';
 
-export function validateCreateHalaqaForm(form: CreateHalaqaFormModel): string | null {
+export function validateCreateHalaqaForm(form: CreateHalaqaFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   if (!form.name.trim()) {
-    return 'اسم الحلقة مطلوب';
+    errors['name'] = 'اسم الحلقة مطلوب';
   }
   if (!form.category) {
-    return 'اختر الفئة';
+    errors['category'] = 'اختر الفئة';
   }
   if (!form.period) {
-    return 'اختر الفترة';
+    errors['periods'] = 'اختر الفترة';
   }
   if (!form.teacherId) {
-    return 'اختر المعلّم';
+    errors['teacherId'] = 'اختر المعلّم';
   }
   if (!form.studentIds.length) {
-    return 'اختر طالباً واحداً على الأقل';
+    errors['studentsIds'] = 'اختر طالباً واحداً على الأقل';
   }
   if (form.studentLimit !== null && form.studentLimit < 1) {
-    return 'عدد الطلاب المستهدف يجب أن يكون 1 على الأقل';
+    errors['studentLimit'] = 'عدد الطلاب المستهدف يجب أن يكون 1 على الأقل';
   }
-  return null;
+  return errors;
 }

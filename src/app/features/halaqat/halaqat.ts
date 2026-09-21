@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../core/api/api-error';
 import { HalqaListItem } from '../../core/api/models/halqa.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { AuthService } from '../../core/auth/auth.service';
+import { formGroupOf } from '../../core/forms/form-group-of';
 import { HalaqaDetailViewModel } from '../halaqa-detail/dto';
 import { EditHalaqaModalComponent } from '../halaqa-detail/edit-halaqa-modal/edit-halaqa-modal';
 import { CreateHalaqaModalComponent } from './create-halaqa-modal/create-halaqa-modal';
@@ -21,13 +22,14 @@ import { HalaqatService } from './halaqat.service';
 
 @Component({
   selector: 'app-halaqat',
-  imports: [FormsModule, RouterLink, CreateHalaqaModalComponent, EditHalaqaModalComponent, Select],
+  imports: [ReactiveFormsModule, RouterLink, CreateHalaqaModalComponent, EditHalaqaModalComponent, Select],
   templateUrl: './halaqat.html',
   styleUrl: './halaqat.scss',
 })
 export class HalaqatComponent {
   private readonly halaqatService = inject(HalaqatService);
   private readonly auth = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
 
   protected readonly HalaqatLoadState = HalaqatLoadState;
   protected readonly categoryFilterOptions = [
@@ -38,7 +40,7 @@ export class HalaqatComponent {
     { value: '' as const, label: 'كل الفترات' },
     ...HALQA_PERIOD_OPTIONS,
   ];
-  protected readonly filters: HalaqatFiltersModel = createEmptyHalaqatFilters();
+  protected readonly filters = formGroupOf(this.fb, createEmptyHalaqatFilters());
 
   protected readonly loadState = signal(HalaqatLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
@@ -56,7 +58,7 @@ export class HalaqatComponent {
   protected periodsLabel = halqaPeriodsLabel;
 
   protected filteredHalaqat(): HalqaListItem[] {
-    return this.halaqatService.filterHalaqat(this.halaqat(), this.filters);
+    return this.halaqatService.filterHalaqat(this.halaqat(), this.filters.getRawValue() as HalaqatFiltersModel);
   }
 
   protected filteredCountLabel(): string {

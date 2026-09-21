@@ -1,7 +1,9 @@
 import { Component, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
+import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
@@ -15,7 +17,7 @@ import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-create-term-modal',
-  imports: [FormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, FieldErrorComponent],
   templateUrl: './create-term-modal.html',
   styleUrl: './create-term-modal.scss',
 })
@@ -24,12 +26,13 @@ export class CreateTermModalComponent {
   private readonly auth = inject(AuthService);
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
   readonly termCreated = output<void>();
   readonly closed = output<void>();
 
-  protected readonly form: CreateTermFormModel = createEmptyCreateTermForm();
+  protected readonly form = formGroupOf(this.fb, createEmptyCreateTermForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   private readonly fields = createFieldErrorBag();
@@ -45,8 +48,20 @@ export class CreateTermModalComponent {
     }
   }
 
+  protected model(): CreateTermFormModel {
+    return this.form.getRawValue() as CreateTermFormModel;
+  }
+
+  constructor() {
+    for (const [name, control] of Object.entries(this.form.controls)) {
+      control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+        this.clearFieldError(name);
+      });
+    }
+  }
+
   protected holidaysEnabled(): boolean {
-    return canPickHolidayDates(this.form);
+    return canPickHolidayDates(this.model());
   }
 
   protected onBackdropClick(event: MouseEvent): void {
@@ -64,26 +79,31 @@ export class CreateTermModalComponent {
   }
 
   protected addHoliday(): void {
-    const date = this.form.pendingHolidayDate;
+    const value = this.model();
+    const date = value.pendingHolidayDate;
     if (!date || !this.holidaysEnabled()) {
       return;
     }
-    if (date < this.form.startDate || date > this.form.endDate) {
-      this.errorMessage.set('يجب أن تقع أيام الإجازة ضمن فترة الدورة');
+    if (date < value.startDate || date > value.endDate) {
+      this.fields.applyMap({ holidayDates: 'يجب أن تقع أيام الإجازة ضمن فترة الدورة' });
       return;
     }
-    if (this.form.holidayDates.includes(date)) {
-      this.errorMessage.set('هذا التاريخ مضاف مسبقاً');
+    if (value.holidayDates.includes(date)) {
+      this.fields.applyMap({ holidayDates: 'هذا التاريخ مضاف مسبقاً' });
       return;
     }
-    this.form.holidayDates = [...this.form.holidayDates, date].sort();
-    this.form.pendingHolidayDate = '';
+    this.form.patchValue({
+      holidayDates: [...value.holidayDates, date].sort(),
+      pendingHolidayDate: '',
+    });
     this.clearFieldError('holidayDates');
     this.errorMessage.set(null);
   }
 
   protected removeHoliday(date: string): void {
-    this.form.holidayDates = this.form.holidayDates.filter((item) => item !== date);
+    this.form.controls['holidayDates'].setValue(
+      this.model().holidayDates.filter((item) => item !== date),
+    );
     this.clearFieldError('holidayDates');
   }
 
@@ -110,14 +130,13 @@ export class CreateTermModalComponent {
       return;
     }
 
-    const validationError = this.termsService.validateForm(this.form);
-    if (validationError) {
-      this.errorMessage.set(validationError);
+    const value = this.model();
+    if (this.fields.applyMap(this.termsService.validateForm(value))) {
       return;
     }
 
     this.submitting.set(true);
-    this.termsService.createTerm(this.form, centerId).subscribe({
+    this.termsService.createTerm(value, centerId).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.termCreated);
@@ -139,7 +158,7 @@ export class CreateTermModalComponent {
   }
 
   private resetForm(): void {
-    Object.assign(this.form, createEmptyCreateTermForm());
+    this.form.reset(createEmptyCreateTermForm());
     this.fields.clearAll();
     this.errorMessage.set(null);
   }

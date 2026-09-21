@@ -77,15 +77,15 @@ export class HalaqatService {
     );
   }
 
-  validateForm(form: CreateHalaqaFormModel): string | null {
+  validateForm(form: CreateHalaqaFormModel): Record<string, string> {
     return validateCreateHalaqaForm(form);
   }
 
   /** Create assigns teacher + students via POST /halqa (not assign-teacher / enroll-students). */
   createHalaqa(form: CreateHalaqaFormModel, termId: number): Observable<HalqaListItem> {
-    const validationError = validateCreateHalaqaForm(form);
-    if (validationError) {
-      throw new Error(validationError);
+    const errors = validateCreateHalaqaForm(form);
+    if (Object.keys(errors).length) {
+      throw new Error(Object.values(errors)[0]);
     }
     return this.halqaApi
       .createHalqa(buildCreateHalaqaPayload(form, termId))

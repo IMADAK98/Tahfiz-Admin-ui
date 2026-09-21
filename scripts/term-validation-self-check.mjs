@@ -2,17 +2,23 @@
 import assert from 'node:assert/strict';
 
 const validate = (form) => {
-  if (!form.name.trim()) return 'اسم الدورة مطلوب';
-  if (!form.startDate || !form.endDate) return 'تاريخ بداية ونهاية الدورة مطلوبان';
-  if (!form.registerationStartDate || !form.registerationEndDate) return 'فترة التسجيل مطلوبة';
-  if (form.startDate > form.endDate) return 'تاريخ النهاية يجب أن يكون بعد تاريخ البداية';
-  if (form.registerationStartDate > form.registerationEndDate) {
-    return 'نهاية التسجيل يجب أن تكون بعد بداية التسجيل';
+  const errors = {};
+  if (!form.name.trim()) errors.name = 'اسم الدورة مطلوب';
+  if (!form.startDate || !form.endDate) {
+    if (!form.startDate) errors.startDate = 'تاريخ بداية ونهاية الدورة مطلوبان';
+    if (!form.endDate) errors.endDate = 'تاريخ بداية ونهاية الدورة مطلوبان';
+  } else if (form.startDate > form.endDate) {
+    errors.endDate = 'تاريخ النهاية يجب أن يكون بعد تاريخ البداية';
   }
-  if (form.registerationEndDate > form.endDate) {
-    return 'نهاية التسجيل يجب أن تكون قبل أو في نفس يوم نهاية الدورة';
+  if (!form.registerationStartDate || !form.registerationEndDate) {
+    if (!form.registerationStartDate) errors.registerationStartDate = 'فترة التسجيل مطلوبة';
+    if (!form.registerationEndDate) errors.registerationEndDate = 'فترة التسجيل مطلوبة';
+  } else if (form.registerationStartDate > form.registerationEndDate) {
+    errors.registerationEndDate = 'نهاية التسجيل يجب أن تكون بعد بداية التسجيل';
+  } else if (form.endDate && form.registerationEndDate > form.endDate) {
+    errors.registerationEndDate = 'نهاية التسجيل يجب أن تكون قبل أو في نفس يوم نهاية الدورة';
   }
-  return null;
+  return errors;
 };
 
 assert.equal(
@@ -23,11 +29,11 @@ assert.equal(
     registerationStartDate: '2026-08-15',
     registerationEndDate: '2027-01-01',
     holidayDates: [],
-  }),
+  }).registerationEndDate,
   'نهاية التسجيل يجب أن تكون قبل أو في نفس يوم نهاية الدورة',
 );
 
-assert.equal(
+assert.deepEqual(
   validate({
     name: 'ok',
     startDate: '2026-09-01',
@@ -36,7 +42,7 @@ assert.equal(
     registerationEndDate: '2026-09-20',
     holidayDates: [],
   }),
-  null,
+  {},
 );
 
 console.log('term-validation-self-check: ok');

@@ -38,9 +38,9 @@ export class ReEnrollmentService {
   }
 
   rejectRequest(id: number, form: RejectReEnrollmentFormModel): Observable<void> {
-    const validationError = validateRejectForm(form);
-    if (validationError) {
-      throw new Error(validationError);
+    const errors = validateRejectForm(form);
+    if (Object.keys(errors).length) {
+      throw new Error(Object.values(errors)[0]);
     }
     return this.reEnrollmentApi.rejectRequest(id, {
       rejectionReason: form.rejectionReason.trim(),

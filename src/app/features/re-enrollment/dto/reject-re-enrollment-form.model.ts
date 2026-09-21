@@ -6,13 +6,13 @@ export function createEmptyRejectForm(): RejectReEnrollmentFormModel {
   return { rejectionReason: '' };
 }
 
-export function validateRejectForm(form: RejectReEnrollmentFormModel): string | null {
+export function validateRejectForm(form: RejectReEnrollmentFormModel): Record<string, string> {
+  const errors: Record<string, string> = {};
   const reason = form.rejectionReason.trim();
   if (!reason) {
-    return 'سبب الرفض مطلوب';
+    errors['rejectionReason'] = 'سبب الرفض مطلوب';
+  } else if (reason.length < 3) {
+    errors['rejectionReason'] = 'اكتب سبباً أوضح (3 أحرف على الأقل)';
   }
-  if (reason.length < 3) {
-    return 'اكتب سبباً أوضح (3 أحرف على الأقل)';
-  }
-  return null;
+  return errors;
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -26,7 +27,7 @@ import {
 
 @Component({
   selector: 'app-attendance-report',
-  imports: [FormsModule, Button, InputText, Select],
+  imports: [ReactiveFormsModule, Button, InputText, Select],
   templateUrl: './attendance-report.html',
   styleUrl: './attendance-report.scss',
 })
@@ -44,6 +45,13 @@ export class AttendanceReportComponent implements OnInit {
   protected readonly weekStartDate = signal(toIsoDate(startOfWeekSunday()));
   protected readonly studentQuery = signal('');
   protected readonly table = signal<WeeklyAttendanceTable | null>(null);
+  protected readonly halqaControl = new FormControl<number | null>(null);
+  protected readonly searchControl = new FormControl('', { nonNullable: true });
+
+  constructor() {
+    this.halqaControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => this.onHalqaChange(id));
+    this.searchControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((query) => this.studentQuery.set(query));
+  }
 
   protected readonly weekLabel = computed(() => formatWeekLabelAr(this.weekStartDate()));
 
@@ -121,8 +129,7 @@ export class AttendanceReportComponent implements OnInit {
         this.termName.set(term?.name ?? null);
         this.halqaOptions.set(halqas);
         if (halqas.length > 0) {
-          this.selectedHalqaId.set(halqas[0].id);
-          this.reloadTable();
+          this.halqaControl.setValue(halqas[0].id);
         }
         this.bootstrapping.set(false);
       },
@@ -148,10 +155,6 @@ export class AttendanceReportComponent implements OnInit {
   nextWeek(): void {
     this.weekStartDate.set(addDays(this.weekStartDate(), 7));
     this.reloadTable();
-  }
-
-  onStudentQuery(value: string): void {
-    this.studentQuery.set(value);
   }
 
   exportCsv(): void {
