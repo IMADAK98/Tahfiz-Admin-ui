@@ -1,4 +1,13 @@
-import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -22,6 +31,8 @@ type AssignStep = 'confirm' | 'select';
   imports: [ReactiveFormsModule, TranslatePipe, Button, Select, FieldErrorComponent],
   templateUrl: './assign-halqa-modal.html',
   styleUrl: './assign-halqa-modal.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'assign-halqa-modal-host' },
 })
 export class AssignHalqaModalComponent {
   private readonly studentsService = inject(StudentsService);
@@ -29,8 +40,7 @@ export class AssignHalqaModalComponent {
   private readonly toastMessage = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
 
-  readonly visible = input.required<boolean>();
-  readonly student = input.required<CreatedManualStudent | null>();
+  readonly student = input.required<CreatedManualStudent>();
   readonly assigned = output<void>();
   readonly skipped = output<void>();
 
@@ -58,10 +68,8 @@ export class AssignHalqaModalComponent {
     });
 
     effect(() => {
-      if (!this.visible()) {
-        return;
-      }
-      untracked(() => this.reset());
+      const created = this.student();
+      untracked(() => this.reset(created));
     });
   }
 
@@ -140,9 +148,9 @@ export class AssignHalqaModalComponent {
     return this.listedHalqaCount() > 0 ? this.i18n.allFull : this.i18n.empty;
   }
 
-  private reset(): void {
+  private reset(created: CreatedManualStudent): void {
     this.step.set('confirm');
-    this.studentId.set(this.student()?.id ?? null);
+    this.studentId.set(created.id ?? null);
     this.selectableHalqas.set([]);
     this.listedHalqaCount.set(0);
     this.selectedHalqaId.setValue(null);
@@ -154,9 +162,6 @@ export class AssignHalqaModalComponent {
 
   private ensureStudentId(): void {
     const current = this.student();
-    if (!current) {
-      return;
-    }
     if (current.id && current.id > 0) {
       this.studentId.set(current.id);
       return;

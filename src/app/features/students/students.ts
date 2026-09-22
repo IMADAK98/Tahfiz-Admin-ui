@@ -43,7 +43,7 @@ export class StudentsComponent {
   protected readonly search = new FormControl('', { nonNullable: true });
 
   protected readonly showFormModal = signal(false);
-  protected readonly showAssignModal = signal(false);
+  /** ponytail: non-null mounts assign dialog. Don't flip a sibling `visible` after closing the form — zoneless CD can skip that. */
   protected readonly createdStudent = signal<CreatedManualStudent | null>(null);
   protected readonly detailStudent = signal<ActiveStudent | null>(null);
 
@@ -96,9 +96,8 @@ export class StudentsComponent {
   }
 
   protected onStudentSaved(created: CreatedManualStudent): void {
-    this.showFormModal.set(false);
     this.createdStudent.set(created);
-    this.showAssignModal.set(true);
+    this.showFormModal.set(false);
   }
 
   protected onAssignSkipped(): void {
@@ -112,7 +111,6 @@ export class StudentsComponent {
   }
 
   private closeAssignModal(): void {
-    this.showAssignModal.set(false);
     this.createdStudent.set(null);
   }
 

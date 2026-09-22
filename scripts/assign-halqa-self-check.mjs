@@ -226,8 +226,20 @@ if (!centerApi.includes('getActiveHalqas') || !centerApi.includes('/active-halqa
 }
 
 const studentsTs = readFileSync(join(root, 'src/app/features/students/students.ts'), 'utf8');
-if (!studentsTs.includes('showAssignModal') || !studentsTs.includes('onStudentSaved')) {
-  throw new Error('students page must open the assign dialog after create');
+if (!studentsTs.includes('onStudentSaved') || !studentsTs.includes('createdStudent.set(created)')) {
+  throw new Error('students page must keep the created student after manual create');
+}
+if (studentsTs.includes('showAssignModal')) {
+  throw new Error('do not gate assign on a sibling visible flag — parent @if (createdStudent) mounts it');
+}
+const onSaved = studentsTs.slice(studentsTs.indexOf('onStudentSaved'));
+if (onSaved.indexOf('createdStudent.set(created)') > onSaved.indexOf('showFormModal.set(false)')) {
+  throw new Error('set createdStudent before closing the form so the assign dialog mounts in the same turn');
+}
+
+const studentsHtml = readFileSync(join(root, 'src/app/features/students/students.html'), 'utf8');
+if (!studentsHtml.includes('@if (createdStudent(); as created)')) {
+  throw new Error('parent must mount assign dialog via @if (createdStudent())');
 }
 
 const formModal = readFileSync(
@@ -247,6 +259,15 @@ if (assignHtml.includes('<button')) {
 }
 if (!assignHtml.includes('p-select') || !assignHtml.includes('p-button')) {
   throw new Error('assign dialog must use PrimeNG p-button + Select');
+}
+if (assignHtml.includes('@if (visible())')) {
+  throw new Error('assign dialog must render when mounted — parent @if owns visibility');
+}
+if (!assignHtml.includes('icon="pi pi-times"')) {
+  throw new Error('close control must use pi-times — projected × renders as A- on PrimeNG 22');
+}
+if (assignHtml.includes('>\n          ×') || assignHtml.includes('>×<')) {
+  throw new Error('do not project × into p-button');
 }
 
 const ar = JSON.parse(readFileSync(join(root, 'public/i18n/ar.json'), 'utf8'));

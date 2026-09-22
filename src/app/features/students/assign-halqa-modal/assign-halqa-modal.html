@@ -1,88 +1,85 @@
-@if (visible()) {
-  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
-    <div
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="assign-halqa-title"
-      (click)="$event.stopPropagation()"
-    >
-      <div class="modal-header">
-        <h2 id="assign-halqa-title">{{ i18n.title | translate }}</h2>
+<div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="assign-halqa-title"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="modal-header">
+      <h2 id="assign-halqa-title">{{ i18n.title | translate }}</h2>
+      <p-button
+        type="button"
+        [text]="true"
+        [rounded]="true"
+        severity="secondary"
+        icon="pi pi-times"
+        ariaLabel="إغلاق"
+        [disabled]="submitting()"
+        (onClick)="close()"
+      />
+    </div>
+
+    @if (step() === 'confirm') {
+      <div class="modal-body">
+        <p class="assign-prompt">{{ i18n.prompt | translate }}</p>
+      </div>
+      <div class="modal-footer">
+        <p-button type="button" [label]="i18n.yes | translate" (onClick)="onYes()" />
         <p-button
           type="button"
-          [text]="true"
-          [rounded]="true"
+          [label]="i18n.no | translate"
           severity="secondary"
-          [ariaLabel]="i18n.close | translate"
-          [disabled]="submitting()"
           (onClick)="close()"
-        >
-          ×
-        </p-button>
+        />
       </div>
-
-      @if (step() === 'confirm') {
+    } @else {
+      <form (ngSubmit)="onSubmit($event)">
         <div class="modal-body">
-          <p class="assign-prompt">{{ i18n.prompt | translate }}</p>
+          @if (errorMessage()) {
+            <p class="form-error" role="alert">{{ errorMessage() }}</p>
+          }
+
+          @if (pickersLoading()) {
+            <p class="hint">{{ i18n.loading | translate }}</p>
+          } @else if (selectableHalqas().length) {
+            <div class="input-group">
+              <label for="assign-halqa-select">{{ i18n.halqaLabel | translate }}</label>
+              <p-select
+                inputId="assign-halqa-select"
+                name="halqaId"
+                [formControl]="selectedHalqaId"
+                [options]="selectableHalqas()"
+                optionLabel="name"
+                optionValue="id"
+                [placeholder]="i18n.halqaPlaceholder | translate"
+                [disabled]="submitting()"
+                [fluid]="true"
+                appendTo="body"
+              />
+              <app-field-error [message]="fieldError('halqaId')" errorId="assign-halqa-error" />
+            </div>
+          } @else {
+            <p class="hint">{{ emptyCopyKey() | translate }}</p>
+          }
         </div>
+
         <div class="modal-footer">
-          <p-button type="button" [label]="i18n.yes | translate" (onClick)="onYes()" />
+          <p-button
+            type="submit"
+            [label]="i18n.save | translate"
+            [loading]="submitting()"
+            [disabled]="saveDisabled()"
+          />
           <p-button
             type="button"
-            [label]="i18n.no | translate"
+            [label]="i18n.cancel | translate"
             severity="secondary"
+            [disabled]="submitting()"
             (onClick)="close()"
           />
         </div>
-      } @else {
-        <form (ngSubmit)="onSubmit($event)">
-          <div class="modal-body">
-            @if (errorMessage()) {
-              <p class="form-error" role="alert">{{ errorMessage() }}</p>
-            }
-
-            @if (pickersLoading()) {
-              <p class="hint">{{ i18n.loading | translate }}</p>
-            } @else if (selectableHalqas().length) {
-              <div class="input-group">
-                <label for="assign-halqa-select">{{ i18n.halqaLabel | translate }}</label>
-                <p-select
-                  inputId="assign-halqa-select"
-                  name="halqaId"
-                  [formControl]="selectedHalqaId"
-                  [options]="selectableHalqas()"
-                  optionLabel="name"
-                  optionValue="id"
-                  [placeholder]="i18n.halqaPlaceholder | translate"
-                  [disabled]="submitting()"
-                  [fluid]="true"
-                  appendTo="body"
-                />
-                <app-field-error [message]="fieldError('halqaId')" errorId="assign-halqa-error" />
-              </div>
-            } @else {
-              <p class="hint">{{ emptyCopyKey() | translate }}</p>
-            }
-          </div>
-
-          <div class="modal-footer">
-            <p-button
-              type="submit"
-              [label]="i18n.save | translate"
-              [loading]="submitting()"
-              [disabled]="saveDisabled()"
-            />
-            <p-button
-              type="button"
-              [label]="i18n.cancel | translate"
-              severity="secondary"
-              [disabled]="submitting()"
-              (onClick)="close()"
-            />
-          </div>
-        </form>
-      }
-    </div>
+      </form>
+    }
   </div>
-}
+</div>

@@ -116,12 +116,13 @@
   (closed)="closeFormModal()"
 />
 
-<app-assign-halqa-modal
-  [visible]="showAssignModal()"
-  [student]="createdStudent()"
-  (assigned)="onAssignDone()"
-  (skipped)="onAssignSkipped()"
-/>
+@if (createdStudent(); as created) {
+  <app-assign-halqa-modal
+    [student]="created"
+    (assigned)="onAssignDone()"
+    (skipped)="onAssignSkipped()"
+  />
+}
 
 @if (detailStudent(); as student) {
   <div class="modal-backdrop" role="presentation" (click)="closeDetail()">
