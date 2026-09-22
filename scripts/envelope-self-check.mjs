@@ -13,6 +13,12 @@ function unwrapData(body, httpStatus) {
   return body.data;
 }
 
+/** Nest enroll often returns `{ data: null }` on 2xx — must not throw. */
+function unwrapEnvelopeOrNull(body, httpStatus) {
+  if (!body || !envelopeOk(body, httpStatus)) throw new Error('not ok');
+  return body.data ?? null;
+}
+
 const cases = [
   [{ statusCode: 200, data: { ok: true } }, 201, { ok: true }],
   [{ status: 200, data: [] }, 200, []],
@@ -28,6 +34,13 @@ for (const [body, http, expected] of cases) {
   if (JSON.stringify(got) !== JSON.stringify(expected)) {
     throw new Error(`unexpected: ${JSON.stringify(got)}`);
   }
+}
+
+if (unwrapEnvelopeOrNull({ statusCode: 200, data: null }, 200) !== null) {
+  throw new Error('unwrapEnvelopeOrNull must accept data:null on 2xx');
+}
+if (unwrapEnvelopeOrNull({ statusCode: 201 }, 201) !== null) {
+  throw new Error('unwrapEnvelopeOrNull must treat missing data as null');
 }
 
 console.log('envelope-self-check: ok');

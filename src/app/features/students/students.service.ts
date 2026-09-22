@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { CenterApiService } from '../../core/api/center-api.service';
 import { HalqaApiService } from '../../core/api/halqa-api.service';
 import { StudentRequestApiService } from '../../core/api/student-request-api.service';
@@ -42,7 +42,14 @@ export class StudentsService {
   createStudent(form: StudentFormModel): Observable<CreatedManualStudent> {
     return this.studentRequestApi
       .createManual(buildCreateManualStudentPayload(form))
-      .pipe(map((created) => mergeCreatedWithForm(created, form)));
+      .pipe(
+        map((created) => mergeCreatedWithForm(created, form)),
+        // ponytail: merge first so email-match can run when Nest data is null / missing id.
+        // catchError: lookup failure must not hide create success (dialog still opens).
+        switchMap((created) =>
+          this.resolveCreatedStudentId(created).pipe(catchError(() => of(created))),
+        ),
+      );
   }
 
   /** Prefer create `data.id`; email-match available then active students only if missing. */
