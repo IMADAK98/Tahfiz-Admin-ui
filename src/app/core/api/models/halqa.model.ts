@@ -1,10 +1,4 @@
-export type HalqaCategory =
-  | 'PRIMARY'
-  | 'SECONDARY'
-  | 'HIGHER'
-  | 'SPECIAL'
-  | 'TALQIN'
-  | 'TELAWAH';
+export type HalqaCategory = 'PRIMARY' | 'SECONDARY' | 'HIGHER' | 'SPECIAL' | 'TALQIN' | 'TELAWAH';
 
 export type HalqaPeriod = 'FAJR' | 'DUHUR' | 'ASR' | 'MAGHRIB' | 'ISHA' | 'ONLINE';
 

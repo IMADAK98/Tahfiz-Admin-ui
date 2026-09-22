@@ -32,14 +32,16 @@ export class CenterApiService {
 
   getDashboardCards(centerId: number): Observable<DashboardCards> {
     return this.http
-      .get<ApiEnvelope<DashboardCards>>(
-        `${this.apiBaseUrl}/center/${centerId}/dashboard-cards`,
-        { observe: 'response' },
-      )
+      .get<ApiEnvelope<DashboardCards>>(`${this.apiBaseUrl}/center/${centerId}/dashboard-cards`, {
+        observe: 'response',
+      })
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  getActiveTeachers(centerId: number, query: ActiveTeachersQuery = {}): Observable<ActiveTeacher[]> {
+  getActiveTeachers(
+    centerId: number,
+    query: ActiveTeachersQuery = {},
+  ): Observable<ActiveTeacher[]> {
     let params = new HttpParams();
     if (query.page !== undefined) {
       params = params.set('page', String(query.page));
@@ -59,7 +61,10 @@ export class CenterApiService {
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  getAvailableTeachers(centerId: number, query: ActiveTeachersQuery = {}): Observable<ActiveTeacher[]> {
+  getAvailableTeachers(
+    centerId: number,
+    query: ActiveTeachersQuery = {},
+  ): Observable<ActiveTeacher[]> {
     return this.getTeachers(`${this.apiBaseUrl}/center/${centerId}/available-teachers`, query);
   }
 
@@ -72,7 +77,10 @@ export class CenterApiService {
       .pipe(map((res) => unwrapActiveStudentsPayload(unwrapEnvelope(res.body, res.status))));
   }
 
-  getActiveStudents(centerId: number, query: ActiveStudentsQuery = {}): Observable<ActiveStudent[]> {
+  getActiveStudents(
+    centerId: number,
+    query: ActiveStudentsQuery = {},
+  ): Observable<ActiveStudent[]> {
     let params = new HttpParams();
     if (query.page !== undefined) {
       params = params.set('page', String(query.page));
@@ -128,7 +136,10 @@ export class CenterApiService {
     }
 
     return this.http
-      .get<ApiEnvelope<ActiveTeacher[]>>(url, withSkipGlobalErrorToast({ observe: 'response', params }))
+      .get<ApiEnvelope<ActiveTeacher[]>>(
+        url,
+        withSkipGlobalErrorToast({ observe: 'response', params }),
+      )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 }

@@ -3,7 +3,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
-import { ActiveStudent, CreatedManualStudent, RegistrationLinkResult } from '../../core/api/models/student.model';
+import {
+  ActiveStudent,
+  CreatedManualStudent,
+  RegistrationLinkResult,
+} from '../../core/api/models/student.model';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
@@ -15,7 +19,13 @@ import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-students',
-  imports: [ReactiveFormsModule, Button, InputText, StudentFormModalComponent, AssignHalqaModalComponent],
+  imports: [
+    ReactiveFormsModule,
+    Button,
+    InputText,
+    StudentFormModalComponent,
+    AssignHalqaModalComponent,
+  ],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })

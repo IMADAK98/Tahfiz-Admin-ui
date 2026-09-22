@@ -108,9 +108,9 @@ assert.deepEqual(
   [3, 5],
 );
 assert.deepEqual(
-  unwrapActiveHalqasPayload({ items: [{ id: '7', name: 'مغرب', studentLimit: '8', studentsCount: '2' }] }).map(
-    (row) => row.remainingCapacity,
-  ),
+  unwrapActiveHalqasPayload({
+    items: [{ id: '7', name: 'مغرب', studentLimit: '8', studentsCount: '2' }],
+  }).map((row) => row.remainingCapacity),
   [6],
 );
 assert.deepEqual(unwrapActiveHalqasPayload(null), []);
@@ -128,8 +128,15 @@ assert.equal(
 assert.equal(findStudentIdByEmail([{ id: 1, email: 'nope@x.com' }], 'a@b.c'), null);
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const createManual = readFileSync(join(root, 'src/app/core/api/student-request-api.service.ts'), 'utf8');
-if (!createManual.includes('createManual(payload: CreateManualStudentPayload): Observable<CreatedManualStudent>')) {
+const createManual = readFileSync(
+  join(root, 'src/app/core/api/student-request-api.service.ts'),
+  'utf8',
+);
+if (
+  !createManual.includes(
+    'createManual(payload: CreateManualStudentPayload): Observable<CreatedManualStudent>',
+  )
+) {
   throw new Error('createManual must not discard the created student as Observable<void>');
 }
 if (!createManual.includes('mapCreatedManualStudent')) {
@@ -146,7 +153,10 @@ if (!studentsTs.includes('showAssignModal') || !studentsTs.includes('onStudentSa
   throw new Error('students page must open the assign dialog after create');
 }
 
-const formModal = readFileSync(join(root, 'src/app/features/students/student-form-modal/student-form-modal.ts'), 'utf8');
+const formModal = readFileSync(
+  join(root, 'src/app/features/students/student-form-modal/student-form-modal.ts'),
+  'utf8',
+);
 if (formModal.includes('saved = output<void>()')) {
   throw new Error('student form must emit created { id, email?, name? }');
 }

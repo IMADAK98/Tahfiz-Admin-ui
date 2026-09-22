@@ -57,7 +57,7 @@ This checkout already cycles roster card taps PRESENT→ABSENT→LATE→LEAVE wi
 
 ## Angular Admin — post manual-create → assign ḥalaqa
 
-In progress
+Done
 
-After admin `POST /admin/student-requests/manual-create` on `/admin/students`, offer «تعيين إلى حلقة؟».
-Preserve create `data.id` (coerce string→number); `GET /center/:id/active-halqas`; enroll via existing `HalqaApiService.enrollStudents`.
+Create success on `/admin/students` opens «تعيين إلى حلقة؟» (نعم/لا). لا reloads the list; نعم + حفظ enrolls via `POST /halqa/enroll-students/{id}`.
+`createManual` now returns coerced `data.id`; `CenterApiService.getActiveHalqas` lists capacity-aware ḥalaqas; full ḥalaqas are skipped when countable.

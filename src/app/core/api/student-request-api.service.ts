@@ -6,8 +6,15 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { CreateManualStudentPayload, CreatedManualStudent, mapCreatedManualStudent } from './models/student.model';
-import { RejectStudentRequestPayload, StudentRequestApiRecord } from './models/student-request.model';
+import {
+  CreateManualStudentPayload,
+  CreatedManualStudent,
+  mapCreatedManualStudent,
+} from './models/student.model';
+import {
+  RejectStudentRequestPayload,
+  StudentRequestApiRecord,
+} from './models/student-request.model';
 
 /** Admin student-requests HTTP — list is pending-only per OpenAPI summary. */
 @Injectable({ providedIn: 'root' })

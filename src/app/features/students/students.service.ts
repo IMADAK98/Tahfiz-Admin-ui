@@ -39,11 +39,13 @@ export class StudentsService {
   }
 
   createStudent(form: StudentFormModel): Observable<CreatedManualStudent> {
-    return this.studentRequestApi.createManual(buildCreateManualStudentPayload(form)).pipe(
-      switchMap((created) =>
-        this.resolveCreatedStudentId(created).pipe(catchError(() => of(created))),
-      ),
-    );
+    return this.studentRequestApi
+      .createManual(buildCreateManualStudentPayload(form))
+      .pipe(
+        switchMap((created) =>
+          this.resolveCreatedStudentId(created).pipe(catchError(() => of(created))),
+        ),
+      );
   }
 
   /** Prefer create `data.id`; email-match available then active students only if missing. */
@@ -76,9 +78,9 @@ export class StudentsService {
   }
 
   loadAssignableHalqas(centerId: number): Observable<AssignableHalqasResult> {
-    return this.centerApi.getActiveHalqas(centerId).pipe(
-      map((all) => ({ all, selectable: selectableActiveHalqas(all) })),
-    );
+    return this.centerApi
+      .getActiveHalqas(centerId)
+      .pipe(map((all) => ({ all, selectable: selectableActiveHalqas(all) })));
   }
 
   enrollStudent(halqaId: number, studentId: number): Observable<unknown> {
