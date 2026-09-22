@@ -4,7 +4,12 @@
       <h1>طلبات الطلاب</h1>
       <p class="requests-subtitle">موافقة على طلبات التسجيل مع بيانات ولي الأمر وحالة الحفظ</p>
     </div>
-    <p-button type="button" label="الطلاب النشطون" severity="secondary" routerLink="/admin/students" />
+    <p-button
+      type="button"
+      label="الطلاب النشطون"
+      severity="secondary"
+      routerLink="/admin/students"
+    />
   </header>
 
   @if (loadState() === StudentRequestsLoadState.Loading) {
@@ -16,7 +21,12 @@
     <div class="empty-block">
       <h2>لا توجد طلبات طلاب معلّقة</h2>
       <p>الطلبات الواردة من رابط التسجيل أو النموذج تظهر هنا للقبول أو الرفض.</p>
-      <p-button type="button" label="عرض الطلاب" severity="secondary" routerLink="/admin/students" />
+      <p-button
+        type="button"
+        label="عرض الطلاب"
+        severity="secondary"
+        routerLink="/admin/students"
+      />
     </div>
   } @else {
     <div class="toolbar">
@@ -113,6 +123,13 @@
   }
 </section>
 
+<app-assign-halqa-modal
+  [visible]="showAssignModal()"
+  [student]="approvedStudent()"
+  (assigned)="onAssignDone()"
+  (skipped)="onAssignSkipped()"
+/>
+
 @if (activeApproveRequest(); as request) {
   <div class="modal-backdrop" role="presentation" (click)="closeApprove()">
     <div
@@ -138,7 +155,8 @@
       </div>
       <div class="modal-body">
         <p style="margin: 0; font-size: 1rem; line-height: 1.55; font-weight: 600">
-          هل أنت متأكد من قبول طلب <strong>{{ request.name }}</strong>؟ سيُضاف كطالب نشط.
+          هل أنت متأكد من قبول طلب <strong>{{ request.name }}</strong
+          >؟ سيُضاف كطالب نشط.
         </p>
       </div>
       <div class="modal-footer">
@@ -186,7 +204,10 @@
       </div>
       <form (ngSubmit)="confirmReject(request)">
         <div class="modal-body">
-          <p class="reject-hint">رفض طلب <strong>{{ request.name }}</strong>.</p>
+          <p class="reject-hint">
+            رفض طلب <strong>{{ request.name }}</strong
+            >.
+          </p>
           <div class="input-group">
             <label for="f-rejection-reason">سبب الرفض</label>
             <textarea

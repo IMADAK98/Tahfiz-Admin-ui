@@ -61,3 +61,10 @@ Done
 
 Create success on `/admin/students` opens «تعيين إلى حلقة؟» (نعم/لا). لا reloads the list; نعم + حفظ enrolls via `POST /halqa/enroll-students/{id}`.
 `createManual` now returns coerced `data.id`; `CenterApiService.getActiveHalqas` lists capacity-aware ḥalaqas; full ḥalaqas are skipped when countable.
+
+## Angular Admin — post approve → assign ḥalaqa
+
+Done
+
+Approve on `/admin/student-requests` reuses `app-assign-halqa-modal` (same chrome as post-create). لا reloads pending; نعم + حفظ enrolls.
+Student id from approve `data` (incl. nested userId/user.id), else `existingUserId`, else email-match in the shared modal.
