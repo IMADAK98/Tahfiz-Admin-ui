@@ -94,6 +94,12 @@
       "noStudents": "TODO: No students available to add"
     }
   },
+  "teachers": {
+    "fields": {
+      "halaqa": "TODO: Ḥalaqa"
+    },
+    "unassigned": "TODO: Unassigned"
+  },
   "students": {
     "assignHalqa": {
       "title": "TODO: Assign to a halaqa?",

@@ -91,6 +91,44 @@ assert.equal(coerceTeacherId('27'), 27);
 assert.equal(coerceTeacherId(27), 27);
 assert.equal(coerceTeacherId('not-a-number'), 0);
 
+function coerceId(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function mapAssignedHalqas(raw) {
+  if (!Array.isArray(raw)) return [];
+  const mapped = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const id = coerceId(item.id);
+    const name = typeof item.name === 'string' ? item.name.trim() : '';
+    if (id > 0 && name) mapped.push({ id, name });
+  }
+  return mapped;
+}
+
+assert.deepEqual(mapAssignedHalqas(undefined), []);
+assert.deepEqual(mapAssignedHalqas(null), []);
+assert.deepEqual(mapAssignedHalqas([]), []);
+assert.deepEqual(mapAssignedHalqas([{ id: '12', name: 'حلقة الفجر' }]), [{ id: 12, name: 'حلقة الفجر' }]);
+assert.deepEqual(
+  mapAssignedHalqas([
+    { id: '12', name: 'حلقة الفجر' },
+    { id: 13, name: 'حلقة العصر' },
+    { id: 'bad', name: 'skip' },
+    { id: 14, name: '   ' },
+  ]),
+  [
+    { id: 12, name: 'حلقة الفجر' },
+    { id: 13, name: 'حلقة العصر' },
+  ],
+);
+
 assert.equal(yesNoToBool('true'), true);
 assert.equal(yesNoToBool('false'), false);
 assert.equal(yesNoToBool(''), false);
@@ -102,6 +140,24 @@ const modalTs = readFileSync(
 );
 if (!modalTs.includes('fields.applyMap(this.teachersService.validate')) {
   throw new Error('teacher form must apply client validation under fields');
+}
+
+const teachersHtml = readFileSync(join(root, 'src/app/features/teachers/teachers.html'), 'utf8');
+if (!teachersHtml.includes(`[routerLink]="['/admin/halaqat', halaqa.id]"`)) {
+  throw new Error('assigned ḥalaqa chips must link to /admin/halaqat/:id');
+}
+if (!teachersHtml.includes('i18n.unassigned') || !teachersHtml.includes('teacher.halqas')) {
+  throw new Error('empty halqas[] must show i18n unassigned copy with no link');
+}
+
+const teachersService = readFileSync(join(root, 'src/app/features/teachers/teachers.service.ts'), 'utf8');
+if (teachersService.includes('by-teacher-id') || teachersService.includes('getByTerm(')) {
+  throw new Error('teachers list must not N+1 roster or by-teacher-id');
+}
+
+const centerApi = readFileSync(join(root, 'src/app/core/api/center-api.service.ts'), 'utf8');
+if (!centerApi.includes('mapActiveTeacher')) {
+  throw new Error('active-teachers must map Nest halqas[] once at the list payload');
 }
 
 console.log('teacher-validation-self-check: ok');

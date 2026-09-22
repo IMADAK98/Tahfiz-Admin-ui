@@ -39,7 +39,7 @@ Slim SYSTEM_ADMIN shell (not center-admin sidebar): طلبات المراكز + 
 
 Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`) rather than the mock's assumed shapes:
 
-- List: `GET /center/{centerId}/active-teachers`. Add: `POST /pending-teacher-request/manual-create`. Edit: `PATCH /teacher-profile/{profileId}` (profile id ≠ user id — fetched via `GET /users/teachers/by-id/{id}`). Requests: `GET /admin/teacher-requests`, `POST .../{id}/approve`, `POST .../{id}/reject` `{ rejectionReason }`.
+- List: `GET /center/{centerId}/active-teachers`. Nest landing adds `halqas: [{ id, name }]` (empty `[]` = unassigned). FE maps that field only — coerce id string→number; missing until Render ships → «غير معيّن», no extra roster / `by-teacher-id` calls. Add: `POST /pending-teacher-request/manual-create`. Edit: `PATCH /teacher-profile/{profileId}` (profile id ≠ user id — fetched via `GET /users/teachers/by-id/{id}`). Requests: `GET /admin/teacher-requests`, `POST .../{id}/approve`, `POST .../{id}/reject` `{ rejectionReason }`.
 - `manual-create` requires `nationality` / `address` / `birthDate` / `password` — none are in the mock's Add dialog. Added the first three as required fields; the password is a random placeholder (teacher activates via the emailed link), never shown in the UI.
 - Live qualification/tajweed/age-group/work-period are fixed backend enums, not the mock's free-text options — selects use the verified enum values with best-fit Arabic labels (see `teachers/enums/`). Dropped the mock's `رقم الهوية` field (not accepted by either the create or update DTO).
 - Mock's single "السند" field maps to two backend booleans (`hasSanadInHifz`, `hasIjazahInHifz`) — split into two selects.

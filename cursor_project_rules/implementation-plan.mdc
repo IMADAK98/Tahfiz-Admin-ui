@@ -68,3 +68,10 @@ Done
 
 Approve on `/admin/student-requests` reuses `app-assign-halqa-modal` (same chrome as post-create). لا reloads pending; نعم + حفظ enrolls.
 Student id from approve `data` (incl. nested userId/user.id), else `existingUserId`, else email-match in the shared modal.
+
+## Angular Admin — teachers list assigned ḥalaqas
+
+Done
+
+`/admin/teachers` table shows each Nest `halqas[]` name as a chip linking to `/admin/halaqat/:id`. Empty/`[]`/missing → muted «غير معيّن», no link.
+Mapped from `GET /center/{id}/active-teachers` only (id string→number). No roster or by-teacher-id calls. Stub until Nest/Render ships the field.

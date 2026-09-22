@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
@@ -8,12 +9,20 @@ import { ActiveTeacher } from '../../core/api/models/teacher.model';
 import { AuthService } from '../../core/auth/auth.service';
 import { TeacherDetailViewModel, TeacherFormMode, teacherInitial } from './dto';
 import { TeachersLoadState } from './enums';
+import { TEACHERS_I18N } from './i18n/teachers-i18n';
 import { TeacherFormModalComponent } from './teacher-form-modal/teacher-form-modal';
 import { TeachersService } from './teachers.service';
 
 @Component({
   selector: 'app-teachers',
-  imports: [ReactiveFormsModule, Button, InputText, TeacherFormModalComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    Button,
+    InputText,
+    TeacherFormModalComponent,
+  ],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
 })
@@ -24,6 +33,7 @@ export class TeachersComponent {
 
   protected readonly TeachersLoadState = TeachersLoadState;
   protected readonly teacherInitial = teacherInitial;
+  protected readonly i18n = TEACHERS_I18N;
 
   protected readonly loadState = signal(TeachersLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);

@@ -17,7 +17,7 @@ Auth: all admin routes under **`adminGuard`** (ADMIN / SYSTEM_ADMIN). Clients in
 | Row id | `number \| string` → coerce |
 | Manual add CTA | Opens form → **manual-create** (below), then refresh **active-teachers** (not requests queue) |
 
-Typical list fields: `id`, `name`, `email`, `phone`, `nationality`, `qualification`, `isActive`, …
+Typical list fields: `id`, `name`, `email`, `phone`, `nationality`, `qualification`, `isActive`, `halqas: [{ id, name }] | []` (Nest landing; empty = unassigned; coerce id string→number; do not N+1 roster or by-teacher-id).
 
 ---
 
