@@ -261,6 +261,9 @@ const studentsModel = readFileSync(join(root, 'src/app/core/api/models/student.m
 if (!studentsModel.includes('export function mergeCreatedWithForm')) {
   throw new Error('mergeCreatedWithForm must live next to mapCreatedManualStudent');
 }
+if (!studentsModel.includes('export function mapApprovedStudent')) {
+  throw new Error('mapApprovedStudent must stay for the approve-after-assign path');
+}
 
 const enrollApi = readFileSync(join(root, 'src/app/core/api/halqa-api.service.ts'), 'utf8');
 if (
@@ -342,11 +345,7 @@ const requestsTs = readFileSync(
   join(root, 'src/app/features/student-requests/student-requests.ts'),
   'utf8',
 );
-if (
-  !requestsTs.includes('AssignHalqaModalComponent') ||
-  !requestsTs.includes('showAssignModal') ||
-  !requestsTs.includes('approvedStudent')
-) {
+if (!requestsTs.includes('AssignHalqaModalComponent') || !requestsTs.includes('approvedStudent')) {
   throw new Error('student-requests must open the shared assign dialog after approve');
 }
 if (requestsTs.includes('notifySuccess(TOAST_I18N.success.studentRequestRejected)') === false) {
@@ -357,7 +356,10 @@ const requestsHtml = readFileSync(
   join(root, 'src/app/features/student-requests/student-requests.html'),
   'utf8',
 );
-if (!requestsHtml.includes('app-assign-halqa-modal')) {
+if (
+  !requestsHtml.includes('app-assign-halqa-modal') ||
+  !requestsHtml.includes('@if (approvedStudent(); as student)')
+) {
   throw new Error(
     'student-requests must mount the shared assign-halqa modal — do not duplicate chrome',
   );

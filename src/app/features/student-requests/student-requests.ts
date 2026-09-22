@@ -42,7 +42,6 @@ export class StudentRequestsComponent {
   protected readonly expandedIds = signal<Set<number>>(new Set());
 
   protected readonly activeApproveRequest = signal<StudentRequestViewModel | null>(null);
-  protected readonly showAssignModal = signal(false);
   protected readonly approvedStudent = signal<CreatedManualStudent | null>(null);
   protected readonly activeRejectRequest = signal<StudentRequestViewModel | null>(null);
   protected readonly rejectionReason = new FormControl('', { nonNullable: true });
@@ -125,7 +124,6 @@ export class StudentRequestsComponent {
         this.activeApproveRequest.set(null);
         this.toastMessage.notifySuccess(TOAST_I18N.success.studentRequestApproved);
         this.approvedStudent.set(student);
-        this.showAssignModal.set(true);
       },
       error: (error: unknown) => {
         this.actingId.set(null);
@@ -147,7 +145,6 @@ export class StudentRequestsComponent {
   }
 
   private closeAssignModal(): void {
-    this.showAssignModal.set(false);
     this.approvedStudent.set(null);
   }
 
