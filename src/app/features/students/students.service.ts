@@ -27,7 +27,7 @@ export class StudentsService {
   private readonly halqaApi = inject(HalqaApiService);
   private readonly auth = inject(AuthService);
 
-  /** GET /center/{id}/active-students — `halqa: { id, name } | null` is on the row. */
+  /** GET /center/{id}/active-students — map Nest `halqa`; missing until Render → unassigned. */
   loadActiveStudents(centerId: number, search = ''): Observable<ActiveStudent[]> {
     return this.centerApi.getActiveStudents(centerId, {
       page: 1,

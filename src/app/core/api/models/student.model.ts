@@ -1,4 +1,4 @@
-/** Nest `GetActiveStudentDto.halqa` — id is a JSON string. */
+/** Nest `GetActiveStudentDto.halqa` — id is a JSON string. Missing until Render ships → null. */
 export interface AssignedStudentHalqa {
   id: number;
   name: string;
@@ -18,7 +18,7 @@ export interface ActiveStudent {
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
-  /** Active-term enrollment; null when unassigned. */
+  /** Active-term enrollment; null when unassigned or field not deployed yet. */
   halqa: AssignedStudentHalqa | null;
 }
 

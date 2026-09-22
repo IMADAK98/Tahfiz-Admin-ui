@@ -80,5 +80,5 @@ Mapped from `GET /center/{id}/active-teachers` only (id string→number). No ros
 
 Done
 
-`/admin/students` cards show Nest `halqa: { id, name } | null` from `GET /center/{id}/active-students` (PR #4 merged). Link → `/admin/halaqat/:id`; null → muted «غير معيّن».
-No active-term + `/halqa/by-term` invert. Coerce string id.
+`/admin/students` cards map Nest `halqa: { id, name } | null` from `GET /center/{id}/active-students` (PR #4). Link → `/admin/halaqat/:id`; null/missing → muted «غير معيّن».
+Coerce string id. Stub until Nest merge + Render deploy. No by-term invert.
