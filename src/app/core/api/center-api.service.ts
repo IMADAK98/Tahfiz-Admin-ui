@@ -15,7 +15,7 @@ import {
 } from './models/student.model';
 import { DashboardCards } from './models/dashboard-cards.model';
 import { ActiveHalqaOption, unwrapActiveHalqasPayload } from './models/halqa.model';
-import { ActiveTeacher, ActiveTeachersQuery } from './models/teacher.model';
+import { ActiveTeacher, ActiveTeachersQuery, mapActiveTeacher } from './models/teacher.model';
 
 @Injectable({ providedIn: 'root' })
 export class CenterApiService {
@@ -42,23 +42,7 @@ export class CenterApiService {
     centerId: number,
     query: ActiveTeachersQuery = {},
   ): Observable<ActiveTeacher[]> {
-    let params = new HttpParams();
-    if (query.page !== undefined) {
-      params = params.set('page', String(query.page));
-    }
-    if (query.limit !== undefined) {
-      params = params.set('limit', String(query.limit));
-    }
-    if (query.search) {
-      params = params.set('search', query.search);
-    }
-
-    return this.http
-      .get<ApiEnvelope<ActiveTeacher[]>>(
-        `${this.apiBaseUrl}/center/${centerId}/active-teachers`,
-        withSkipGlobalErrorToast({ observe: 'response', params }),
-      )
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+    return this.getTeachers(`${this.apiBaseUrl}/center/${centerId}/active-teachers`, query);
   }
 
   getAvailableTeachers(
@@ -136,10 +120,12 @@ export class CenterApiService {
     }
 
     return this.http
-      .get<ApiEnvelope<ActiveTeacher[]>>(
-        url,
-        withSkipGlobalErrorToast({ observe: 'response', params }),
-      )
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .get<ApiEnvelope<unknown>>(url, withSkipGlobalErrorToast({ observe: 'response', params }))
+      .pipe(
+        map((res) => {
+          const data = unwrapEnvelope(res.body, res.status);
+          return Array.isArray(data) ? data.map(mapActiveTeacher) : [];
+        }),
+      );
   }
 }

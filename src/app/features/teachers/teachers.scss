@@ -94,6 +94,26 @@
   color: var(--color-text);
 }
 
+.halaqa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.halaqa-chip {
+  text-decoration: none;
+  font-weight: 800;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.unassigned {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
 .row-actions {
   display: flex;
   gap: 8px;

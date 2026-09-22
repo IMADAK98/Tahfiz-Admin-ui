@@ -4,7 +4,12 @@
       <h1>المعلمون</h1>
     </div>
     <div class="teachers-actions">
-      <p-button type="button" label="طلبات المعلمين" severity="secondary" (onClick)="goToRequests()" />
+      <p-button
+        type="button"
+        label="طلبات المعلمين"
+        severity="secondary"
+        (onClick)="goToRequests()"
+      />
       <p-button type="button" label="+ إضافة معلّم" (onClick)="openAddModal()" />
     </div>
   </header>
@@ -20,7 +25,12 @@
       <p>أضِف معلّماً مباشرة، أو راجع طلبات الانضمام ثم فعّلها.</p>
       <div class="empty-actions">
         <p-button type="button" label="إضافة معلّم" (onClick)="openAddModal()" />
-        <p-button type="button" label="عرض الطلبات" severity="secondary" (onClick)="goToRequests()" />
+        <p-button
+          type="button"
+          label="عرض الطلبات"
+          severity="secondary"
+          (onClick)="goToRequests()"
+        />
       </div>
     </div>
   } @else {
@@ -29,7 +39,9 @@
         <div class="input-group">
           <label for="teacher-search">بحث</label>
           <input
-            pInputText class="input search" fluid
+            pInputText
+            class="input search"
+            fluid
             id="teacher-search"
             type="search"
             placeholder="ابحث بالاسم…"
@@ -47,6 +59,7 @@
           <thead>
             <tr>
               <th>المعلّم</th>
+              <th>{{ i18n.fields.halaqa | translate }}</th>
               <th>الجوال</th>
               <th>الحالة</th>
               <th>إجراءات</th>
@@ -57,9 +70,26 @@
               <tr>
                 <td>
                   <div class="name-cell">
-                    <span class="avatar-initial" aria-hidden="true">{{ teacherInitial(teacher.name) }}</span>
+                    <span class="avatar-initial" aria-hidden="true">{{
+                      teacherInitial(teacher.name)
+                    }}</span>
                     <span>{{ teacher.name }}</span>
                   </div>
+                </td>
+                <td>
+                  @if (teacher.halqas.length) {
+                    <div class="halaqa-chips">
+                      @for (halaqa of teacher.halqas; track halaqa.id) {
+                        <a
+                          class="badge badge-primary halaqa-chip"
+                          [routerLink]="['/admin/halaqat', halaqa.id]"
+                          >{{ halaqa.name }}</a
+                        >
+                      }
+                    </div>
+                  } @else {
+                    <span class="unassigned">{{ i18n.unassigned | translate }}</span>
+                  }
                 </td>
                 <td>{{ teacher.phone || '—' }}</td>
                 <td><span class="badge badge-success">نشط</span></td>

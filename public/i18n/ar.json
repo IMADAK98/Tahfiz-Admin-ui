@@ -94,6 +94,12 @@
       "noStudents": "لا يوجد طلاب متاحون للإضافة"
     }
   },
+  "teachers": {
+    "fields": {
+      "halaqa": "الحلقة"
+    },
+    "unassigned": "غير معيّن"
+  },
   "students": {
     "assignHalqa": {
       "title": "تعيين إلى حلقة؟",
