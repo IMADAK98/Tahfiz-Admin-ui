@@ -97,12 +97,14 @@
                 <div class="input-group">
                   <label for="s-dob">تاريخ الميلاد <span class="req">*</span></label>
                   <input
+                    pInputText
                     class="input"
                     id="s-dob"
                     name="birthDate"
                     type="date"
                     formControlName="birthDate"
                     required
+                    fluid
                     [disabled]="submitting()"
                   />
                   <app-field-error [message]="fieldError('birthDate')" errorId="s-dob-error" />
@@ -363,6 +365,7 @@
                   <div class="input-group">
                     <label for="surahFrom">من سورة (1–114) <span class="req">*</span></label>
                     <input
+                      pInputText
                       class="input"
                       id="surahFrom"
                       name="surahFrom"
@@ -371,6 +374,7 @@
                       max="114"
                       formControlName="surahFrom"
                       required
+                      fluid
                       [disabled]="submitting()"
                     />
                     <app-field-error [message]="fieldError('surahFrom')" errorId="surahFrom-error" />
@@ -378,6 +382,7 @@
                   <div class="input-group">
                     <label for="surahTo">إلى سورة (1–114) <span class="req">*</span></label>
                     <input
+                      pInputText
                       class="input"
                       id="surahTo"
                       name="surahTo"
@@ -386,6 +391,7 @@
                       max="114"
                       formControlName="surahTo"
                       required
+                      fluid
                       [disabled]="submitting()"
                     />
                     <app-field-error [message]="fieldError('surahTo')" errorId="surahTo-error" />

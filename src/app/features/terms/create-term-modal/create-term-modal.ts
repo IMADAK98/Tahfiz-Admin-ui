@@ -2,6 +2,7 @@ import { Component, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { InputText } from 'primeng/inputtext';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
@@ -17,7 +18,7 @@ import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-create-term-modal',
-  imports: [ReactiveFormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, FieldErrorComponent],
   templateUrl: './create-term-modal.html',
   styleUrl: './create-term-modal.scss',
 })

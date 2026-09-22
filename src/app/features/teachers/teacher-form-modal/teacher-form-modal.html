@@ -33,7 +33,7 @@
             <div class="input-group">
               <label for="tf-name">الاسم الكامل</label>
               <input
-                class="input"
+                pInputText class="input" fluid
                 id="tf-name"
                 name="fullName"
                 type="text"
@@ -42,12 +42,12 @@
                 placeholder="مثال: محمد العتيبي"
                 [disabled]="submitting()"
               />
-              <app-field-error [message]="fieldError(nameField())" errorId="tf-name-error" />
+              <app-field-error [message]="fieldError('teacherName')" errorId="tf-name-error" />
             </div>
             <div class="input-group">
               <label for="tf-email">البريد الإلكتروني</label>
               <input
-                class="input"
+                pInputText class="input" fluid
                 id="tf-email"
                 name="email"
                 type="email"
@@ -63,7 +63,7 @@
             <div class="input-group">
               <label for="tf-phone">رقم الجوال</label>
               <input
-                class="input"
+                pInputText class="input" fluid
                 id="tf-phone"
                 name="phone"
                 type="tel"
@@ -80,7 +80,7 @@
               <div class="input-group">
                 <label for="tf-nationality">الجنسية</label>
                 <input
-                  class="input"
+                  pInputText class="input" fluid
                   id="tf-nationality"
                   name="nationality"
                   type="text"
@@ -94,7 +94,7 @@
               <div class="input-group">
                 <label for="tf-address">العنوان</label>
                 <input
-                  class="input"
+                  pInputText class="input" fluid
                   id="tf-address"
                   name="address"
                   type="text"
@@ -108,7 +108,7 @@
               <div class="input-group">
                 <label for="tf-birthdate">تاريخ الميلاد</label>
                 <input
-                  class="input"
+                  pInputText class="input" fluid
                   id="tf-birthdate"
                   name="birthDate"
                   type="date"
@@ -160,7 +160,7 @@
             <div class="input-group">
               <label for="tf-parts">عدد الأجزاء المحفوظة</label>
               <input
-                class="input"
+                pInputText class="input" fluid
                 id="tf-parts"
                 name="numberOfMemorizedJuz"
                 type="number"

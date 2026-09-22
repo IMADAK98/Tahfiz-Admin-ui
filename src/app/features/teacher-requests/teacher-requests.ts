@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Button } from 'primeng/button';
+import { Textarea } from 'primeng/textarea';
 import { ApiError } from '../../core/api/api-error';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
@@ -20,7 +21,7 @@ import { TeacherRequestsService } from './teacher-requests.service';
 
 @Component({
   selector: 'app-teacher-requests',
-  imports: [ReactiveFormsModule, RouterLink, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, RouterLink, Button, Textarea, FieldErrorComponent],
   templateUrl: './teacher-requests.html',
   styleUrl: './teacher-requests.scss',
 })

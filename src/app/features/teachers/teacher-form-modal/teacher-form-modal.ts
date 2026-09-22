@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -29,7 +30,7 @@ import { TeachersService } from '../teachers.service';
 
 @Component({
   selector: 'app-teacher-form-modal',
-  imports: [ReactiveFormsModule, Button, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, InputText, Select, FieldErrorComponent],
   templateUrl: './teacher-form-modal.html',
   styleUrl: './teacher-form-modal.scss',
 })
@@ -68,20 +69,14 @@ export class TeacherFormModalComponent {
     }
   }
 
-  /** Nest create uses teacherName; update uses name. */
-  protected nameField(): string {
-    return this.isAdd ? 'teacherName' : 'name';
-  }
-
   constructor() {
     const nestKey: Record<string, string> = {
-      fullName: this.nameField(),
       ageGroups: 'teachingAgeGroup',
       workPeriods: 'availableWorkPeriod',
     };
     for (const [name, control] of Object.entries(this.form.controls)) {
       control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
-        this.clearFieldError(name === 'fullName' ? this.nameField() : (nestKey[name] ?? name));
+        this.clearFieldError(name === 'fullName' ? 'teacherName' : (nestKey[name] ?? name));
       });
     }
 

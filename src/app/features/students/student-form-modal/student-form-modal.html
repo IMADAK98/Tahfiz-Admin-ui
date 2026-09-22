@@ -33,6 +33,7 @@
             <div class="input-group">
               <label for="sf-name">الاسم الكامل</label>
               <input
+                pInputText
                 class="input"
                 id="sf-name"
                 name="fullName"
@@ -40,6 +41,7 @@
                 required
                 formControlName="fullName"
                 placeholder="مثال: عبدالله بن سعد الدوسري"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('name')" errorId="sf-name-error" />
@@ -47,6 +49,7 @@
             <div class="input-group">
               <label for="sf-email">البريد الإلكتروني</label>
               <input
+                pInputText
                 class="input"
                 id="sf-email"
                 name="email"
@@ -56,6 +59,7 @@
                 placeholder="name@example.com"
                 dir="ltr"
                 style="text-align: right"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('email')" errorId="sf-email-error" />
@@ -63,6 +67,7 @@
             <div class="input-group">
               <label for="sf-phone">رقم الجوال</label>
               <input
+                pInputText
                 class="input"
                 id="sf-phone"
                 name="phone"
@@ -72,6 +77,7 @@
                 placeholder="05XXXXXXXX"
                 dir="ltr"
                 style="text-align: right"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('phone')" errorId="sf-phone-error" />
@@ -79,6 +85,7 @@
             <div class="input-group">
               <label for="sf-parent-phone">جوال ولي الأمر</label>
               <input
+                pInputText
                 class="input"
                 id="sf-parent-phone"
                 name="parentPhone"
@@ -88,6 +95,7 @@
                 placeholder="05XXXXXXXX"
                 dir="ltr"
                 style="text-align: right"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error
@@ -98,6 +106,7 @@
             <div class="input-group">
               <label for="sf-id">رقم الهوية</label>
               <input
+                pInputText
                 class="input"
                 id="sf-id"
                 name="identificationNumber"
@@ -108,6 +117,7 @@
                 placeholder="10 أرقام"
                 dir="ltr"
                 style="text-align: right"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error
@@ -118,6 +128,7 @@
             <div class="input-group">
               <label for="sf-passport">رقم الجواز</label>
               <input
+                pInputText
                 class="input"
                 id="sf-passport"
                 name="passportNumber"
@@ -128,6 +139,7 @@
                 placeholder="رقم الجواز"
                 dir="ltr"
                 style="text-align: right"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error
@@ -138,6 +150,7 @@
             <div class="input-group">
               <label for="sf-address">العنوان</label>
               <input
+                pInputText
                 class="input"
                 id="sf-address"
                 name="address"
@@ -145,6 +158,7 @@
                 required
                 formControlName="address"
                 placeholder="الحي، المدينة"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('address')" errorId="sf-address-error" />
@@ -152,12 +166,14 @@
             <div class="input-group">
               <label for="sf-birthdate">تاريخ الميلاد</label>
               <input
+                pInputText
                 class="input"
                 id="sf-birthdate"
                 name="birthDate"
                 type="date"
                 required
                 formControlName="birthDate"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('birthDate')" errorId="sf-birthdate-error" />
@@ -223,6 +239,7 @@
             <div class="input-group">
               <label for="sf-surah-from">من سورة (1–114)</label>
               <input
+                pInputText
                 class="input"
                 id="sf-surah-from"
                 name="surahFrom"
@@ -231,6 +248,7 @@
                 max="114"
                 required
                 formControlName="surahFrom"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('surahFrom')" errorId="sf-surah-from-error" />
@@ -238,6 +256,7 @@
             <div class="input-group">
               <label for="sf-surah-to">إلى سورة (1–114)</label>
               <input
+                pInputText
                 class="input"
                 id="sf-surah-to"
                 name="surahTo"
@@ -246,6 +265,7 @@
                 max="114"
                 required
                 formControlName="surahTo"
+                fluid
                 [disabled]="submitting()"
               />
               <app-field-error [message]="fieldError('surahTo')" errorId="sf-surah-to-error" />

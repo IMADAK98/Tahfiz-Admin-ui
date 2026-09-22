@@ -20,7 +20,7 @@
         <div class="input-group">
           <label for="create-plan-name">اسم الخطة</label>
           <input
-            class="input"
+            pInputText class="input" fluid
             id="create-plan-name"
             type="text"
             placeholder="مثال: خطة الحفظ الأسبوعية"
@@ -155,7 +155,7 @@
                 </div>
                 <div class="input-group">
                   <label>القيمة</label>
-                  <input class="input" type="number" min="1" formControlName="amountValue" />
+                  <input pInputText class="input" fluid type="number" min="1" formControlName="amountValue" />
                   <app-field-error
                     [message]="itemField(index, 'amountValue')"
                     [errorId]="'amountValue-error-' + index"

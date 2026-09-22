@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
 import { ActiveTeacher } from '../../core/api/models/teacher.model';
 import { AuthService } from '../../core/auth/auth.service';
@@ -12,7 +13,7 @@ import { TeachersService } from './teachers.service';
 
 @Component({
   selector: 'app-teachers',
-  imports: [ReactiveFormsModule, Button, TeacherFormModalComponent],
+  imports: [ReactiveFormsModule, Button, InputText, TeacherFormModalComponent],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
 })

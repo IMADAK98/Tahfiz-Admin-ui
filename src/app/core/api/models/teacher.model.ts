@@ -87,7 +87,7 @@ export interface CreateManualTeacherPayload {
 
 /** PATCH /teacher-profile/{profileId} — UpdateTeacherProfileDto (partial; no identificationNumber support). */
 export interface UpdateTeacherProfilePayload {
-  name?: string;
+  teacherName?: string;
   email?: string;
   phone?: string;
   qualification?: TeacherQualification;

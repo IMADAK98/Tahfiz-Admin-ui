@@ -72,7 +72,7 @@ export function mapTeacherDetailToForm(detail: TeacherDetailViewModel): TeacherF
 export function validateTeacherForm(form: TeacherFormModel, mode: TeacherFormMode): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!form.fullName.trim()) {
-    errors[mode === 'add' ? 'teacherName' : 'name'] = 'الاسم الكامل مطلوب';
+    errors['teacherName'] = 'الاسم الكامل مطلوب';
   }
   if (!form.email.trim()) {
     errors['email'] = 'البريد الإلكتروني مطلوب';
@@ -167,7 +167,7 @@ export function buildCreateManualPayload(form: TeacherFormModel, centerId: numbe
 
 export function buildUpdateProfilePayload(form: TeacherFormModel): UpdateTeacherProfilePayload {
   return {
-    name: form.fullName.trim(),
+    teacherName: form.fullName.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
     qualification: form.qualification as TeacherQualification,

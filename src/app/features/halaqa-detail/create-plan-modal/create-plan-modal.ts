@@ -2,6 +2,7 @@ import { Component, computed, DestroyRef, effect, inject, input, output, signal,
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
@@ -29,7 +30,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-create-plan-modal',
-  imports: [ReactiveFormsModule, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, Select, FieldErrorComponent],
   templateUrl: './create-plan-modal.html',
 })
 export class CreatePlanModalComponent {

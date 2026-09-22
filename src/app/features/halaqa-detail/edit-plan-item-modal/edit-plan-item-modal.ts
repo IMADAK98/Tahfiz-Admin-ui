@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal, untracked }
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
@@ -45,7 +46,7 @@ const emptyPlanItemView: StudyPlanItemViewModel = {
 
 @Component({
   selector: 'app-edit-plan-item-modal',
-  imports: [ReactiveFormsModule, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, Select, FieldErrorComponent],
   templateUrl: './edit-plan-item-modal.html',
 })
 export class EditPlanItemModalComponent {

@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { formGroupOf } from '../../../core/forms/form-group-of';
@@ -15,7 +16,7 @@ import { StudentsService } from '../students.service';
 
 @Component({
   selector: 'app-student-form-modal',
-  imports: [ReactiveFormsModule, Button, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, InputText, Select, FieldErrorComponent],
   templateUrl: './student-form-modal.html',
   styleUrl: './student-form-modal.scss',
 })

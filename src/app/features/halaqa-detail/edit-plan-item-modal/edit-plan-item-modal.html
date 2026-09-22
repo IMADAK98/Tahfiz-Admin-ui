@@ -91,7 +91,7 @@
           </div>
           <div class="input-group">
             <label for="edit-to-ayah">إلى آية <span class="hint-inline">(عرض فقط)</span></label>
-            <input class="input" id="edit-to-ayah" type="text" [value]="model().toAyah ?? '—'" readonly />
+            <input pInputText class="input" fluid id="edit-to-ayah" type="text" [value]="model().toAyah ?? '—'" readonly />
           </div>
         </div>
 
@@ -112,7 +112,7 @@
           <div class="input-group">
             <label for="edit-amount-value">القيمة</label>
             <input
-              class="input"
+              pInputText class="input" fluid
               id="edit-amount-value"
               type="number"
               min="1"

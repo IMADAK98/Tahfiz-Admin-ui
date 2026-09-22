@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../core/api/api-error';
 import { HalqaListItem } from '../../core/api/models/halqa.model';
@@ -22,7 +23,7 @@ import { HalaqatService } from './halaqat.service';
 
 @Component({
   selector: 'app-halaqat',
-  imports: [ReactiveFormsModule, RouterLink, CreateHalaqaModalComponent, EditHalaqaModalComponent, Select],
+  imports: [ReactiveFormsModule, RouterLink, InputText, CreateHalaqaModalComponent, EditHalaqaModalComponent, Select],
   templateUrl: './halaqat.html',
   styleUrl: './halaqat.scss',
 })

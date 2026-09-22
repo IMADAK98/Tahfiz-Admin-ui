@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
 import { ActiveStudent, RegistrationLinkResult } from '../../core/api/models/student.model';
 import { AuthService } from '../../core/auth/auth.service';
@@ -13,7 +14,7 @@ import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-students',
-  imports: [ReactiveFormsModule, Button, StudentFormModalComponent],
+  imports: [ReactiveFormsModule, Button, InputText, StudentFormModalComponent],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import { Textarea } from 'primeng/textarea';
 import { extractHttpErrorMessage } from '../../core/api/error-message.helpers';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
@@ -18,7 +19,7 @@ import { CenterRequestsService } from './center-requests.service';
 
 @Component({
   selector: 'app-center-requests',
-  imports: [ReactiveFormsModule, Button, FieldErrorComponent],
+  imports: [ReactiveFormsModule, Button, Textarea, FieldErrorComponent],
   templateUrl: './center-requests.html',
   styleUrl: './center-requests.scss',
 })

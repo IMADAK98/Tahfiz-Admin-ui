@@ -128,7 +128,9 @@
                     {{ 'reEnrollment.reject.reasonLabel' | translate }}
                   </label>
                   <textarea
+                    pTextarea
                     class="input"
+                    fluid
                     [id]="'reject-reason-' + request.id"
                     rows="3"
                     [formControl]="rejectControl(request.id)"

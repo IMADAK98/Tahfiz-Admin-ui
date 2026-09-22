@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, output, signal, viewChild }
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
@@ -19,7 +20,7 @@ import { HalaqatService } from '../halaqat.service';
 
 @Component({
   selector: 'app-create-halaqa-modal',
-  imports: [ReactiveFormsModule, TranslatePipe, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputText, Select, FieldErrorComponent],
   templateUrl: './create-halaqa-modal.html',
   styleUrl: './create-halaqa-modal.scss',
 })

@@ -2,6 +2,7 @@ import { Component, effect, inject, input, output, signal, untracked } from '@an
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
@@ -12,7 +13,7 @@ import { HalaqaDetailService } from '../halaqa-detail.service';
 
 @Component({
   selector: 'app-edit-plan-name-modal',
-  imports: [ReactiveFormsModule, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, FieldErrorComponent],
   templateUrl: './edit-plan-name-modal.html',
 })
 export class EditPlanNameModalComponent {

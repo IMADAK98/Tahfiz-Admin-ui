@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Textarea } from 'primeng/textarea';
 import { ApiError } from '../../core/api/api-error';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
 import { AuthService } from '../../core/auth/auth.service';
@@ -21,7 +22,7 @@ type ConfirmKind = 'approve' | 'reject';
 
 @Component({
   selector: 'app-re-enrollment',
-  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, FieldErrorComponent],
+  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, Textarea, FieldErrorComponent],
   templateUrl: './re-enrollment.html',
   styleUrl: './re-enrollment.scss',
 })
