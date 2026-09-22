@@ -12,6 +12,7 @@
       "teacherRequestApproved": "TODO: Teacher request approved",
       "teacherRequestRejected": "TODO: Teacher request rejected",
       "studentCreated": "TODO: Student registered",
+      "studentAssignedToHalqa": "TODO: Student assigned to halaqa",
       "studentRequestApproved": "TODO: Student request approved",
       "studentRequestRejected": "TODO: Student request rejected",
       "centerRequestApproved": "TODO: Center request approved",
@@ -91,6 +92,26 @@
     "picker": {
       "noTeachers": "TODO: No teachers available to assign",
       "noStudents": "TODO: No students available to add"
+    }
+  },
+  "students": {
+    "assignHalqa": {
+      "title": "TODO: Assign to a halaqa?",
+      "prompt": "TODO: Assign this student to a halaqa now?",
+      "yes": "TODO: Yes",
+      "no": "TODO: No",
+      "close": "TODO: Close",
+      "halqaLabel": "TODO: Halaqa",
+      "halqaPlaceholder": "TODO: — Select —",
+      "save": "TODO: Save",
+      "cancel": "TODO: Cancel",
+      "empty": "TODO: No active halaqas available",
+      "allFull": "TODO: All active halaqas are full",
+      "loading": "TODO: Loading halaqas…",
+      "pickHalqa": "TODO: Select a halaqa",
+      "missingId": "TODO: Could not resolve the created student",
+      "centerUnknown": "TODO: Could not resolve center from session",
+      "enrollFailed": "TODO: Could not assign the student to a halaqa. Try again."
     }
   },
   "halaqaDetail": {

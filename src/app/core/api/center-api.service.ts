@@ -14,6 +14,7 @@ import {
   unwrapActiveStudentsPayload,
 } from './models/student.model';
 import { DashboardCards } from './models/dashboard-cards.model';
+import { ActiveHalqaOption, unwrapActiveHalqasPayload } from './models/halqa.model';
 import { ActiveTeacher, ActiveTeachersQuery } from './models/teacher.model';
 
 @Injectable({ providedIn: 'root' })
@@ -89,6 +90,19 @@ export class CenterApiService {
         withSkipGlobalErrorToast({ observe: 'response', params }),
       )
       .pipe(map((res) => unwrapActiveStudentsPayload(unwrapEnvelope(res.body, res.status))));
+  }
+
+  /**
+   * GET /center/:centerId/active-halqas (active date-valid term; assigned teacher).
+   * Nest availability routes are JWT-only without @Roles / center ownership — flag for later.
+   */
+  getActiveHalqas(centerId: number): Observable<ActiveHalqaOption[]> {
+    return this.http
+      .get<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/center/${centerId}/active-halqas`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(map((res) => unwrapActiveHalqasPayload(unwrapEnvelopeOrNull(res.body, res.status))));
   }
 
   generateRegistrationLink(centerId: number): Observable<RegistrationLinkResult> {

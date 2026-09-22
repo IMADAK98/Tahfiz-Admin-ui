@@ -11,6 +11,7 @@ export const TOAST_I18N = {
     teacherRequestApproved: 'toast.success.teacherRequestApproved',
     teacherRequestRejected: 'toast.success.teacherRequestRejected',
     studentCreated: 'toast.success.studentCreated',
+    studentAssignedToHalqa: 'toast.success.studentAssignedToHalqa',
     studentRequestApproved: 'toast.success.studentRequestApproved',
     studentRequestRejected: 'toast.success.studentRequestRejected',
     centerRequestApproved: 'toast.success.centerRequestApproved',

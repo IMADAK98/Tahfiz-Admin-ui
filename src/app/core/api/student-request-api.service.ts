@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { CreateManualStudentPayload } from './models/student.model';
+import { CreateManualStudentPayload, CreatedManualStudent, mapCreatedManualStudent } from './models/student.model';
 import { RejectStudentRequestPayload, StudentRequestApiRecord } from './models/student-request.model';
 
 /** Admin student-requests HTTP — list is pending-only per OpenAPI summary. */
@@ -35,20 +35,17 @@ export class StudentRequestApiService {
 
   /**
    * Admin add-student: creates user + profile directly (no pending row).
-   * Success often returns `data: null` — caller must re-list active-students.
+   * Live returns `data: { id, name, email, … }` (id often a string). Teacher
+   * manual-create is the path that often has `data: null` — do not discard this id.
    */
-  createManual(payload: CreateManualStudentPayload): Observable<void> {
+  createManual(payload: CreateManualStudentPayload): Observable<CreatedManualStudent> {
     return this.http
       .post<ApiEnvelope<unknown>>(
         `${this.apiBaseUrl}/admin/student-requests/manual-create`,
         payload,
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(
-        map((res) => {
-          unwrapEnvelopeOrNull(res.body, res.status);
-        }),
-      );
+      .pipe(map((res) => mapCreatedManualStudent(unwrapEnvelopeOrNull(res.body, res.status))));
   }
 
   /** May return `data: null` on success — caller must re-list. */
