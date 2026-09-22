@@ -101,6 +101,10 @@
     "unassigned": "غير معيّن"
   },
   "students": {
+    "fields": {
+      "halaqa": "الحلقة"
+    },
+    "unassigned": "غير معيّن",
     "assignHalqa": {
       "title": "تعيين إلى حلقة؟",
       "prompt": "هل تريد تعيين هذا الطالب إلى حلقة الآن؟",

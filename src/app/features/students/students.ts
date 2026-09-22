@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
@@ -9,12 +11,20 @@ import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { formatStudentDate } from './dto';
 import { StudentsLoadState } from './enums';
+import { STUDENTS_I18N } from './i18n/students-i18n';
 import { StudentFormModalComponent } from './student-form-modal/student-form-modal';
 import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-students',
-  imports: [ReactiveFormsModule, Button, InputText, StudentFormModalComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    Button,
+    InputText,
+    StudentFormModalComponent,
+  ],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })
@@ -25,6 +35,7 @@ export class StudentsComponent {
 
   protected readonly StudentsLoadState = StudentsLoadState;
   protected readonly formatStudentDate = formatStudentDate;
+  protected readonly i18n = STUDENTS_I18N;
 
   protected readonly loadState = signal(StudentsLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);

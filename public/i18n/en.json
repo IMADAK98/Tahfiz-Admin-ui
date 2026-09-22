@@ -101,6 +101,10 @@
     "unassigned": "TODO: Unassigned"
   },
   "students": {
+    "fields": {
+      "halaqa": "TODO: Ḥalaqa"
+    },
+    "unassigned": "TODO: Unassigned",
     "assignHalqa": {
       "title": "TODO: Assign to a halaqa?",
       "prompt": "TODO: Assign this student to a halaqa now?",

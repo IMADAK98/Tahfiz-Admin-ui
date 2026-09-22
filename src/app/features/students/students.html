@@ -91,6 +91,16 @@
                 <dt>تاريخ الميلاد</dt>
                 <dd>{{ formatStudentDate(student.birthDate) }}</dd>
               </div>
+              <div>
+                <dt>{{ i18n.fields.halaqa | translate }}</dt>
+                <dd>
+                  @if (student.halqa; as halqa) {
+                    <a [routerLink]="['/admin/halaqat', halqa.id]">{{ halqa.name }}</a>
+                  } @else {
+                    <span class="unassigned">{{ i18n.unassigned | translate }}</span>
+                  }
+                </dd>
+              </div>
             </dl>
             <div class="row-actions">
               <p-button
@@ -179,6 +189,16 @@
           <div>
             <dt>الحالة</dt>
             <dd>{{ student.isActive === false ? 'غير نشط' : 'نشط' }}</dd>
+          </div>
+          <div>
+            <dt>{{ i18n.fields.halaqa | translate }}</dt>
+            <dd>
+              @if (student.halqa; as halqa) {
+                <a [routerLink]="['/admin/halaqat', halqa.id]">{{ halqa.name }}</a>
+              } @else {
+                <span class="unassigned">{{ i18n.unassigned | translate }}</span>
+              }
+            </dd>
           </div>
         </dl>
       </div>
