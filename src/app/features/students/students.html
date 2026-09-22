@@ -112,17 +112,9 @@
 
 <app-student-form-modal
   [visible]="showFormModal()"
-  (saved)="onStudentSaved($event)"
+  (saved)="onStudentSaved()"
   (closed)="closeFormModal()"
 />
-
-@if (createdStudent(); as created) {
-  <app-assign-halqa-modal
-    [student]="created"
-    (assigned)="onAssignDone()"
-    (skipped)="onAssignSkipped()"
-  />
-}
 
 @if (detailStudent(); as student) {
   <div class="modal-backdrop" role="presentation" (click)="closeDetail()">

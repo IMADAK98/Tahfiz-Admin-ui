@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { CenterApiService } from '../../core/api/center-api.service';
 import { HalqaApiService } from '../../core/api/halqa-api.service';
 import { StudentRequestApiService } from '../../core/api/student-request-api.service';
@@ -10,6 +10,7 @@ import {
   ActiveStudent,
   CreatedManualStudent,
   findStudentIdByEmail,
+  mergeCreatedWithForm,
   RegistrationLinkResult,
 } from '../../core/api/models/student.model';
 import { StudentFormModel, buildCreateManualStudentPayload, validateStudentForm } from './dto';
@@ -41,11 +42,7 @@ export class StudentsService {
   createStudent(form: StudentFormModel): Observable<CreatedManualStudent> {
     return this.studentRequestApi
       .createManual(buildCreateManualStudentPayload(form))
-      .pipe(
-        switchMap((created) =>
-          this.resolveCreatedStudentId(created).pipe(catchError(() => of(created))),
-        ),
-      );
+      .pipe(map((created) => mergeCreatedWithForm(created, form)));
   }
 
   /** Prefer create `data.id`; email-match available then active students only if missing. */

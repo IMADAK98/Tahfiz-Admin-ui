@@ -124,6 +124,18 @@ export function mapApprovedStudent(data: unknown): CreatedManualStudent {
   };
 }
 
+/** When Nest `data` is null / missing id, keep form email+name so email-match fallback can run. */
+export function mergeCreatedWithForm(
+  created: CreatedManualStudent,
+  form: { email?: string; fullName?: string; name?: string },
+): CreatedManualStudent {
+  return {
+    id: created.id,
+    email: created.email ?? optionalString(form.email),
+    name: created.name ?? optionalString(form.fullName) ?? optionalString(form.name),
+  };
+}
+
 export function findStudentIdByEmail(
   students: Array<{ id: number; email?: string }>,
   email: string,

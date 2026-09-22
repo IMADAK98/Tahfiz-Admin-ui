@@ -115,6 +115,14 @@ function studentFromApprovedRequest(request, approved) {
   };
 }
 
+function mergeCreatedWithForm(created, form) {
+  return {
+    id: created.id,
+    email: created.email ?? optionalString(form.email),
+    name: created.name ?? optionalString(form.fullName) ?? optionalString(form.name),
+  };
+}
+
 assert.deepEqual(mapCreatedManualStudent({ id: '28', name: 'Ahmed', email: 'a@b.c' }), {
   id: 28,
   name: 'Ahmed',
@@ -193,6 +201,15 @@ assert.deepEqual(
   ),
   { id: 12, email: undefined, name: undefined },
 );
+assert.deepEqual(mergeCreatedWithForm({ id: null }, { fullName: 'Ahmed', email: 'a@b.c' }), {
+  id: null,
+  name: 'Ahmed',
+  email: 'a@b.c',
+});
+assert.deepEqual(
+  mergeCreatedWithForm({ id: 9, email: 'x@y.z', name: 'X' }, { fullName: 'Ahmed', email: 'a@b.c' }),
+  { id: 9, email: 'x@y.z', name: 'X' },
+);
 assert.equal(
   findStudentIdByEmail(
     [{ id: 28, email: 'a@b.c' }],
@@ -200,6 +217,13 @@ assert.equal(
       { email: 'a@b.c', name: 'Ahmed', existingUserId: null },
       { id: null },
     ).email,
+  ),
+  28,
+);
+assert.equal(
+  findStudentIdByEmail(
+    [{ id: 28, email: 'a@b.c' }],
+    mergeCreatedWithForm(mapCreatedManualStudent(null), { email: 'a@b.c' }).email,
   ),
   28,
 );
@@ -225,33 +249,53 @@ if (!centerApi.includes('getActiveHalqas') || !centerApi.includes('/active-halqa
   throw new Error('CenterApiService must wrap GET /center/:centerId/active-halqas');
 }
 
-const studentsTs = readFileSync(join(root, 'src/app/features/students/students.ts'), 'utf8');
-if (!studentsTs.includes('onStudentSaved') || !studentsTs.includes('createdStudent.set(created)')) {
-  throw new Error('students page must keep the created student after manual create');
-}
-if (studentsTs.includes('showAssignModal')) {
-  throw new Error(
-    'do not gate assign on a sibling visible flag — parent @if (createdStudent) mounts it',
-  );
-}
-const onSaved = studentsTs.slice(studentsTs.indexOf('onStudentSaved'));
-if (onSaved.indexOf('createdStudent.set(created)') > onSaved.indexOf('showFormModal.set(false)')) {
-  throw new Error(
-    'set createdStudent before closing the form so the assign dialog mounts in the same turn',
-  );
+const studentsService = readFileSync(
+  join(root, 'src/app/features/students/students.service.ts'),
+  'utf8',
+);
+if (!studentsService.includes('mergeCreatedWithForm')) {
+  throw new Error('createStudent must merge form email/name before id fallback');
 }
 
-const studentsHtml = readFileSync(join(root, 'src/app/features/students/students.html'), 'utf8');
-if (!studentsHtml.includes('@if (createdStudent(); as created)')) {
-  throw new Error('parent must mount assign dialog via @if (createdStudent())');
+const studentsModel = readFileSync(join(root, 'src/app/core/api/models/student.model.ts'), 'utf8');
+if (!studentsModel.includes('export function mergeCreatedWithForm')) {
+  throw new Error('mergeCreatedWithForm must live next to mapCreatedManualStudent');
+}
+
+const enrollApi = readFileSync(join(root, 'src/app/core/api/halqa-api.service.ts'), 'utf8');
+if (
+  !enrollApi.includes('enrollStudents') ||
+  !enrollApi.includes('unwrapEnvelopeOrNull(res.body, res.status)')
+) {
+  throw new Error('enrollStudents must use unwrapEnvelopeOrNull — Nest enroll often has data:null');
+}
+
+const studentsTs = readFileSync(join(root, 'src/app/features/students/students.ts'), 'utf8');
+if (!studentsTs.includes('onStudentSaved')) {
+  throw new Error('students page must finish the create flow after assign');
 }
 
 const formModal = readFileSync(
   join(root, 'src/app/features/students/student-form-modal/student-form-modal.ts'),
   'utf8',
 );
-if (formModal.includes('saved = output<void>()')) {
-  throw new Error('student form must emit created { id, email?, name? }');
+if (formModal.includes('saved.emit(created)') && formModal.includes('notifySuccess')) {
+  const toastAt = formModal.indexOf('notifySuccess');
+  const emitAt = formModal.indexOf('saved.emit');
+  if (emitAt !== -1 && emitAt < toastAt + 200 && formModal.indexOf('createdStudent.set') === -1) {
+    throw new Error('do not emit saved on create — open assign in the form modal first');
+  }
+}
+if (!formModal.includes('createdStudent.set(created)')) {
+  throw new Error('form modal must open assign confirm after create, before parent close');
+}
+
+const formHtml = readFileSync(
+  join(root, 'src/app/features/students/student-form-modal/student-form-modal.html'),
+  'utf8',
+);
+if (!formHtml.includes('app-assign-halqa-modal') || !formHtml.includes('createdStudent()')) {
+  throw new Error('assign confirm must render inside the create modal after success');
 }
 
 const assignHtml = readFileSync(
@@ -269,6 +313,9 @@ if (assignHtml.includes('@if (visible())')) {
 }
 if (!assignHtml.includes('icon="pi pi-times"')) {
   throw new Error('close control must use pi-times — projected × renders as A- on PrimeNG 22');
+}
+if (!assignHtml.includes('empty-halqas')) {
+  throw new Error('after نعم, empty active-ḥalaqas must show a clear empty state');
 }
 if (assignHtml.includes('>\n          ×') || assignHtml.includes('>×<')) {
   throw new Error('do not project × into p-button');

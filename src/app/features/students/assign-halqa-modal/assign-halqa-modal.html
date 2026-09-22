@@ -60,20 +60,22 @@
               <app-field-error [message]="fieldError('halqaId')" errorId="assign-halqa-error" />
             </div>
           } @else {
-            <p class="hint">{{ emptyCopyKey() | translate }}</p>
+            <p class="empty-halqas" role="status">{{ emptyCopyKey() | translate }}</p>
           }
         </div>
 
         <div class="modal-footer">
-          <p-button
-            type="submit"
-            [label]="i18n.save | translate"
-            [loading]="submitting()"
-            [disabled]="saveDisabled()"
-          />
+          @if (selectableHalqas().length) {
+            <p-button
+              type="submit"
+              [label]="i18n.save | translate"
+              [loading]="submitting()"
+              [disabled]="saveDisabled()"
+            />
+          }
           <p-button
             type="button"
-            [label]="i18n.cancel | translate"
+            [label]="(selectableHalqas().length ? i18n.cancel : i18n.close) | translate"
             severity="secondary"
             [disabled]="submitting()"
             (onClick)="close()"
