@@ -253,8 +253,15 @@ const studentsService = readFileSync(
   join(root, 'src/app/features/students/students.service.ts'),
   'utf8',
 );
-if (!studentsService.includes('mergeCreatedWithForm')) {
+const createFn = studentsService.slice(
+  studentsService.indexOf('createStudent('),
+  studentsService.indexOf('/** Prefer create `data.id`'),
+);
+if (!createFn.includes('mergeCreatedWithForm')) {
   throw new Error('createStudent must merge form email/name before id fallback');
+}
+if (!createFn.includes('this.resolveCreatedStudentId')) {
+  throw new Error('createStudent must resolve id after merge when data.id is missing');
 }
 
 const studentsModel = readFileSync(join(root, 'src/app/core/api/models/student.model.ts'), 'utf8');

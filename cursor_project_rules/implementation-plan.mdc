@@ -62,6 +62,13 @@ Done
 Create success on `/admin/students` opens «تعيين إلى حلقة؟» (نعم/لا). لا reloads the list; نعم + حفظ enrolls via `POST /halqa/enroll-students/{id}`.
 `createManual` now returns coerced `data.id`; `CenterApiService.getActiveHalqas` lists capacity-aware ḥalaqas; full ḥalaqas are skipped when countable.
 
+## Angular Admin — create-assign hardenings (null `data.id` / enroll `data:null`)
+
+Done
+
+`createStudent` merges form email/name when create `data` is null/missing id, then email-match resolve. Lookup failure does not hide create.
+`enrollStudents` keeps `unwrapEnvelopeOrNull` (Nest 2xx + `data: null`). No dialog remount change — production E2E passed; localhost toast-only is stale `ng serve`.
+
 ## Angular Admin — post approve → assign ḥalaqa
 
 Done
