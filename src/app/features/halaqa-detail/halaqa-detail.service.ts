@@ -76,12 +76,9 @@ export class HalaqaDetailService {
   }
 
   loadStudentPickers(centerId: number): Observable<ActiveStudent[]> {
-    return forkJoin({
-      available: this.centerApi.getAvailableStudents(centerId),
-      active: this.centerApi.getActiveStudents(centerId, { limit: 200 }),
-    }).pipe(
-      map(({ available, active }) => coercePersonList(available.length ? available : active)),
-    );
+    return this.centerApi
+      .getAvailableStudents(centerId)
+      .pipe(map((students) => coercePersonList(students)));
   }
 
   validateEditForm(form: EditHalaqaFormModel): Record<string, string> {

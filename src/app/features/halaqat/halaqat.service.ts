@@ -25,12 +25,6 @@ export interface HalaqatPageData {
 export interface CreateHalaqaPickers {
   teachers: ActiveTeacher[];
   students: ActiveStudent[];
-  /** True when available-teachers returned [] (may still show active fallback). */
-  teachersAvailableEmpty: boolean;
-  /** True when available-students returned [] (empty available ≠ no students in center). */
-  studentsAvailableEmpty: boolean;
-  teachersShowingActiveFallback: boolean;
-  studentsShowingActiveFallback: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -51,29 +45,16 @@ export class HalaqatService {
     );
   }
 
-  /** Prefer available-* pickers; fall back to active-* when available is empty. */
+  /** Create pickers: available teachers and available students only. */
   loadCreatePickers(centerId: number): Observable<CreateHalaqaPickers> {
     return forkJoin({
-      availableTeachers: this.centerApi.getAvailableTeachers(centerId, { limit: 100 }),
-      activeTeachers: this.centerApi.getActiveTeachers(centerId, { limit: 100 }),
-      availableStudents: this.centerApi.getAvailableStudents(centerId),
-      activeStudents: this.centerApi.getActiveStudents(centerId, { limit: 200 }),
+      teachers: this.centerApi.getAvailableTeachers(centerId, { limit: 100 }),
+      students: this.centerApi.getAvailableStudents(centerId),
     }).pipe(
-      map(({ availableTeachers, activeTeachers, availableStudents, activeStudents }) => {
-        const teachersAvailableEmpty = !availableTeachers.length;
-        const studentsAvailableEmpty = !availableStudents.length;
-        const teachers = teachersAvailableEmpty ? activeTeachers : availableTeachers;
-        const students = studentsAvailableEmpty ? activeStudents : availableStudents;
-
-        return {
-          teachers: coercePersonList(teachers),
-          students: coercePersonList(students),
-          teachersAvailableEmpty,
-          studentsAvailableEmpty,
-          teachersShowingActiveFallback: teachersAvailableEmpty && activeTeachers.length > 0,
-          studentsShowingActiveFallback: studentsAvailableEmpty && activeStudents.length > 0,
-        };
-      }),
+      map(({ teachers, students }) => ({
+        teachers: coercePersonList(teachers),
+        students: coercePersonList(students),
+      })),
     );
   }
 
