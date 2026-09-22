@@ -230,11 +230,15 @@ if (!studentsTs.includes('onStudentSaved') || !studentsTs.includes('createdStude
   throw new Error('students page must keep the created student after manual create');
 }
 if (studentsTs.includes('showAssignModal')) {
-  throw new Error('do not gate assign on a sibling visible flag — parent @if (createdStudent) mounts it');
+  throw new Error(
+    'do not gate assign on a sibling visible flag — parent @if (createdStudent) mounts it',
+  );
 }
 const onSaved = studentsTs.slice(studentsTs.indexOf('onStudentSaved'));
 if (onSaved.indexOf('createdStudent.set(created)') > onSaved.indexOf('showFormModal.set(false)')) {
-  throw new Error('set createdStudent before closing the form so the assign dialog mounts in the same turn');
+  throw new Error(
+    'set createdStudent before closing the form so the assign dialog mounts in the same turn',
+  );
 }
 
 const studentsHtml = readFileSync(join(root, 'src/app/features/students/students.html'), 'utf8');
