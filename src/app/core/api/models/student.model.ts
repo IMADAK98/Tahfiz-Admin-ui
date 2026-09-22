@@ -1,3 +1,9 @@
+/** Nest `GetActiveStudentDto.halqa` — id is a JSON string. */
+export interface AssignedStudentHalqa {
+  id: number;
+  name: string;
+}
+
 /** GET /center/{centerId}/active-students · available-students — flattened User. Ids may be strings. */
 export interface ActiveStudent {
   id: number;
@@ -12,6 +18,8 @@ export interface ActiveStudent {
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  /** Active-term enrollment; null when unassigned. */
+  halqa: AssignedStudentHalqa | null;
 }
 
 export interface ActiveStudentsQuery {
@@ -148,6 +156,19 @@ export function findStudentIdByEmail(
   return match && match.id > 0 ? match.id : null;
 }
 
+export function mapAssignedStudentHalqa(raw: unknown): AssignedStudentHalqa | null {
+  if (!raw || typeof raw !== 'object') {
+    return null;
+  }
+  const row = raw as Record<string, unknown>;
+  const id = coerceStudentId(row['id'] as number | string);
+  const name = optionalString(row['name']);
+  if (id <= 0 || !name) {
+    return null;
+  }
+  return { id, name };
+}
+
 export function mapActiveStudent(raw: unknown): ActiveStudent {
   const row = (raw ?? {}) as Record<string, unknown>;
   return {
@@ -163,6 +184,7 @@ export function mapActiveStudent(raw: unknown): ActiveStudent {
     isActive: typeof row['isActive'] === 'boolean' ? row['isActive'] : undefined,
     createdAt: optionalString(row['createdAt']),
     updatedAt: optionalString(row['updatedAt']),
+    halqa: mapAssignedStudentHalqa(row['halqa']),
   };
 }
 

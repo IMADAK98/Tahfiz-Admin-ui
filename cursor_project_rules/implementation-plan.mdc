@@ -75,3 +75,10 @@ Done
 
 `/admin/teachers` table shows each Nest `halqas[]` name as a chip linking to `/admin/halaqat/:id`. Empty/`[]`/missing → muted «غير معيّن», no link.
 Mapped from `GET /center/{id}/active-teachers` only (id string→number). No roster or by-teacher-id calls. Stub until Nest/Render ships the field.
+
+## Angular Admin — students list assigned ḥalaqa
+
+Done
+
+`/admin/students` cards show Nest `halqa: { id, name } | null` from `GET /center/{id}/active-students` (PR #4 merged). Link → `/admin/halaqat/:id`; null → muted «غير معيّن».
+No active-term + `/halqa/by-term` invert. Coerce string id.

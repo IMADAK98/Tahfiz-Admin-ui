@@ -1,5 +1,9 @@
-/** i18n keys for the shared assign-ḥalaqa dialog (post-create + post-approve). */
+/** i18n keys for the students list + shared assign-ḥalaqa dialog (post-create + post-approve). */
 export const STUDENTS_I18N = {
+  fields: {
+    halaqa: 'students.fields.halaqa',
+  },
+  unassigned: 'students.unassigned',
   assignHalqa: {
     title: 'students.assignHalqa.title',
     prompt: 'students.assignHalqa.prompt',

@@ -14,6 +14,20 @@ function coerceStudentId(value) {
   return 0;
 }
 
+function optionalString(value) {
+  if (value == null) return undefined;
+  const trimmed = String(value).trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function mapAssignedStudentHalqa(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const id = coerceStudentId(raw.id);
+  const name = optionalString(raw.name);
+  if (id <= 0 || !name) return null;
+  return { id, name };
+}
+
 function mapActiveStudent(raw) {
   const row = raw ?? {};
   return {
@@ -21,6 +35,7 @@ function mapActiveStudent(raw) {
     name: String(row.name ?? ''),
     email: row.email,
     phone: row.phone,
+    halqa: mapAssignedStudentHalqa(row.halqa),
   };
 }
 
@@ -170,6 +185,19 @@ assert.equal(mapped.surahTo, 18);
 
 assert.equal(''.trim() ? null : 'سبب الرفض مطلوب', 'سبب الرفض مطلوب');
 
+assert.deepEqual(mapAssignedStudentHalqa({ id: '12', name: 'حلقة الفجر' }), {
+  id: 12,
+  name: 'حلقة الفجر',
+});
+assert.equal(mapAssignedStudentHalqa(null), null);
+assert.equal(mapAssignedStudentHalqa({ id: '12', name: '  ' }), null);
+assert.equal(mapAssignedStudentHalqa({ id: '0', name: 'حلقة الفجر' }), null);
+assert.deepEqual(mapActiveStudent({ id: '26', name: 'Abdullah', halqa: { id: '12', name: 'حلقة الفجر' } }).halqa, {
+  id: 12,
+  name: 'حلقة الفجر',
+});
+assert.equal(mapActiveStudent({ id: '99', name: 'Unassigned', halqa: null }).halqa, null);
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const modalTs = readFileSync(
   join(root, 'src/app/features/students/student-form-modal/student-form-modal.ts'),
@@ -188,6 +216,24 @@ if (modalTs.includes('errorMessage.set(validationError)')) {
 const componentsScss = readFileSync(join(root, 'src/styles/_components.scss'), 'utf8');
 if (!componentsScss.includes(':has(+ [required])::after')) {
   throw new Error('required labels must get a * from shared CSS, not per-form markup');
+}
+
+const studentModel = readFileSync(join(root, 'src/app/core/api/models/student.model.ts'), 'utf8');
+if (!studentModel.includes('mapAssignedStudentHalqa') || !studentModel.includes("row['halqa']")) {
+  throw new Error('active-students mapper must coerce Nest `halqa: { id, name } | null`');
+}
+
+const studentsService = readFileSync(join(root, 'src/app/features/students/students.service.ts'), 'utf8');
+if (studentsService.includes('getByTerm(') || studentsService.includes('attachHalaqaToStudents(')) {
+  throw new Error('students list must not invert GET /halqa/by-term');
+}
+
+const studentsHtml = readFileSync(join(root, 'src/app/features/students/students.html'), 'utf8');
+if (!studentsHtml.includes(`[routerLink]="['/admin/halaqat', halqa.id]"`)) {
+  throw new Error('assigned ḥalaqa must link to /admin/halaqat/:id');
+}
+if (!studentsHtml.includes('i18n.unassigned') || studentsHtml.includes('routerLink') === false) {
+  throw new Error('unassigned students must show i18n empty copy');
 }
 
 console.log('student-validation-self-check: ok');
