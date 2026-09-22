@@ -12,12 +12,20 @@ import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, HIFZ_QUALITY_OPTIONS, STUDENT_YES_NO_OPTIONS } from '../enums';
 import { CreatedManualStudent } from '../../../core/api/models/student.model';
+import { AssignHalqaModalComponent } from '../assign-halqa-modal/assign-halqa-modal';
 import { StudentFormModel, createEmptyStudentForm } from '../dto';
 import { StudentsService } from '../students.service';
 
 @Component({
   selector: 'app-student-form-modal',
-  imports: [ReactiveFormsModule, Button, InputText, Select, FieldErrorComponent],
+  imports: [
+    ReactiveFormsModule,
+    Button,
+    InputText,
+    Select,
+    FieldErrorComponent,
+    AssignHalqaModalComponent,
+  ],
   templateUrl: './student-form-modal.html',
   styleUrl: './student-form-modal.scss',
 })
@@ -38,6 +46,8 @@ export class StudentFormModalComponent {
   protected readonly form = formGroupOf(this.fb, createEmptyStudentForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  /** ponytail: assign confirm stays in this modal so toast + dialog share one CD turn. */
+  protected readonly createdStudent = signal<CreatedManualStudent | null>(null);
   private readonly fields = createFieldErrorBag();
 
   protected fieldError(...fieldNames: string[]): string | undefined {
@@ -61,6 +71,10 @@ export class StudentFormModalComponent {
 
     effect(() => {
       if (!this.visible()) {
+        untracked(() => this.createdStudent.set(null));
+        return;
+      }
+      if (this.createdStudent()) {
         return;
       }
       untracked(() => {
@@ -78,10 +92,17 @@ export class StudentFormModalComponent {
   }
 
   protected close(): void {
-    if (this.submitting()) {
+    if (this.submitting() || this.createdStudent()) {
       return;
     }
     this.closed.emit();
+  }
+
+  protected onAssignFinished(): void {
+    const created = this.createdStudent();
+    if (created) {
+      this.saved.emit(created);
+    }
   }
 
   protected onSubmit(event: Event): void {
@@ -98,8 +119,8 @@ export class StudentFormModalComponent {
     this.studentsService.createStudent(value).subscribe({
       next: (created) => {
         this.submitting.set(false);
+        this.createdStudent.set(created);
         this.toastMessage.notifySuccess(TOAST_I18N.success.studentCreated);
-        this.saved.emit(created);
       },
       error: (error: unknown) => {
         this.submitting.set(false);

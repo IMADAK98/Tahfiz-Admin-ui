@@ -3,15 +3,10 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
-import {
-  ActiveStudent,
-  CreatedManualStudent,
-  RegistrationLinkResult,
-} from '../../core/api/models/student.model';
+import { ActiveStudent, RegistrationLinkResult } from '../../core/api/models/student.model';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
-import { AssignHalqaModalComponent } from './assign-halqa-modal/assign-halqa-modal';
 import { formatStudentDate } from './dto';
 import { StudentsLoadState } from './enums';
 import { StudentFormModalComponent } from './student-form-modal/student-form-modal';
@@ -19,13 +14,7 @@ import { StudentsService } from './students.service';
 
 @Component({
   selector: 'app-students',
-  imports: [
-    ReactiveFormsModule,
-    Button,
-    InputText,
-    StudentFormModalComponent,
-    AssignHalqaModalComponent,
-  ],
+  imports: [ReactiveFormsModule, Button, InputText, StudentFormModalComponent],
   templateUrl: './students.html',
   styleUrl: './students.scss',
 })
@@ -43,8 +32,6 @@ export class StudentsComponent {
   protected readonly search = new FormControl('', { nonNullable: true });
 
   protected readonly showFormModal = signal(false);
-  protected readonly showAssignModal = signal(false);
-  protected readonly createdStudent = signal<CreatedManualStudent | null>(null);
   protected readonly detailStudent = signal<ActiveStudent | null>(null);
 
   protected readonly generatingLink = signal(false);
@@ -95,25 +82,9 @@ export class StudentsComponent {
     this.showFormModal.set(false);
   }
 
-  protected onStudentSaved(created: CreatedManualStudent): void {
+  protected onStudentSaved(): void {
     this.showFormModal.set(false);
-    this.createdStudent.set(created);
-    this.showAssignModal.set(true);
-  }
-
-  protected onAssignSkipped(): void {
-    this.closeAssignModal();
     this.reload();
-  }
-
-  protected onAssignDone(): void {
-    this.closeAssignModal();
-    this.reload();
-  }
-
-  private closeAssignModal(): void {
-    this.showAssignModal.set(false);
-    this.createdStudent.set(null);
   }
 
   protected openDetail(student: ActiveStudent): void {

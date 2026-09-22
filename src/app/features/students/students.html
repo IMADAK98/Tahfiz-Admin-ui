@@ -112,15 +112,8 @@
 
 <app-student-form-modal
   [visible]="showFormModal()"
-  (saved)="onStudentSaved($event)"
+  (saved)="onStudentSaved()"
   (closed)="closeFormModal()"
-/>
-
-<app-assign-halqa-modal
-  [visible]="showAssignModal()"
-  [student]="createdStudent()"
-  (assigned)="onAssignDone()"
-  (skipped)="onAssignSkipped()"
 />
 
 @if (detailStudent(); as student) {
