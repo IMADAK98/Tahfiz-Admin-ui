@@ -48,6 +48,13 @@ export interface CreateManualStudentPayload {
   isHafiz: boolean;
 }
 
+/** POST /admin/student-requests/manual-create — live `data` includes `id` (often a string). */
+export interface CreatedManualStudent {
+  id: number | null;
+  email?: string;
+  name?: string;
+}
+
 /** POST /center/{centerId}/generate-registration-link */
 export interface RegistrationLinkResult {
   registrationUrl: string;
@@ -71,6 +78,31 @@ function optionalString(value: unknown): string | undefined {
   }
   const trimmed = String(value).trim();
   return trimmed ? trimmed : undefined;
+}
+
+export function mapCreatedManualStudent(data: unknown): CreatedManualStudent {
+  if (!data || typeof data !== 'object') {
+    return { id: null };
+  }
+  const row = data as Record<string, unknown>;
+  const coerced = coerceStudentId(row['id'] as number | string | undefined | null);
+  return {
+    id: coerced > 0 ? coerced : null,
+    email: optionalString(row['email']),
+    name: optionalString(row['name']),
+  };
+}
+
+export function findStudentIdByEmail(
+  students: Array<{ id: number; email?: string }>,
+  email: string,
+): number | null {
+  const needle = email.trim().toLowerCase();
+  if (!needle) {
+    return null;
+  }
+  const match = students.find((student) => (student.email ?? '').trim().toLowerCase() === needle);
+  return match && match.id > 0 ? match.id : null;
 }
 
 export function mapActiveStudent(raw: unknown): ActiveStudent {

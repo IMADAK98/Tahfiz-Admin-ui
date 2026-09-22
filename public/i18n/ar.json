@@ -12,6 +12,7 @@
       "teacherRequestApproved": "تم قبول طلب المعلّم",
       "teacherRequestRejected": "تم رفض طلب المعلّم",
       "studentCreated": "تم تسجيل الطالب",
+      "studentAssignedToHalqa": "تم تعيين الطالب إلى الحلقة",
       "studentRequestApproved": "تم قبول طلب الطالب",
       "studentRequestRejected": "تم رفض طلب الطالب",
       "centerRequestApproved": "تم قبول طلب المركز",
@@ -91,6 +92,26 @@
     "picker": {
       "noTeachers": "لا يوجد معلّمون متاحون للتعيين",
       "noStudents": "لا يوجد طلاب متاحون للإضافة"
+    }
+  },
+  "students": {
+    "assignHalqa": {
+      "title": "تعيين إلى حلقة؟",
+      "prompt": "هل تريد تعيين هذا الطالب إلى حلقة الآن؟",
+      "yes": "نعم",
+      "no": "لا",
+      "close": "إغلاق",
+      "halqaLabel": "الحلقة",
+      "halqaPlaceholder": "— اختر —",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "empty": "لا توجد حلقات نشطة متاحة",
+      "allFull": "جميع الحلقات النشطة ممتلئة",
+      "loading": "جاري تحميل الحلقات…",
+      "pickHalqa": "اختر حلقة",
+      "missingId": "تعذّر تحديد الطالب بعد التسجيل",
+      "centerUnknown": "تعذّر تحديد المركز من الجلسة",
+      "enrollFailed": "تعذّر تعيين الطالب إلى الحلقة. حاول مرة أخرى."
     }
   },
   "halaqaDetail": {

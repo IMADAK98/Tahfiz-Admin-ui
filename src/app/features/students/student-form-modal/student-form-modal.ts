@@ -11,6 +11,7 @@ import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, HIFZ_QUALITY_OPTIONS, STUDENT_YES_NO_OPTIONS } from '../enums';
+import { CreatedManualStudent } from '../../../core/api/models/student.model';
 import { StudentFormModel, createEmptyStudentForm } from '../dto';
 import { StudentsService } from '../students.service';
 
@@ -27,7 +28,7 @@ export class StudentFormModalComponent {
   private readonly fb = inject(FormBuilder);
 
   readonly visible = input.required<boolean>();
-  readonly saved = output<void>();
+  readonly saved = output<CreatedManualStudent>();
   readonly closed = output<void>();
 
   protected readonly educationStageOptions = [...EDUCATION_STAGE_OPTIONS];
@@ -95,10 +96,10 @@ export class StudentFormModalComponent {
 
     this.submitting.set(true);
     this.studentsService.createStudent(value).subscribe({
-      next: () => {
+      next: (created) => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.studentCreated);
-        this.saved.emit();
+        this.saved.emit(created);
       },
       error: (error: unknown) => {
         this.submitting.set(false);

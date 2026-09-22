@@ -43,7 +43,9 @@
         <div class="input-group">
           <label for="student-search">بحث</label>
           <input
-            pInputText class="input search" fluid
+            pInputText
+            class="input search"
+            fluid
             id="student-search"
             type="search"
             placeholder="ابحث باسم الطالب…"
@@ -64,7 +66,11 @@
                 <strong>{{ student.name }}</strong>
                 <span>{{ student.email || '—' }} · userId {{ student.id }}</span>
               </div>
-              <span class="badge" [class.badge-success]="student.isActive !== false" [class.badge-neutral]="student.isActive === false">
+              <span
+                class="badge"
+                [class.badge-success]="student.isActive !== false"
+                [class.badge-neutral]="student.isActive === false"
+              >
                 {{ student.isActive === false ? 'غير نشط' : 'نشط' }}
               </span>
             </div>
@@ -87,7 +93,13 @@
               </div>
             </dl>
             <div class="row-actions">
-              <p-button type="button" label="التفاصيل" severity="secondary" size="small" (onClick)="openDetail(student)" />
+              <p-button
+                type="button"
+                label="التفاصيل"
+                severity="secondary"
+                size="small"
+                (onClick)="openDetail(student)"
+              />
             </div>
           </article>
         }
@@ -100,16 +112,36 @@
 
 <app-student-form-modal
   [visible]="showFormModal()"
-  (saved)="onStudentSaved()"
+  (saved)="onStudentSaved($event)"
   (closed)="closeFormModal()"
+/>
+
+<app-assign-halqa-modal
+  [visible]="showAssignModal()"
+  [student]="createdStudent()"
+  (assigned)="onAssignDone()"
+  (skipped)="onAssignSkipped()"
 />
 
 @if (detailStudent(); as student) {
   <div class="modal-backdrop" role="presentation" (click)="closeDetail()">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="student-detail-title" (click)="$event.stopPropagation()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="student-detail-title"
+      (click)="$event.stopPropagation()"
+    >
       <div class="modal-header">
         <h2 id="student-detail-title">تفاصيل الطالب</h2>
-        <p-button type="button" [text]="true" [rounded]="true" severity="secondary" ariaLabel="إغلاق" (onClick)="closeDetail()">
+        <p-button
+          type="button"
+          [text]="true"
+          [rounded]="true"
+          severity="secondary"
+          ariaLabel="إغلاق"
+          (onClick)="closeDetail()"
+        >
           ×
         </p-button>
       </div>

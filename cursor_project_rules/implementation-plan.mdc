@@ -54,3 +54,10 @@ Replace fake name/email with `GET /teacher-profile` (JWT teacher). Logout stays.
 
 Multi-state attendance toggle POC — pack cancelled it.
 This checkout already cycles roster card taps PRESENT→ABSENT→LATE→LEAVE with debounce save. Do not revert that without an ask.
+
+## Angular Admin — post manual-create → assign ḥalaqa
+
+Done
+
+Create success on `/admin/students` opens «تعيين إلى حلقة؟» (نعم/لا). لا reloads the list; نعم + حفظ enrolls via `POST /halqa/enroll-students/{id}`.
+`createManual` now returns coerced `data.id`; `CenterApiService.getActiveHalqas` lists capacity-aware ḥalaqas; full ḥalaqas are skipped when countable.

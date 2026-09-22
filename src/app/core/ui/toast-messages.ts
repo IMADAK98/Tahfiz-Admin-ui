@@ -11,6 +11,7 @@ export const TOAST_I18N = {
     teacherRequestApproved: 'toast.success.teacherRequestApproved',
     teacherRequestRejected: 'toast.success.teacherRequestRejected',
     studentCreated: 'toast.success.studentCreated',
+    studentAssignedToHalqa: 'toast.success.studentAssignedToHalqa',
     studentRequestApproved: 'toast.success.studentRequestApproved',
     studentRequestRejected: 'toast.success.studentRequestRejected',
     centerRequestApproved: 'toast.success.centerRequestApproved',
@@ -40,8 +41,7 @@ export const TOAST_I18N = {
 } as const;
 
 export type ServerErrorToastDisplay =
-  | { mode: 'single'; body: string }
-  | { mode: 'titled'; summary: string; detail: string };
+  { mode: 'single'; body: string } | { mode: 'titled'; summary: string; detail: string };
 
 const ARABIC_RE = /[\u0600-\u06FF]/;
 const SHORT_LATIN_MAX_LEN = 120;
