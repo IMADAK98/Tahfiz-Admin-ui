@@ -93,6 +93,37 @@ export function mapCreatedManualStudent(data: unknown): CreatedManualStudent {
   };
 }
 
+function firstPositiveId(...values: unknown[]): number | null {
+  for (const value of values) {
+    const coerced = coerceStudentId(value as number | string | undefined | null);
+    if (coerced > 0) {
+      return coerced;
+    }
+  }
+  return null;
+}
+
+/**
+ * Approve often has `data: null`. When a body is present, id may be nested
+ * (`userId` / `studentId` / `user.id`) — prefer any of those over email-match.
+ */
+export function mapApprovedStudent(data: unknown): CreatedManualStudent {
+  const created = mapCreatedManualStudent(data);
+  if (created.id || !data || typeof data !== 'object') {
+    return created;
+  }
+  const row = data as Record<string, unknown>;
+  const user =
+    row['user'] && typeof row['user'] === 'object'
+      ? (row['user'] as Record<string, unknown>)
+      : null;
+  return {
+    id: firstPositiveId(row['userId'], row['studentId'], user?.['id']),
+    email: created.email ?? optionalString(user?.['email']),
+    name: created.name ?? optionalString(user?.['name']),
+  };
+}
+
 export function findStudentIdByEmail(
   students: Array<{ id: number; email?: string }>,
   email: string,

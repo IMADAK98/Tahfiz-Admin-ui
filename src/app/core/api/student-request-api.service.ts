@@ -9,6 +9,7 @@ import { ApiEnvelope } from './models/api-envelope.model';
 import {
   CreateManualStudentPayload,
   CreatedManualStudent,
+  mapApprovedStudent,
   mapCreatedManualStudent,
 } from './models/student.model';
 import {
@@ -55,19 +56,18 @@ export class StudentRequestApiService {
       .pipe(map((res) => mapCreatedManualStudent(unwrapEnvelopeOrNull(res.body, res.status))));
   }
 
-  /** May return `data: null` on success — caller must re-list. */
-  approve(id: number | string): Observable<void> {
+  /**
+   * Approve pending request. Nest often returns `data: null` (same as
+   * term-enroll with ḥalaqa=null). Prefer any user id when present.
+   */
+  approve(id: number | string): Observable<CreatedManualStudent> {
     return this.http
-      .post<ApiEnvelope<null>>(
+      .post<ApiEnvelope<unknown>>(
         `${this.apiBaseUrl}/admin/student-requests/${id}/approve`,
         {},
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(
-        map((res) => {
-          unwrapEnvelopeOrNull(res.body, res.status);
-        }),
-      );
+      .pipe(map((res) => mapApprovedStudent(unwrapEnvelopeOrNull(res.body, res.status))));
   }
 
   reject(id: number | string, payload: RejectStudentRequestPayload): Observable<void> {

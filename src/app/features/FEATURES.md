@@ -52,7 +52,7 @@ Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`) ra
 Verified against live `https://tahfiz.onrender.com` OpenAPI (`GET /api-json`):
 
 - List: `GET /center/{centerId}/active-students?page&limit&search`. Manual add: `POST /admin/student-requests/manual-create` (no `centerId`; JWT-scoped). Then re-list active-students — manual users do **not** appear in the requests queue.
-- Requests: `GET /admin/student-requests`, `GET …/{id}`, `POST …/{id}/approve` empty body, `POST …/{id}/reject` `{ rejectionReason }` required. Cards collapsed by default with عرض/إخفاء التفاصيل.
+- Requests: `GET /admin/student-requests`, `GET …/{id}`, `POST …/{id}/approve` empty body, `POST …/{id}/reject` `{ rejectionReason }` required. Cards collapsed by default with عرض/إخفاء التفاصيل. Approve reuses `app-assign-halqa-modal` («تعيين إلى حلقة؟») — same chrome as post-manual-create.
 - `educationStage` enum values include spaces (`ELEMENTARY SCHOOL`). List rows may use snake_case `surah_from`/`surah_to`.
 - No `GET /users/students/by-id/{id}` and `UpdateStudentProfileDto` is empty — list «التفاصيل» is read-only from the active-students row. Dropped mock «التقدّم» (no student progress route).
 - Registration link: `POST /center/{centerId}/generate-registration-link` + copy modal. Public signup page (mock 12) is out of scope.

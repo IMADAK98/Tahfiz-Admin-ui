@@ -1,3 +1,4 @@
+import { CreatedManualStudent } from '../../../core/api/models/student.model';
 import { StudentRequestApiRecord } from '../../../core/api/models/student-request.model';
 import { ageFromBirthDate, coerceStudentId } from '../../students/dto';
 import { educationStageLabel, hifzQualityLabel } from '../../students/enums';
@@ -69,12 +70,42 @@ export function mapStudentRequest(record: StudentRequestApiRecord): StudentReque
     hifzQuality,
     hifzQualityLabel: hifzQualityLabel(hifzQuality),
     isHafiz: record.isHafiz ?? null,
-    appliedToCenterId: record.appliedToCenterId != null ? coerceStudentId(record.appliedToCenterId) : null,
+    appliedToCenterId:
+      record.appliedToCenterId != null ? coerceStudentId(record.appliedToCenterId) : null,
     termId: record.termId != null ? coerceStudentId(record.termId) : null,
     existingUserId: record.existingUserId != null ? coerceStudentId(record.existingUserId) : null,
     status: record.status ?? 'PENDING',
     rejectionReason: optionalNullable(record.rejectionReason),
     createdAt: optionalNullable(record.createdAt),
+  };
+}
+
+/** Display mapper uses '—' for empty — strip that before email-match fallback. */
+function displayValueToOptional(value: string | null | undefined): string | undefined {
+  if (value == null) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === '—') {
+    return undefined;
+  }
+  return trimmed;
+}
+
+/**
+ * Prefer approve `data` id, then request `existingUserId`, then email/name
+ * for the shared assign-ḥalaqa modal fallback.
+ */
+export function studentFromApprovedRequest(
+  request: Pick<StudentRequestViewModel, 'email' | 'name' | 'existingUserId'>,
+  approved: CreatedManualStudent,
+): CreatedManualStudent {
+  const existingId =
+    request.existingUserId && request.existingUserId > 0 ? request.existingUserId : null;
+  return {
+    id: approved.id ?? existingId,
+    email: approved.email ?? displayValueToOptional(request.email),
+    name: approved.name ?? displayValueToOptional(request.name),
   };
 }
 

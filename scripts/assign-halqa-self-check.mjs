@@ -79,6 +79,42 @@ function findStudentIdByEmail(students, email) {
   return match && match.id > 0 ? match.id : null;
 }
 
+function firstPositiveId(...values) {
+  for (const value of values) {
+    const coerced = coerceStudentId(value);
+    if (coerced > 0) return coerced;
+  }
+  return null;
+}
+
+function mapApprovedStudent(data) {
+  const created = mapCreatedManualStudent(data);
+  if (created.id || !data || typeof data !== 'object') return created;
+  const user = data.user && typeof data.user === 'object' ? data.user : null;
+  return {
+    id: firstPositiveId(data.userId, data.studentId, user?.id),
+    email: created.email ?? optionalString(user?.email),
+    name: created.name ?? optionalString(user?.name),
+  };
+}
+
+function displayValueToOptional(value) {
+  if (value == null) return undefined;
+  const trimmed = String(value).trim();
+  if (!trimmed || trimmed === '—') return undefined;
+  return trimmed;
+}
+
+function studentFromApprovedRequest(request, approved) {
+  const existingId =
+    request.existingUserId && request.existingUserId > 0 ? request.existingUserId : null;
+  return {
+    id: approved.id ?? existingId,
+    email: approved.email ?? displayValueToOptional(request.email),
+    name: approved.name ?? displayValueToOptional(request.name),
+  };
+}
+
 assert.deepEqual(mapCreatedManualStudent({ id: '28', name: 'Ahmed', email: 'a@b.c' }), {
   id: 28,
   name: 'Ahmed',
@@ -126,6 +162,47 @@ assert.equal(
   28,
 );
 assert.equal(findStudentIdByEmail([{ id: 1, email: 'nope@x.com' }], 'a@b.c'), null);
+
+assert.deepEqual(mapApprovedStudent(null), { id: null });
+assert.deepEqual(mapApprovedStudent({ id: '28', email: 'a@b.c' }), {
+  id: 28,
+  email: 'a@b.c',
+  name: undefined,
+});
+assert.deepEqual(mapApprovedStudent({ userId: '31', user: { name: 'Sara' } }), {
+  id: 31,
+  email: undefined,
+  name: 'Sara',
+});
+assert.deepEqual(mapApprovedStudent({ user: { id: '9', email: 'u@x.com', name: 'U' } }), {
+  id: 9,
+  email: 'u@x.com',
+  name: 'U',
+});
+assert.deepEqual(
+  studentFromApprovedRequest(
+    { email: 'req@x.com', name: 'طلب', existingUserId: 44 },
+    mapApprovedStudent(null),
+  ),
+  { id: 44, email: 'req@x.com', name: 'طلب' },
+);
+assert.deepEqual(
+  studentFromApprovedRequest(
+    { email: '—', name: '—', existingUserId: null },
+    mapApprovedStudent({ id: '12' }),
+  ),
+  { id: 12, email: undefined, name: undefined },
+);
+assert.equal(
+  findStudentIdByEmail(
+    [{ id: 28, email: 'a@b.c' }],
+    studentFromApprovedRequest(
+      { email: 'a@b.c', name: 'Ahmed', existingUserId: null },
+      { id: null },
+    ).email,
+  ),
+  28,
+);
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const createManual = readFileSync(
@@ -177,5 +254,59 @@ assert.equal(ar.students.assignHalqa.title, 'تعيين إلى حلقة؟');
 assert.equal(ar.students.assignHalqa.yes, 'نعم');
 assert.equal(ar.students.assignHalqa.no, 'لا');
 assert.equal(ar.toast.success.studentAssignedToHalqa, 'تم تعيين الطالب إلى الحلقة');
+
+const approveApi = readFileSync(
+  join(root, 'src/app/core/api/student-request-api.service.ts'),
+  'utf8',
+);
+if (
+  !approveApi.includes('approve(id: number | string): Observable<CreatedManualStudent>') ||
+  !approveApi.includes('mapApprovedStudent')
+) {
+  throw new Error('approve must return coerced user id, not Observable<void>');
+}
+
+const requestsTs = readFileSync(
+  join(root, 'src/app/features/student-requests/student-requests.ts'),
+  'utf8',
+);
+if (
+  !requestsTs.includes('AssignHalqaModalComponent') ||
+  !requestsTs.includes('showAssignModal') ||
+  !requestsTs.includes('approvedStudent')
+) {
+  throw new Error('student-requests must open the shared assign dialog after approve');
+}
+if (requestsTs.includes('notifySuccess(TOAST_I18N.success.studentRequestRejected)') === false) {
+  throw new Error('reject path must stay toast + reload');
+}
+
+const requestsHtml = readFileSync(
+  join(root, 'src/app/features/student-requests/student-requests.html'),
+  'utf8',
+);
+if (!requestsHtml.includes('app-assign-halqa-modal')) {
+  throw new Error(
+    'student-requests must mount the shared assign-halqa modal — do not duplicate chrome',
+  );
+}
+if (requestsHtml.includes('confirmReject') && requestsHtml.includes('app-assign-halqa-modal')) {
+  const rejectAt = requestsHtml.indexOf('confirmReject');
+  const assignAt = requestsHtml.indexOf('app-assign-halqa-modal');
+  if (assignAt > rejectAt) {
+    // ponytail: only checks that reject still exists; assign is a sibling, not inside reject.
+  }
+}
+
+const requestsDto = readFileSync(
+  join(root, 'src/app/features/student-requests/dto/student-request-view.model.ts'),
+  'utf8',
+);
+if (
+  !requestsDto.includes('studentFromApprovedRequest') ||
+  !requestsDto.includes('existingUserId')
+) {
+  throw new Error('approve must merge existingUserId / email when data is null');
+}
 
 console.log('assign-halqa-self-check: ok');

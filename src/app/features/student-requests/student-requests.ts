@@ -5,9 +5,11 @@ import { Button } from 'primeng/button';
 import { Textarea } from 'primeng/textarea';
 import { ApiError } from '../../core/api/api-error';
 import { createFieldErrorBag } from '../../core/api/field-error-state';
+import { CreatedManualStudent } from '../../core/api/models/student.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
+import { AssignHalqaModalComponent } from '../students/assign-halqa-modal/assign-halqa-modal';
 import { yesNoLabel } from '../students/enums';
 import { hifzSummary, StudentRequestViewModel } from './dto';
 import { StudentRequestsLoadState } from './enums';
@@ -15,7 +17,14 @@ import { StudentRequestsService } from './student-requests.service';
 
 @Component({
   selector: 'app-student-requests',
-  imports: [ReactiveFormsModule, RouterLink, Button, Textarea, FieldErrorComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    Button,
+    Textarea,
+    FieldErrorComponent,
+    AssignHalqaModalComponent,
+  ],
   templateUrl: './student-requests.html',
   styleUrl: './student-requests.scss',
 })
@@ -33,6 +42,8 @@ export class StudentRequestsComponent {
   protected readonly expandedIds = signal<Set<number>>(new Set());
 
   protected readonly activeApproveRequest = signal<StudentRequestViewModel | null>(null);
+  protected readonly showAssignModal = signal(false);
+  protected readonly approvedStudent = signal<CreatedManualStudent | null>(null);
   protected readonly activeRejectRequest = signal<StudentRequestViewModel | null>(null);
   protected readonly rejectionReason = new FormControl('', { nonNullable: true });
   protected readonly rejectError = signal<string | null>(null);
@@ -108,12 +119,13 @@ export class StudentRequestsComponent {
       return;
     }
     this.actingId.set(request.id);
-    this.requestsService.approve(request.id).subscribe({
-      next: () => {
+    this.requestsService.approve(request).subscribe({
+      next: (student) => {
         this.actingId.set(null);
         this.activeApproveRequest.set(null);
         this.toastMessage.notifySuccess(TOAST_I18N.success.studentRequestApproved);
-        this.reload();
+        this.approvedStudent.set(student);
+        this.showAssignModal.set(true);
       },
       error: (error: unknown) => {
         this.actingId.set(null);
@@ -122,6 +134,21 @@ export class StudentRequestsComponent {
         );
       },
     });
+  }
+
+  protected onAssignSkipped(): void {
+    this.closeAssignModal();
+    this.reload();
+  }
+
+  protected onAssignDone(): void {
+    this.closeAssignModal();
+    this.reload();
+  }
+
+  private closeAssignModal(): void {
+    this.showAssignModal.set(false);
+    this.approvedStudent.set(null);
   }
 
   protected openReject(request: StudentRequestViewModel): void {

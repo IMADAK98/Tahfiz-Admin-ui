@@ -1,4 +1,4 @@
-/** i18n keys for post-create assign-ḥalaqa dialog. */
+/** i18n keys for the shared assign-ḥalaqa dialog (post-create + post-approve). */
 export const STUDENTS_I18N = {
   assignHalqa: {
     title: 'students.assignHalqa.title',
