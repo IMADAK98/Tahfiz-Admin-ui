@@ -9,23 +9,11 @@ export const STUDENT_SIGNUP_ROUTE = '/signup/student';
 /** Public identify / returning student (mock 16) — append ?token=&term= */
 export const IDENTIFY_ROUTE = '/identify';
 
-/** Product host lock for displayed reg links (rewrite vercel → this). */
-export const PRODUCT_PUBLIC_HOST = 'https://www.tahfiz.work';
-
 /**
- * Hosts that do not serve this Angular app's `/identify` (404 on 2026-09-23).
- * ponytail: swap only these; a working absolute host (admin Vercel, localhost) stays.
- * Upgrade: point PRODUCT_PUBLIC_HOST at the deploy that actually serves `/identify`.
+ * www.tahfiz.work 404s `/identify` (2026-09-23). Do not use it for admin invite share.
+ * The admin app origin is what serves identify.
  */
-const STALE_INVITE_HOSTS = new Set(['tahfiz-client.vercel.app', 'www.tahfiz.work', 'tahfiz.work']);
-
-/** Build shareable identify URL for admin "copy link" UIs. */
-export function buildIdentifyShareUrl(token: string, termName?: string): string {
-  const url = new URL(`${PRODUCT_PUBLIC_HOST}/identify`);
-  url.searchParams.set('token', token);
-  if (termName) url.searchParams.set('term', termName);
-  return url.toString();
-}
+export const PRODUCT_PUBLIC_HOST = 'https://www.tahfiz.work';
 
 export function readAppOrigin(): string | undefined {
   const origin = globalThis.location?.origin;
@@ -33,35 +21,6 @@ export function readAppOrigin(): string | undefined {
     return undefined;
   }
   return origin;
-}
-
-/**
- * Invite entry is `/identify`, keeping `token` / `term` (and any other query).
- * Stale hosts are rewritten to `appOrigin` when the admin app is the one that serves identify.
- */
-export function rewriteInviteEntryUrl(rawUrl: string, appOrigin?: string): string {
-  const trimmed = rawUrl.trim();
-  const origin = (appOrigin?.trim() || PRODUCT_PUBLIC_HOST).replace(/\/$/, '');
-  if (!trimmed) {
-    return '';
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(trimmed, `${origin}/`);
-  } catch {
-    return '';
-  }
-
-  if (STALE_INVITE_HOSTS.has(parsed.hostname)) {
-    const product = new URL(origin);
-    parsed.protocol = product.protocol;
-    parsed.host = product.host;
-  }
-
-  parsed.pathname = IDENTIFY_ROUTE;
-  parsed.hash = '';
-  return parsed.toString();
 }
 
 function optionalLinkString(value: unknown): string | undefined {
@@ -72,36 +31,71 @@ function optionalLinkString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function inviteQueryParam(rawUrl: string, key: string): string | undefined {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  try {
+    return optionalLinkString(new URL(trimmed, 'https://invite.invalid/').searchParams.get(key));
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Admin invite share. Host and path are only the admin app + `/identify`.
+ * Nest host and `/signup/student` are ignored.
+ * ponytail: only `term` + `token`. Upgrade: forward extra Nest query keys if identify starts reading them.
+ */
+export function buildAdminIdentifyShareUrl(
+  token: string,
+  term?: string,
+  appOrigin?: string,
+): string {
+  const origin = (appOrigin?.trim() || readAppOrigin() || '').replace(/\/$/, '');
+  const trimmedToken = token.trim();
+  if (!origin || !trimmedToken) {
+    return '';
+  }
+  const url = new URL(`${origin}${IDENTIFY_ROUTE}`);
+  const trimmedTerm = term?.trim();
+  if (trimmedTerm) {
+    url.searchParams.set('term', trimmedTerm);
+  }
+  url.searchParams.set('token', trimmedToken);
+  return url.toString();
+}
+
+/** Extract token/term from a Nest URL and rebuild the admin identify share link. */
+export function rewriteInviteEntryUrl(rawUrl: string, appOrigin?: string): string {
+  const token = inviteQueryParam(rawUrl, 'token');
+  if (!token) {
+    return '';
+  }
+  return buildAdminIdentifyShareUrl(token, inviteQueryParam(rawUrl, 'term'), appOrigin);
+}
+
 /** Nest field names differ by contract: `registrationUrl` | `registrationLink` | `url`. */
 export function mapInviteRegistrationLink(
   data: unknown,
   appOrigin?: string,
-): { registrationUrl: string; expiresAt: string | null } {
+): { shareUrl: string; expiresAt: string | null } {
   const row = data && typeof data === 'object' ? (data as Record<string, unknown>) : {};
   const raw =
     optionalLinkString(row['registrationUrl']) ??
     optionalLinkString(row['registrationLink']) ??
     optionalLinkString(row['url']) ??
     '';
-  const token = optionalLinkString(row['token']);
-  const term = optionalLinkString(row['termName']) ?? optionalLinkString(row['term']);
-  const origin = (appOrigin?.trim() || PRODUCT_PUBLIC_HOST).replace(/\/$/, '');
-  let registrationUrl = raw ? rewriteInviteEntryUrl(raw, origin) : '';
-  if (!registrationUrl && token) {
-    registrationUrl = rewriteInviteEntryUrl(`${origin}/identify`, origin);
-  }
-  if (registrationUrl) {
-    const url = new URL(registrationUrl);
-    if (token && !url.searchParams.get('token')) {
-      url.searchParams.set('token', token);
-    }
-    if (term && !url.searchParams.get('term')) {
-      url.searchParams.set('term', term);
-    }
-    registrationUrl = url.toString();
-  }
+  const token =
+    optionalLinkString(row['token']) ?? (raw ? inviteQueryParam(raw, 'token') : undefined);
+  const term =
+    optionalLinkString(row['termName']) ??
+    optionalLinkString(row['term']) ??
+    (raw ? inviteQueryParam(raw, 'term') : undefined);
+  const origin = (appOrigin?.trim() || readAppOrigin() || '').replace(/\/$/, '');
   return {
-    registrationUrl,
+    shareUrl: token ? buildAdminIdentifyShareUrl(token, term, origin) : '',
     expiresAt: optionalLinkString(row['expiresAt']) ?? null,
   };
 }

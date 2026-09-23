@@ -242,7 +242,7 @@
             تم إنشاء رابط آمن لمشاركته مع ولي الأمر. بعد الإرسال يظهر الطلب في طلبات الطلاب.
           </p>
           <div class="link-box" role="status">
-            <code dir="ltr">{{ registrationShareUrl(result) }}</code>
+            <code dir="ltr">{{ result.shareUrl }}</code>
             <p-button type="button" label="نسخ" size="small" (onClick)="copyRegistrationLink()" />
           </div>
           @if (result.expiresAt) {
@@ -251,7 +251,7 @@
         }
       </div>
       <div class="modal-footer">
-        @if (registrationShareUrl(linkResult())) {
+        @if (linkResult()?.shareUrl) {
           <p-button type="button" label="تم" (onClick)="closeLinkModal()" />
         }
         <p-button

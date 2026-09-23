@@ -94,5 +94,5 @@ No active-term + `/halqa/by-term` invert. Coerce string id.
 
 Done
 
-The students share dialog and copy button run `mapInviteRegistrationLink` so a Nest `/signup/student` URL is shown and copied as `/identify` with the same query.
-`check:invite-link` fails if the dialog interpolates `result.registrationUrl` or the clipboard writes that field raw.
+`/admin/students` dialog and «نسخ» both read `shareUrl`, built once as admin `/identify?term=&token=` from the Nest token. Nest host and `/signup/student` are not kept.
+`npm run build` runs `check:invite-link`, which fails if that dialog or copy handler still uses `registrationUrl` or can emit `/signup/student`.

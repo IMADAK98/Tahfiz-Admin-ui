@@ -65,14 +65,17 @@ export interface CreatedManualStudent {
   name?: string;
 }
 
-/** POST /center/{centerId}/generate-registration-link */
+/** POST /center/{centerId}/generate-registration-link. `shareUrl` is the only string the dialog may show or copy. */
 export interface RegistrationLinkResult {
-  registrationUrl: string;
+  shareUrl: string;
   expiresAt?: string | null;
 }
 
-/** Display/copy always enters `/identify` with the same query. */
-export function mapRegistrationLinkResult(data: unknown, appOrigin?: string): RegistrationLinkResult {
+/** Build admin `/identify?term=&token=` once. Nest host and `/signup/student` are not kept. */
+export function mapRegistrationLinkResult(
+  data: unknown,
+  appOrigin?: string,
+): RegistrationLinkResult {
   return mapInviteRegistrationLink(data, appOrigin);
 }
 
