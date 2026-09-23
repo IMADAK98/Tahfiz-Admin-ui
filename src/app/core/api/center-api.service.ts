@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
+import { readAppOrigin } from '../config/public-links';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
@@ -10,6 +11,7 @@ import { ActiveTerm } from './models/term.model';
 import {
   ActiveStudent,
   ActiveStudentsQuery,
+  mapRegistrationLinkResult,
   RegistrationLinkResult,
   unwrapActiveStudentsPayload,
 } from './models/student.model';
@@ -99,12 +101,14 @@ export class CenterApiService {
 
   generateRegistrationLink(centerId: number): Observable<RegistrationLinkResult> {
     return this.http
-      .post<ApiEnvelope<RegistrationLinkResult>>(
+      .post<ApiEnvelope<unknown>>(
         `${this.apiBaseUrl}/center/${centerId}/generate-registration-link`,
         {},
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .pipe(
+        map((res) => mapRegistrationLinkResult(unwrapEnvelope(res.body, res.status), readAppOrigin())),
+      );
   }
 
   private getTeachers(url: string, query: ActiveTeachersQuery): Observable<ActiveTeacher[]> {
