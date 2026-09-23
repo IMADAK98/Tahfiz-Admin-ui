@@ -7,6 +7,7 @@ import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
 import { ActiveStudent, RegistrationLinkResult } from '../../core/api/models/student.model';
 import { AuthService } from '../../core/auth/auth.service';
+import { mapInviteRegistrationLink, readAppOrigin } from '../../core/config/public-links';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { formatStudentDate } from './dto';
@@ -145,8 +146,13 @@ export class StudentsComponent {
     this.linkError.set(null);
   }
 
+  /** Dialog text and clipboard. Remap here so a raw Nest `/signup/student` URL is not what gets copied. */
+  protected registrationShareUrl(result: RegistrationLinkResult | null | undefined): string {
+    return mapInviteRegistrationLink(result, readAppOrigin()).registrationUrl;
+  }
+
   protected async copyRegistrationLink(): Promise<void> {
-    const link = this.linkResult()?.registrationUrl?.trim();
+    const link = this.registrationShareUrl(this.linkResult());
     if (!link) {
       return;
     }
