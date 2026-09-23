@@ -89,3 +89,10 @@ Done
 
 `/admin/students` cards show Nest `halqa: { id, name } | null` from `GET /center/{id}/active-students` (PR #4 merged). Link → `/admin/halaqat/:id`; null → muted «غير معيّن».
 No active-term + `/halqa/by-term` invert. Coerce string id.
+
+## Angular Admin — invite share dialog copies /identify
+
+Done
+
+The students share dialog and copy button run `mapInviteRegistrationLink` so a Nest `/signup/student` URL is shown and copied as `/identify` with the same query.
+`check:invite-link` fails if the dialog interpolates `result.registrationUrl` or the clipboard writes that field raw.
