@@ -9,6 +9,7 @@ import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
 import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { IdentifiedStudent, RegisterTokenValidation } from '../../core/api/models/identify.model';
+import { allowSignupFromIdentify, INVITE_IDENTIFIED_STATE } from '../../core/auth/invite-identify';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
@@ -193,11 +194,13 @@ export class IdentifyComponent implements OnInit {
   }
 
   goToSignup(): void {
+    allowSignupFromIdentify(this.token);
     void this.router.navigate(['/signup/student'], {
       queryParams: {
         token: this.token || undefined,
         term: this.termHint || this.tokenContext()?.termName || undefined,
       },
+      state: { [INVITE_IDENTIFIED_STATE]: this.token },
     });
   }
 

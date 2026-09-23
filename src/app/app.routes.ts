@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/auth/admin.guard';
+import { inviteIdentifyGuard } from './core/auth/invite-identify.guard';
 import { systemAdminGuard } from './core/auth/system-admin.guard';
 
 export const routes: Routes = [
@@ -30,6 +31,7 @@ export const routes: Routes = [
   },
   {
     path: 'signup/student',
+    canActivate: [inviteIdentifyGuard],
     loadComponent: () =>
       import('./features/student-signup/student-signup').then((m) => m.StudentSignupComponent),
   },

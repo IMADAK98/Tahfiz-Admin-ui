@@ -1,3 +1,5 @@
+import { mapInviteRegistrationLink } from '../../config/public-links';
+
 /** Nest `GetActiveStudentDto.halqa` — id is a JSON string. */
 export interface AssignedStudentHalqa {
   id: number;
@@ -67,6 +69,11 @@ export interface CreatedManualStudent {
 export interface RegistrationLinkResult {
   registrationUrl: string;
   expiresAt?: string | null;
+}
+
+/** Display/copy always enters `/identify` with the same query. */
+export function mapRegistrationLinkResult(data: unknown, appOrigin?: string): RegistrationLinkResult {
+  return mapInviteRegistrationLink(data, appOrigin);
 }
 
 export function coerceStudentId(value: number | string | undefined | null): number {
