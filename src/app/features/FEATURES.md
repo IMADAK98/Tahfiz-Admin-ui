@@ -35,7 +35,7 @@ Slim SYSTEM_ADMIN shell (not center-admin sidebar): طلبات المراكز + 
 | `reports-attendance/` | `/admin/reports/attendance` | `13` | Placeholder |
 | `reports-progress/` | `/admin/reports/progress` | `14` | Placeholder |
 | `center-profile/` | `/admin/center-profile` | `22` | Implemented |
-| `profile/` | `/admin/profile` | `23` | Implemented |
+| `profile/` | `/admin/profile` | `23` | Implemented (view-only + credential dialogs) |
 
 ## Teachers set — live API notes
 

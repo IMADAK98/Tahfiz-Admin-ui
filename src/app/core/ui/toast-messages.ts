@@ -21,6 +21,8 @@ export const TOAST_I18N = {
     registrationLinkGenerated: 'toast.success.registrationLinkGenerated',
     registrationLinkCopied: 'toast.success.registrationLinkCopied',
     copied: 'toast.success.copied',
+    passwordChanged: 'toast.success.passwordChanged',
+    emailChanged: 'toast.success.emailChanged',
   },
   warn: {
     endActiveTermFirst: 'toast.warn.endActiveTermFirst',

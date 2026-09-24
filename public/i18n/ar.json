@@ -20,6 +20,8 @@
       "registrationLinkGenerated": "تم إنشاء رابط التسجيل",
       "registrationLinkCopied": "تم نسخ رابط التسجيل",
       "copied": "تم النسخ",
+      "passwordChanged": "تم تغيير كلمة المرور",
+      "emailChanged": "تم تغيير البريد الإلكتروني",
       "studentSignupSubmitted": "تم إرسال طلب التسجيل — قيد المراجعة",
       "identifyActivated": "تم إرسال طلب الالتحاق / إعادة التسجيل",
       "identifyAlreadyEnrolled": "الطالب مسجّل مسبقاً في هذه الدورة"

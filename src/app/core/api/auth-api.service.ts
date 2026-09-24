@@ -4,10 +4,11 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
+import { ApiError, apiErrorFromBody } from './api-error';
 import { bearerHeaders } from './http-auth.helpers';
-import { apiErrorFromBody } from './api-error';
 import { catchHttpAsApiError, envelopeOk, mapEnvelopeResponse, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
+import { authTokensFromUnknown, ChangeEmailRequest, ChangePasswordRequest } from './credential-change.model';
 import { AuthTokens, LoginRequest, RefreshRequest } from './models/auth.model';
 import { RequestPasswordResetBody, ResetPasswordBody } from './password-reset.model';
 
@@ -71,6 +72,54 @@ export class AuthApiService {
           }
           return throwError(() => err);
         }),
+      );
+  }
+
+  /**
+   * In-session password change. Success is 200 with `data: null`.
+   * Tokens stay as they are — Nest does not rotate them.
+   */
+  changePassword(body: ChangePasswordRequest): Observable<void> {
+    return this.http
+      .post<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/auth/change-password`,
+        body,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          if (!envelopeOk(res.body, res.status)) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return undefined;
+        }),
+        catchHttpAsApiError(),
+      );
+  }
+
+  /**
+   * In-session email change. Success `data` is the new access/refresh pair.
+   * Nest invalidates the previous refresh token, so a body without the pair is a failure.
+   */
+  changeEmail(body: ChangeEmailRequest): Observable<AuthTokens> {
+    return this.http
+      .post<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/auth/change-email`,
+        body,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          if (!envelopeOk(res.body, res.status)) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          const tokens = authTokensFromUnknown(res.body?.data);
+          if (!tokens) {
+            throw new ApiError('تعذّر تحديث الجلسة بعد تغيير البريد', res.status);
+          }
+          return tokens;
+        }),
+        catchHttpAsApiError(),
       );
   }
 

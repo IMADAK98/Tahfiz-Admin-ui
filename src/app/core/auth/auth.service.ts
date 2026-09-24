@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { AuthApiService } from '../api/auth-api.service';
+import { ChangeEmailRequest, ChangePasswordRequest } from '../api/credential-change.model';
 import {
   RequestPasswordResetBody,
   ResetPasswordBody,
@@ -81,6 +82,19 @@ export class AuthService {
         this.clearSession();
         return of(undefined);
       }),
+    );
+  }
+
+  /** 200 `data: null`. Does not replace the stored access/refresh pair. */
+  changePassword(body: ChangePasswordRequest): Observable<void> {
+    return this.authApi.changePassword(body);
+  }
+
+  /** Stores the returned pair before callers reload the profile. The old refresh token is dead. */
+  changeEmail(body: ChangeEmailRequest): Observable<void> {
+    return this.authApi.changeEmail(body).pipe(
+      tap((tokens) => this.tokenStorage.setTokens(tokens)),
+      map(() => undefined),
     );
   }
 
