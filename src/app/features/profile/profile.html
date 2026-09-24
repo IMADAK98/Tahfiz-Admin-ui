@@ -1,24 +1,70 @@
-<section class="profile-page">
-  @if (loading()) {
-    <p class="profile-muted">جاري تحميل الملف الشخصي…</p>
-  } @else if (profile(); as view) {
-    <dl class="profile-facts" aria-label="بيانات الحساب">
+@if (loadState() === ProfileLoadState.Loading) {
+  <p class="acct-muted">جاري تحميل الملف الشخصي…</p>
+} @else if (loadState() === ProfileLoadState.Error) {
+  <p class="acct-error" role="alert">{{ loadError() }}</p>
+  <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+} @else if (view(); as profile) {
+  <div class="acct-page-head">
+    <div class="acct-head-main">
+      <div class="acct-avatar is-person" aria-hidden="true">{{ profile.initial }}</div>
       <div>
+        <h1>{{ profile.name }}</h1>
+        <p class="acct-sub">{{ profile.roleHeadLabel }} · {{ profile.centerName }}</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="acct-section" aria-label="البيانات الشخصية">
+    <h2>البيانات الشخصية</h2>
+    <dl class="acct-facts">
+      <div class="acct-fact">
         <dt>الاسم</dt>
-        <dd>{{ view.name }}</dd>
+        <dd>{{ profile.name }}</dd>
       </div>
-      <div>
-        <dt>البريد</dt>
-        <dd>{{ view.email }}</dd>
-      </div>
-      <div>
-        <dt>الهاتف</dt>
-        <dd>{{ view.phone }}</dd>
-      </div>
-      <div>
+      <div class="acct-fact">
         <dt>الدور</dt>
-        <dd>{{ view.roleLabel }}</dd>
+        <dd>{{ profile.roleLabel }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>الحالة</dt>
+        <dd>
+          <span class="acct-badge" [class.is-inactive]="!profile.isActive">
+            {{ profile.isActive ? 'نشط' : 'غير نشط' }}
+          </span>
+        </dd>
+      </div>
+      <div class="acct-fact">
+        <dt>المركز</dt>
+        <dd>{{ profile.centerName }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>البريد الإلكتروني</dt>
+        <dd dir="ltr">{{ profile.email }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>رقم الجوال</dt>
+        <dd dir="ltr">{{ profile.phone }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>تاريخ الميلاد</dt>
+        <dd dir="ltr">{{ profile.birthDate }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>الجنسية</dt>
+        <dd>{{ profile.nationality }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>رقم الهوية الوطنية</dt>
+        <dd dir="ltr">{{ profile.identificationNumber }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>رقم جواز السفر</dt>
+        <dd dir="ltr" [class.is-muted]="profile.passportNumber === '—'">{{ profile.passportNumber }}</dd>
+      </div>
+      <div class="acct-fact is-span-2">
+        <dt>العنوان</dt>
+        <dd [class.is-muted]="profile.address === '—'">{{ profile.address }}</dd>
       </div>
     </dl>
-  }
-</section>
+  </section>
+}

@@ -59,6 +59,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/profile/profile').then((m) => m.ProfileComponent),
       },
       {
+        path: 'center-profile',
+        loadComponent: () =>
+          import('./features/center-profile/center-profile').then((m) => m.CenterProfileComponent),
+      },
+      {
         path: 'terms',
         loadComponent: () => import('./features/terms/terms').then((m) => m.TermsComponent),
       },
