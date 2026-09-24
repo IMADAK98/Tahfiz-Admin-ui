@@ -19,11 +19,14 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
   '/admin/reports/attendance': 'تقرير الحضور',
   '/admin/reports/progress': 'تقرير التقدّم',
   '/admin/profile': 'الملف الشخصي',
+  '/admin/center-profile': 'بيانات المركز',
 };
 
 const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
   '/admin/re-enrollment': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
   '/admin/re-enrollment-requests': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
+  '/admin/center-profile': 'عرض فقط · GET /center/{id}',
+  '/admin/profile': 'عرض فقط · GET /users/{id}',
 };
 
 const SIDEBAR_COLLAPSED_KEY = 'tahfiz.admin.sidebarCollapsed';
@@ -49,13 +52,16 @@ export class AdminShellComponent {
     return [
       {
         label: 'الملف الشخصي',
-        icon: 'pi pi-user',
         command: () => void this.router.navigate(['/admin/profile']),
+      },
+      {
+        label: 'بيانات المركز',
+        command: () => void this.router.navigate(['/admin/center-profile']),
       },
       { separator: true },
       {
         label: this.loggingOut() ? 'جاري الخروج…' : 'تسجيل الخروج',
-        icon: 'pi pi-sign-out',
+        styleClass: 'is-danger',
         disabled: this.loggingOut(),
         command: () => this.logout(),
       },

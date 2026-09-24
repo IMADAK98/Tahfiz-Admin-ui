@@ -15,6 +15,7 @@ import {
   RegistrationLinkResult,
   unwrapActiveStudentsPayload,
 } from './models/student.model';
+import { CenterApiRecord } from './models/center.model';
 import { DashboardCards } from './models/dashboard-cards.model';
 import { ActiveHalqaOption, unwrapActiveHalqasPayload } from './models/halqa.model';
 import { ActiveTeacher, ActiveTeachersQuery, mapActiveTeacher } from './models/teacher.model';
@@ -23,6 +24,15 @@ import { ActiveTeacher, ActiveTeachersQuery, mapActiveTeacher } from './models/t
 export class CenterApiService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = inject(API_BASE_URL);
+
+  /** GET /center/{id} — view-only center profile. */
+  getById(centerId: number): Observable<CenterApiRecord> {
+    return this.http
+      .get<ApiEnvelope<CenterApiRecord>>(`${this.apiBaseUrl}/center/${centerId}`, {
+        observe: 'response',
+      })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
 
   getActiveTerm(centerId: number): Observable<ActiveTerm | null> {
     return this.http

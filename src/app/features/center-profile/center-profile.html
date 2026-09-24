@@ -1,0 +1,38 @@
+@if (loadState() === CenterProfileLoadState.Loading) {
+  <p class="acct-muted">جاري تحميل بيانات المركز…</p>
+} @else if (loadState() === CenterProfileLoadState.Error) {
+  <p class="acct-error" role="alert">{{ loadError() }}</p>
+  <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
+} @else if (view(); as center) {
+  <div class="acct-page-head">
+    <div class="acct-head-main">
+      <div class="acct-avatar" aria-hidden="true">{{ center.initial }}</div>
+      <div>
+        <h1>{{ center.name }}</h1>
+        <p class="acct-sub">بيانات المركز كما في النظام</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="acct-section" aria-label="بيانات المركز">
+    <h2>معلومات المركز</h2>
+    <dl class="acct-facts">
+      <div class="acct-fact">
+        <dt>اسم المركز</dt>
+        <dd>{{ center.name }}</dd>
+      </div>
+      <div class="acct-fact">
+        <dt>الحالة</dt>
+        <dd>
+          <span class="acct-badge" [class.is-inactive]="!center.isActive">
+            {{ center.isActive ? 'نشط' : 'غير نشط' }}
+          </span>
+        </dd>
+      </div>
+      <div class="acct-fact is-span-2">
+        <dt>عنوان المركز</dt>
+        <dd [class.is-muted]="center.address === '—'">{{ center.address }}</dd>
+      </div>
+    </dl>
+  </section>
+}

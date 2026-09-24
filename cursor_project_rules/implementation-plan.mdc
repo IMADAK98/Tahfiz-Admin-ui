@@ -96,3 +96,9 @@ Done
 
 The students share dialog and copy button run `mapInviteRegistrationLink` so a Nest `/signup/student` URL is shown and copied as `/identify` with the same query.
 `check:invite-link` fails if the dialog interpolates `result.registrationUrl` or the clipboard writes that field raw.
+
+## Angular Admin — view-only center + admin profiles
+
+Done
+
+`/admin/center-profile` reads `GET /center/{id}` (name, address, isActive only). `/admin/profile` reads `GET /users/{id}` for the locked personal fields. Sidebar الحساب and the topbar menu link both pages. No edit, save, or password UI.
