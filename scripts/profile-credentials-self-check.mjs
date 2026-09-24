@@ -70,6 +70,7 @@ assert.deepEqual(emailBody, { newEmail: 'name@example.com', currentPassword: 'se
 
 assert.equal(authTokensFromUnknown(null), null);
 assert.equal(authTokensFromUnknown({ accessToken: 'a' }), null);
+assert.equal(authTokensFromUnknown({ data: null }), null);
 assert.deepEqual(authTokensFromUnknown({ accessToken: 'a', refreshToken: 'b' }), {
   accessToken: 'a',
   refreshToken: 'b',
@@ -82,6 +83,9 @@ assert.deepEqual(authTokensFromUnknown({ tokens: { accessToken: 'a', refreshToke
 const authApi = readFileSync(new URL('../src/app/core/api/auth-api.service.ts', import.meta.url), 'utf8');
 assert.match(authApi, /\/auth\/change-password/);
 assert.match(authApi, /\/auth\/change-email/);
+assert.match(authApi, /تعذّر تحديث الجلسة بعد تغيير البريد/);
+const passwordMethod = authApi.slice(authApi.indexOf('changePassword('), authApi.indexOf('changeEmail('));
+assert.doesNotMatch(passwordMethod, /setTokens|authTokensFromUnknown/);
 const credentialModel = readFileSync(
   new URL('../src/app/core/api/credential-change.model.ts', import.meta.url),
   'utf8',
@@ -99,6 +103,12 @@ const profileDir = [
 assert.doesNotMatch(profileDir, /request-password-reset|reset-password|admin-profile|teacher-profile/);
 assert.match(profileDir, /changePassword/);
 assert.match(profileDir, /changeEmail/);
+
+const authService = readFileSync(new URL('../src/app/core/auth/auth.service.ts', import.meta.url), 'utf8');
+const servicePassword = authService.slice(authService.indexOf('changePassword('), authService.indexOf('changeEmail('));
+const serviceEmail = authService.slice(authService.indexOf('changeEmail('), authService.indexOf('requestPasswordReset('));
+assert.doesNotMatch(servicePassword, /setTokens/);
+assert.match(serviceEmail, /setTokens\(tokens\)/);
 
 const interceptor = readFileSync(new URL('../src/app/core/auth/auth.interceptor.ts', import.meta.url), 'utf8');
 assert.match(interceptor, /\/auth\/change-password/);

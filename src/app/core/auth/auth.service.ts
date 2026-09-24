@@ -85,17 +85,15 @@ export class AuthService {
     );
   }
 
+  /** 200 `data: null`. Does not replace the stored access/refresh pair. */
   changePassword(body: ChangePasswordRequest): Observable<void> {
     return this.authApi.changePassword(body);
   }
 
+  /** Stores the returned pair before callers reload the profile. The old refresh token is dead. */
   changeEmail(body: ChangeEmailRequest): Observable<void> {
     return this.authApi.changeEmail(body).pipe(
-      tap((tokens) => {
-        if (tokens) {
-          this.tokenStorage.setTokens(tokens);
-        }
-      }),
+      tap((tokens) => this.tokenStorage.setTokens(tokens)),
       map(() => undefined),
     );
   }

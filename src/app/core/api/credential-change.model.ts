@@ -10,7 +10,7 @@ export interface ChangeEmailRequest {
   readonly currentPassword: string;
 }
 
-/** Session rotation is optional. Missing tokens leave the current Bearer session in place. */
+/** `POST /auth/change-email` success `data` is the new pair. Password change returns `data: null`. */
 export function authTokensFromUnknown(data: unknown): AuthTokens | null {
   if (!data || typeof data !== 'object') {
     return null;

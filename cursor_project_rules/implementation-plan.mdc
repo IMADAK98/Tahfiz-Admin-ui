@@ -107,4 +107,4 @@ Done
 
 Done
 
-`/admin/profile` stays view-only from `GET /users/{id}`. تغيير البريد and تغيير كلمة المرور open dialogs that POST `/auth/change-email` and `/auth/change-password`. Center page unchanged. Public reset routes are not used.
+`/admin/profile` stays view-only from `GET /users/{id}`. تغيير البريد and تغيير كلمة المرور open dialogs that POST `/auth/change-email` and `/auth/change-password` (Nest PR #8). Password success keeps the current tokens. Email success stores the new access/refresh pair, then reloads the profile. Center page unchanged. Public reset routes are not used.
