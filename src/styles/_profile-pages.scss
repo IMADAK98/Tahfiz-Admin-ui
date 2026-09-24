@@ -36,6 +36,29 @@
   font-weight: 600;
 }
 
+.acct-page-head-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.acct-actions,
+.acct-credentials-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.acct-section-hint {
+  margin: -8px 0 var(--space-4);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
 .acct-head-main {
   display: flex;
   align-items: center;
@@ -150,6 +173,45 @@
 
 .nav-section.is-account {
   margin-top: 4px;
+}
+
+.modal.profile-pw {
+  max-width: 440px;
+}
+
+.modal.profile-pw .modal-header {
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.modal.profile-pw .modal-header h2 {
+  font-size: 1.0625rem;
+}
+
+.modal.profile-pw .modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 1.5rem;
+  color: var(--color-muted);
+}
+
+.modal.profile-pw .modal-footer {
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+.modal.profile-pw .btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.input[readonly] {
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: not-allowed;
 }
 
 .p-menu-item.is-danger .p-menu-item-link,

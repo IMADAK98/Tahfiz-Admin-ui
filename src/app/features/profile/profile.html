@@ -5,11 +5,17 @@
   <p-button type="button" label="إعادة المحاولة" severity="secondary" (onClick)="reload()" />
 } @else if (view(); as profile) {
   <div class="acct-page-head">
-    <div class="acct-head-main">
-      <div class="acct-avatar is-person" aria-hidden="true">{{ profile.initial }}</div>
-      <div>
-        <h1>{{ profile.name }}</h1>
-        <p class="acct-sub">{{ profile.roleHeadLabel }} · {{ profile.centerName }}</p>
+    <div class="acct-page-head-top">
+      <div class="acct-head-main">
+        <div class="acct-avatar is-person" aria-hidden="true">{{ profile.initial }}</div>
+        <div>
+          <h1>{{ profile.name }}</h1>
+          <p class="acct-sub">{{ profile.roleHeadLabel }} · {{ profile.centerName }}</p>
+        </div>
+      </div>
+      <div class="acct-actions">
+        <button type="button" class="btn btn-ghost" (click)="openCredentialDialog(ProfileCredentialDialog.Email)">تغيير البريد</button>
+        <button type="button" class="btn btn-primary" (click)="openCredentialDialog(ProfileCredentialDialog.Password)">تغيير كلمة المرور</button>
       </div>
     </div>
   </div>
@@ -67,4 +73,25 @@
       </div>
     </dl>
   </section>
+
+  <section class="acct-section" aria-label="أمان الحساب">
+    <h2>أمان الحساب</h2>
+    <p class="acct-section-hint">الملف يبقى للعرض فقط. تغيير البريد أو كلمة المرور يتم عبر نافذة منفصلة.</p>
+    <div class="acct-credentials-actions">
+      <button type="button" class="btn btn-ghost" (click)="openCredentialDialog(ProfileCredentialDialog.Email)">تغيير البريد</button>
+      <button type="button" class="btn btn-primary" (click)="openCredentialDialog(ProfileCredentialDialog.Password)">تغيير كلمة المرور</button>
+    </div>
+  </section>
+
+  <app-change-password-dialog
+    [visible]="credentialDialog() === ProfileCredentialDialog.Password"
+    (saved)="onPasswordSaved()"
+    (closed)="closeCredentialDialog()"
+  />
+  <app-change-email-dialog
+    [visible]="credentialDialog() === ProfileCredentialDialog.Email"
+    [currentEmail]="profile.email"
+    (saved)="onEmailSaved($event)"
+    (closed)="closeCredentialDialog()"
+  />
 }

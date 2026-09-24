@@ -8,6 +8,7 @@ import { bearerHeaders } from './http-auth.helpers';
 import { apiErrorFromBody } from './api-error';
 import { catchHttpAsApiError, envelopeOk, mapEnvelopeResponse, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
+import { authTokensFromUnknown, ChangeEmailRequest, ChangePasswordRequest } from './credential-change.model';
 import { AuthTokens, LoginRequest, RefreshRequest } from './models/auth.model';
 import { RequestPasswordResetBody, ResetPasswordBody } from './password-reset.model';
 
@@ -71,6 +72,44 @@ export class AuthApiService {
           }
           return throwError(() => err);
         }),
+      );
+  }
+
+  /** In-session admin password change. Bearer is attached by the auth interceptor. */
+  changePassword(body: ChangePasswordRequest): Observable<void> {
+    return this.http
+      .post<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/auth/change-password`,
+        body,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          if (!envelopeOk(res.body, res.status)) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return undefined;
+        }),
+        catchHttpAsApiError(),
+      );
+  }
+
+  /** In-session admin email change. Returns rotated tokens when the body includes them. */
+  changeEmail(body: ChangeEmailRequest): Observable<AuthTokens | null> {
+    return this.http
+      .post<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/auth/change-email`,
+        body,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          if (!envelopeOk(res.body, res.status)) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return authTokensFromUnknown(res.body?.data);
+        }),
+        catchHttpAsApiError(),
       );
   }
 

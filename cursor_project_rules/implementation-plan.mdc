@@ -102,3 +102,9 @@ The students share dialog and copy button run `mapInviteRegistrationLink` so a N
 Done
 
 `/admin/center-profile` reads `GET /center/{id}` (name, address, isActive only). `/admin/profile` reads `GET /users/{id}` for the locked personal fields. Sidebar الحساب and the topbar menu link both pages. No edit, save, or password UI.
+
+## Angular Admin — profile credential dialogs
+
+Done
+
+`/admin/profile` stays view-only from `GET /users/{id}`. تغيير البريد and تغيير كلمة المرور open dialogs that POST `/auth/change-email` and `/auth/change-password`. Center page unchanged. Public reset routes are not used.

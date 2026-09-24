@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { AuthApiService } from '../api/auth-api.service';
+import { ChangeEmailRequest, ChangePasswordRequest } from '../api/credential-change.model';
 import {
   RequestPasswordResetBody,
   ResetPasswordBody,
@@ -81,6 +82,21 @@ export class AuthService {
         this.clearSession();
         return of(undefined);
       }),
+    );
+  }
+
+  changePassword(body: ChangePasswordRequest): Observable<void> {
+    return this.authApi.changePassword(body);
+  }
+
+  changeEmail(body: ChangeEmailRequest): Observable<void> {
+    return this.authApi.changeEmail(body).pipe(
+      tap((tokens) => {
+        if (tokens) {
+          this.tokenStorage.setTokens(tokens);
+        }
+      }),
+      map(() => undefined),
     );
   }
 

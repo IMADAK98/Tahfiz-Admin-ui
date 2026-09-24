@@ -21,7 +21,8 @@
     "check:assign-halqa": "node scripts/assign-halqa-self-check.mjs",
     "check:center-requests": "node scripts/center-request-self-check.mjs",
     "check:reactive-forms": "node scripts/reactive-forms-self-check.mjs",
-    "check:profile-pages": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/profile-pages-self-check.mjs"
+    "check:profile-pages": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/profile-pages-self-check.mjs",
+    "check:profile-credentials": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/profile-credentials-self-check.mjs"
   },
   "private": true,
   "engines": {

@@ -9,12 +9,18 @@ import { TokenStorageService } from './token-storage.service';
 export const AUTH_RETRY = new HttpContextToken<boolean>(() => false);
 
 const AUTH_PATHS = ['/auth/login', '/auth/refresh', '/auth/logout'] as const;
+const CREDENTIAL_CHANGE_PATHS = ['/auth/change-password', '/auth/change-email'] as const;
 const ACCEPT_LANGUAGE = 'ar';
 
 let refreshInFlight$: Observable<string> | null = null;
 
 export function isAuthEndpoint(url: string): boolean {
   return AUTH_PATHS.some((path) => url.includes(path));
+}
+
+/** Wrong current password may be 401. Keep the session; the dialog shows the error. */
+export function isCredentialChangeEndpoint(url: string): boolean {
+  return CREDENTIAL_CHANGE_PATHS.some((path) => url.includes(path));
 }
 
 export function isAuthRefreshInProgress(): boolean {
@@ -80,6 +86,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authedReq).pipe(
     catchError((error: unknown) => {
       if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
+        return throwError(() => error);
+      }
+
+      if (isCredentialChangeEndpoint(langReq.url)) {
         return throwError(() => error);
       }
 

@@ -92,7 +92,10 @@ assert.doesNotMatch(centerHtml, /هاتف|البريد|المدينة|الشعا
 const profileHtml = readFileSync(new URL('../src/app/features/profile/profile.html', import.meta.url), 'utf8');
 assert.match(profileHtml, /رقم جواز السفر/);
 assert.match(profileHtml, /رقم الهوية الوطنية/);
-assert.doesNotMatch(profileHtml, /تعديل|حفظ|كلمة المرور|password/);
+assert.match(profileHtml, /تغيير البريد/);
+assert.match(profileHtml, /تغيير كلمة المرور/);
+assert.match(profileHtml, /أمان الحساب/);
+assert.doesNotMatch(profileHtml, /admin-profile|teacher-profile|request-password-reset|\/auth\/reset-password/);
 
 const shell = readFileSync(new URL('../src/app/layout/admin-shell/admin-shell.html', import.meta.url), 'utf8');
 assert.match(shell, /الحساب/);

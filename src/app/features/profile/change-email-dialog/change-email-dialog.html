@@ -1,0 +1,53 @@
+@if (visible()) {
+  <div class="modal-backdrop profile-modal" role="presentation" (click)="onBackdropClick($event)">
+    <div class="modal profile-pw" role="dialog" aria-modal="true" aria-labelledby="email-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="email-title">تغيير البريد</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="close()">×</button>
+      </div>
+      <form class="modal-body" id="formEmail" [formGroup]="form" novalidate (submit)="onSubmit($event)">
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        <div class="input-group">
+          <label for="email-current">البريد الحالي</label>
+          <input class="input" type="email" id="email-current" [value]="currentEmail()" readonly tabindex="-1" />
+        </div>
+        <div class="input-group">
+          <label for="email-new">البريد الجديد <span class="req">*</span></label>
+          <input
+            pInputText
+            class="input"
+            fluid
+            id="email-new"
+            type="email"
+            autocomplete="email"
+            placeholder="name@example.com"
+            formControlName="newEmail"
+          />
+          <app-field-error [message]="fieldError('newEmail')" errorId="email-new-error" />
+        </div>
+        <div class="input-group">
+          <label for="email-pw">كلمة المرور الحالية <span class="req">*</span></label>
+          <input
+            pInputText
+            class="input"
+            fluid
+            id="email-pw"
+            type="password"
+            autocomplete="current-password"
+            formControlName="currentPassword"
+          />
+          <p class="hint">للتأكيد أنك صاحب الحساب</p>
+          <app-field-error [message]="fieldError('currentPassword')" errorId="email-pw-error" />
+        </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" [disabled]="submitting()" (click)="close()">إلغاء</button>
+        <button type="submit" class="btn btn-primary" form="formEmail" [disabled]="submitting()">
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
