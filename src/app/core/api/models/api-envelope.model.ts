@@ -14,7 +14,10 @@ export interface NestFieldError {
 
 export interface NestErrorBody {
   statusCode?: number;
+  status?: number;
   message?: string | string[];
   error?: string;
+  /** Nest error key, e.g. TEACHER_HAS_ASSIGNED_HALAQAS. May also arrive as `message`. */
+  code?: string;
   errors?: NestFieldError[];
 }

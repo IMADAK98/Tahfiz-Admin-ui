@@ -36,7 +36,13 @@ export class TeachersService {
   }
 
   updateTeacher(profileId: number, form: TeacherFormModel): Observable<void> {
-    return this.teacherApi.updateProfile(profileId, buildUpdateProfilePayload(form)).pipe(map(() => undefined));
+    return this.teacherApi
+      .updateProfile(profileId, buildUpdateProfilePayload(form))
+      .pipe(map(() => undefined));
+  }
+
+  deactivateTeacher(profileId: number): Observable<void> {
+    return this.teacherApi.deactivate(profileId);
   }
 
   filterTeachers(teachers: ActiveTeacher[], search: string): ActiveTeacher[] {
@@ -46,7 +52,8 @@ export class TeachersService {
     }
     return teachers.filter(
       (teacher) =>
-        teacher.name.toLowerCase().includes(query) || (teacher.phone ?? '').toLowerCase().includes(query),
+        teacher.name.toLowerCase().includes(query) ||
+        (teacher.phone ?? '').toLowerCase().includes(query),
     );
   }
 }

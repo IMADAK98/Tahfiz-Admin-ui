@@ -111,6 +111,18 @@
                       [disabled]="isEditLoading(teacher)"
                       (onClick)="openEditModal(teacher)"
                     />
+                    @if (!isSelf(teacher.id)) {
+                      <p-button
+                        type="button"
+                        label="حذف"
+                        severity="danger"
+                        [text]="true"
+                        size="small"
+                        [loading]="isDeleteLoading(teacher)"
+                        [disabled]="isDeleteLoading(teacher)"
+                        (onClick)="openDeleteModal(teacher)"
+                      />
+                    }
                   </div>
                 </td>
               </tr>
@@ -130,4 +142,12 @@
   [teacher]="editingTeacher()"
   (saved)="onTeacherSaved()"
   (closed)="closeFormModal()"
+/>
+
+<app-delete-teacher-modal
+  [visible]="showDeleteModal()"
+  [teacherName]="deleteTarget()?.name ?? ''"
+  [profileId]="deleteTarget()?.profileId ?? null"
+  (deleted)="onTeacherDeleted()"
+  (closed)="closeDeleteModal()"
 />

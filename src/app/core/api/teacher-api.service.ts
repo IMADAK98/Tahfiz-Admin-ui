@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
-import { unwrapEnvelope } from './envelope.helpers';
+import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import {
   CreateManualTeacherPayload,
@@ -54,5 +54,23 @@ export class TeacherApiService {
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  /**
+   * DELETE /teacher-profile/:profileId — same id as updateProfile.
+   * Success is 200 `{ data: null }` (soft-deactivate). `unwrapEnvelopeOrNull` accepts that;
+   * `unwrapEnvelope` also returns null for `data: null` and only throws when `data` is missing.
+   */
+  deactivate(profileId: number | string): Observable<void> {
+    return this.http
+      .delete<ApiEnvelope<null>>(
+        `${this.apiBaseUrl}/teacher-profile/${profileId}`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          unwrapEnvelopeOrNull(res.body, res.status);
+        }),
+      );
   }
 }

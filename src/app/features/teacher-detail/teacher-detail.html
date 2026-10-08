@@ -7,7 +7,9 @@
   <div class="teacher-page-head">
     <div class="teacher-page-head-top">
       <div class="teacher-head-main">
-        <span class="teacher-detail-avatar" aria-hidden="true">{{ teacherInitial(teacher.name) }}</span>
+        <span class="teacher-detail-avatar" aria-hidden="true">{{
+          teacherInitial(teacher.name)
+        }}</span>
         <div>
           <h1>{{ teacher.name }}</h1>
           <span class="badge badge-success" style="margin-top: 8px; display: inline-flex">
@@ -17,6 +19,15 @@
       </div>
       <div class="teacher-page-actions">
         <p-button type="button" label="تعديل" (onClick)="openEditModal()" />
+        @if (canDelete()) {
+          <p-button
+            type="button"
+            label="حذف"
+            severity="danger"
+            [text]="true"
+            (onClick)="openDeleteModal()"
+          />
+        }
         <p-button type="button" label="العودة للقائمة" [text]="true" routerLink="/admin/teachers" />
       </div>
     </div>
@@ -91,4 +102,12 @@
   [teacher]="detail()"
   (saved)="onTeacherSaved()"
   (closed)="closeEditModal()"
+/>
+
+<app-delete-teacher-modal
+  [visible]="showDeleteModal()"
+  [teacherName]="detail()?.name ?? ''"
+  [profileId]="detail()?.profileId ?? null"
+  (deleted)="onTeacherDeleted()"
+  (closed)="closeDeleteModal()"
 />
