@@ -11,8 +11,10 @@ import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
   CreateTermFormModel,
+  WEEKEND_HOLIDAY_ERROR,
   canPickHolidayDates,
   createEmptyCreateTermForm,
+  isWeekendHoliday,
 } from '../dto';
 import { TermsService } from '../terms.service';
 
@@ -83,6 +85,10 @@ export class CreateTermModalComponent {
     const value = this.model();
     const date = value.pendingHolidayDate;
     if (!date || !this.holidaysEnabled()) {
+      return;
+    }
+    if (isWeekendHoliday(date)) {
+      this.fields.applyMap({ holidayDates: WEEKEND_HOLIDAY_ERROR });
       return;
     }
     if (date < value.startDate || date > value.endDate) {

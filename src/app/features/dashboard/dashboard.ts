@@ -9,13 +9,14 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { CreateTermModalComponent } from '../terms/create-term-modal/create-term-modal';
+import { EditTermModalComponent } from '../terms/edit-term-modal/edit-term-modal';
 import { TermsService } from '../terms/terms.service';
 import { DashboardLoadState } from './enums/dashboard-load-state.enum';
 import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, CreateTermModalComponent, ConfirmDialog],
+  imports: [RouterLink, CreateTermModalComponent, EditTermModalComponent, ConfirmDialog],
   providers: [ConfirmationService],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
@@ -34,7 +35,9 @@ export class DashboardComponent {
   protected readonly activeTerm = signal<ActiveTerm | null>(null);
   protected readonly cards = signal<DashboardCards | null>(null);
   protected readonly showCreateModal = signal(false);
+  protected readonly showEditModal = signal(false);
   protected readonly endingTerm = signal(false);
+  protected readonly updatedRows = signal<ReadonlySet<string>>(new Set());
 
   protected readonly hasActiveTerm = computed(() => !!this.activeTerm());
 
@@ -75,6 +78,36 @@ export class DashboardComponent {
 
   protected closeCreateModal(): void {
     this.showCreateModal.set(false);
+  }
+
+  protected openEditModal(): void {
+    if (!this.activeTerm() || this.endingTerm()) {
+      return;
+    }
+    this.updatedRows.set(new Set());
+    this.showEditModal.set(true);
+  }
+
+  protected closeEditModal(): void {
+    this.showEditModal.set(false);
+  }
+
+  protected onTermUpdated(rows: string[]): void {
+    this.updatedRows.set(new Set(rows));
+    this.showEditModal.set(false);
+    this.reload();
+  }
+
+  protected isRowUpdated(row: string): boolean {
+    return this.updatedRows().has(row);
+  }
+
+  protected canEditTerm(term: ActiveTerm): boolean {
+    return term.status !== 'COMPLETED';
+  }
+
+  protected termHasStarted(term: ActiveTerm): boolean {
+    return this.formatDate(term.startDate) <= this.todayIsoDate();
   }
 
   protected onTermCreated(): void {

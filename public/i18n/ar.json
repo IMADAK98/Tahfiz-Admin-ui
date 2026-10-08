@@ -3,6 +3,7 @@
     "success": {
       "saved": "تم الحفظ",
       "termCreated": "تم إنشاء الدورة",
+      "termUpdated": "تم تحديث الدورة",
       "termEnded": "تم إنهاء الدورة",
       "halaqaCreated": "تم إنشاء الحلقة",
       "reEnrollmentApproved": "تم قبول طلب إعادة التسجيل",

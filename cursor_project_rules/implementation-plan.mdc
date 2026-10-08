@@ -108,3 +108,9 @@ Done
 Done
 
 `/admin/profile` stays view-only from `GET /users/{id}`. تغيير البريد and تغيير كلمة المرور open dialogs that POST `/auth/change-email` and `/auth/change-password` (Nest PR #8). Password success keeps the current tokens. Email success stores the new access/refresh pair, then reloads the profile. Center page unchanged. Public reset routes are not used.
+
+## Angular Admin — edit active term (تعديل الدورة)
+
+Done
+
+Dashboard «تفاصيل الدورة» opens an edit dialog (create submit rules unchanged) that PUTs `/term/{id}` and refetches the active term. 409 with top-level `code` shows the in-dialog conflict banner; other errors show the localized message. Create and edit both block Friday/Saturday holidays on add.

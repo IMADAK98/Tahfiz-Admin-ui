@@ -1,0 +1,303 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick($event)">
+    <div
+      class="modal modal-lg modal-edit"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edit-term-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <h2 id="edit-term-title">تعديل الدورة</h2>
+          <span
+            class="badge"
+            [class.badge-success]="startLocked()"
+            [class.badge-primary]="!startLocked()"
+          >
+            {{ startLocked() ? 'جارية' : 'قادمة' }}
+          </span>
+        </div>
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="إغلاق"
+          (click)="close()"
+          [disabled]="submitting()"
+        >
+          ×
+        </button>
+      </div>
+
+      <form [formGroup]="form" id="edit-term-form" class="modal-body" (ngSubmit)="onSubmit($event)">
+        @if (conflictOpen()) {
+          <div class="alert-danger" role="alert">
+            <span class="alert-icon" aria-hidden="true">!</span>
+            <div>
+              <h3>تعذّر حفظ التعديلات</h3>
+              <p>
+                توجد أيام مسجّل فيها حضور أو تقدّم ضمن الفترة التي تحاول حذفها أو تحويلها إلى إجازة.
+                لم يُحذف أي شيء. عدّل التواريخ أو الإجازات ثم أعد المحاولة.
+                @if (conflictDates().length) {
+                  <span class="affected">
+                    الأيام المتأثرة:
+                    @for (date of conflictDates(); track date; let last = $last) {
+                      <time [attr.datetime]="date">{{ formatDate(date) }}</time>
+                      @if (!last) {
+                        ،
+                      }
+                    }
+                  </span>
+                }
+              </p>
+            </div>
+          </div>
+        }
+
+        @if (errorMessage(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+
+        <div class="input-group">
+          <label for="edit-term-name">اسم الدورة</label>
+          <input
+            pInputText
+            class="input"
+            fluid
+            id="edit-term-name"
+            #nameInput
+            name="name"
+            type="text"
+            formControlName="name"
+            required
+            [class.is-invalid]="fieldError('name')"
+            [attr.aria-invalid]="fieldError('name') ? true : null"
+          />
+          <app-field-error [message]="fieldError('name')" errorId="edit-term-name-error" />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <div class="label-row">
+              <label for="edit-term-start">تاريخ البداية</label>
+              @if (startLocked()) {
+                <span class="lock-tag">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    aria-hidden="true"
+                  >
+                    <rect x="5" y="11" width="14" height="10" rx="2" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                  مقفل
+                </span>
+              }
+            </div>
+            <input
+              pInputText
+              class="input"
+              fluid
+              id="edit-term-start"
+              name="startDate"
+              type="date"
+              formControlName="startDate"
+              required
+              [attr.min]="startLocked() ? null : todayMin()"
+              [class.is-locked]="startLocked()"
+              [class.is-invalid]="fieldError('startDate')"
+              [attr.aria-invalid]="fieldError('startDate') ? true : null"
+              [attr.aria-describedby]="startLocked() ? 'edit-term-start-hint' : null"
+            />
+            @if (startLocked()) {
+              <p class="field-hint" id="edit-term-start-hint">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                  aria-hidden="true"
+                >
+                  <rect x="5" y="11" width="14" height="10" rx="2" />
+                  <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+                لا يمكن تغيير تاريخ البداية بعد بدء الدورة
+              </p>
+            }
+            <app-field-error [message]="fieldError('startDate')" errorId="edit-term-start-error" />
+          </div>
+          <div class="input-group">
+            <label for="edit-term-end">تاريخ النهاية</label>
+            <input
+              pInputText
+              class="input"
+              fluid
+              id="edit-term-end"
+              name="endDate"
+              type="date"
+              formControlName="endDate"
+              required
+              [attr.min]="endMin()"
+              [class.is-invalid]="fieldError('endDate')"
+              [attr.aria-invalid]="fieldError('endDate') ? true : null"
+            />
+            <app-field-error [message]="fieldError('endDate')" errorId="edit-term-end-error" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="input-group">
+            <label for="edit-term-reg-start">بداية التسجيل</label>
+            <input
+              pInputText
+              class="input"
+              fluid
+              id="edit-term-reg-start"
+              name="registerationStartDate"
+              type="date"
+              formControlName="registerationStartDate"
+              required
+              [class.is-invalid]="fieldError('registerationStartDate')"
+              [attr.aria-invalid]="fieldError('registerationStartDate') ? true : null"
+            />
+            <app-field-error
+              [message]="fieldError('registerationStartDate')"
+              errorId="edit-term-reg-start-error"
+            />
+          </div>
+          <div class="input-group">
+            <label for="edit-term-reg-end">نهاية التسجيل</label>
+            <input
+              pInputText
+              class="input"
+              fluid
+              id="edit-term-reg-end"
+              name="registerationEndDate"
+              type="date"
+              formControlName="registerationEndDate"
+              required
+              [attr.max]="validation().endValid ? model().endDate : null"
+              [class.is-invalid]="fieldError('registerationEndDate')"
+              [attr.aria-invalid]="fieldError('registerationEndDate') ? true : null"
+            />
+            <app-field-error
+              [message]="fieldError('registerationEndDate')"
+              errorId="edit-term-reg-end-error"
+            />
+          </div>
+        </div>
+
+        <div class="info-note" role="note">
+          <span class="i" aria-hidden="true">i</span>
+          <span
+            >روابط التسجيل المُرسلة سابقًا تبقى بتاريخ انتهائها القديم. إذا مدّدت فترة التسجيل فأرسل
+            روابط جديدة.</span
+          >
+        </div>
+
+        <div class="input-group">
+          <div class="label-row">
+            <label for="edit-term-holiday">أيام الإجازات</label>
+            @if (showFrozenLegend()) {
+              <span class="holiday-legend">
+                <i class="sw frozen"></i>
+                الإجازات السابقة مقفلة ولا يمكن حذفها
+              </span>
+            }
+          </div>
+          <div class="holiday-box">
+            <div class="holiday-adder">
+              <input
+                pInputText
+                class="input"
+                fluid
+                id="edit-term-holiday"
+                type="date"
+                name="pendingHolidayDate"
+                formControlName="pendingHolidayDate"
+                [attr.min]="model().startDate || null"
+                [attr.max]="validation().endValid ? model().endDate : null"
+                aria-label="تاريخ إجازة"
+                [class.is-invalid]="adderError()"
+                (keydown.enter)="onHolidayEnter($event)"
+              />
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                (click)="addHoliday()"
+                [disabled]="submitting()"
+              >
+                + إضافة
+              </button>
+            </div>
+            @if (adderError(); as adder) {
+              <p class="adder-error" role="alert">{{ adder }}</p>
+            }
+            <div class="chip-list" aria-label="الإجازات المحددة">
+              @for (chip of holidayChips(); track chip.date) {
+                <span
+                  class="holiday-chip"
+                  [class.is-frozen]="chip.frozen"
+                  [class.is-new]="chip.isNew"
+                  [class.is-invalid]="chip.invalid"
+                  [attr.title]="chip.title || null"
+                >
+                  {{ chip.label }}
+                  @if (chip.frozen) {
+                    <svg
+                      width="11"
+                      height="11"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.4"
+                      aria-hidden="true"
+                    >
+                      <rect x="5" y="11" width="14" height="10" rx="2" />
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
+                  } @else {
+                    <button
+                      type="button"
+                      [attr.aria-label]="'حذف ' + chip.label"
+                      (click)="removeHoliday(chip.date)"
+                      [disabled]="submitting()"
+                    >
+                      ×
+                    </button>
+                  }
+                </span>
+              } @empty {
+                <span class="holiday-empty">لا إجازات</span>
+              }
+            </div>
+            <app-field-error
+              [message]="fieldError('holidayDates')"
+              errorId="edit-term-holiday-error"
+            />
+          </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button
+          type="submit"
+          form="edit-term-form"
+          class="btn btn-primary"
+          [disabled]="saveDisabled()"
+        >
+          {{ submitting() ? 'جاري الحفظ…' : 'حفظ' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="close()" [disabled]="submitting()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

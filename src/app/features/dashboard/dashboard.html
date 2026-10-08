@@ -5,15 +5,27 @@
       <p>ملخص تشغيل المركز اليوم</p>
     </div>
 
-    <div class="term-actions" [attr.aria-label]="hasActiveTerm() ? 'إجراءات الدورة النشطة' : 'إنشاء أول دورة'">
+    <div
+      class="term-actions"
+      [attr.aria-label]="hasActiveTerm() ? 'إجراءات الدورة النشطة' : 'إنشاء أول دورة'"
+    >
       @if (hasActiveTerm()) {
-        <button type="button" class="btn btn-primary is-disabled" disabled title="أنهِ الدورة الحالية أولاً">
+        <button
+          type="button"
+          class="btn btn-primary is-disabled"
+          disabled
+          title="أنهِ الدورة الحالية أولاً"
+        >
           + إنشاء دورة
         </button>
         <p class="create-hint">أنهِ الدورة الحالية أولاً</p>
-        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">إنهاء الدورة</button>
+        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">
+          إنهاء الدورة
+        </button>
       } @else {
-        <button type="button" class="btn btn-primary" (click)="openCreateModal()">+ إنشاء دورة</button>
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          + إنشاء دورة
+        </button>
       }
     </div>
   </header>
@@ -27,9 +39,12 @@
     <div class="empty-block">
       <h2>ابدأ بإنشاء أول دورة</h2>
       <p>
-        لا توجد دورة نشطة بعد. أنشئ دورة دراسية لتحديد فترة التسجيل والإجازات، ثم أضف الحلقات والمعلمين.
+        لا توجد دورة نشطة بعد. أنشئ دورة دراسية لتحديد فترة التسجيل والإجازات، ثم أضف الحلقات
+        والمعلمين.
       </p>
-      <button type="button" class="btn btn-primary btn-lg" (click)="openCreateModal()">إنشاء دورة</button>
+      <button type="button" class="btn btn-primary btn-lg" (click)="openCreateModal()">
+        إنشاء دورة
+      </button>
     </div>
   } @else {
     @if (activeTerm(); as term) {
@@ -71,29 +86,75 @@
       <div class="layout-2">
         <section class="card panel" aria-labelledby="term-detail-title">
           <div class="panel-head">
-            <h3 id="term-detail-title">تفاصيل الدورة</h3>
+            <div class="panel-head-title">
+              <h3 id="term-detail-title">تفاصيل الدورة</h3>
+              <span
+                class="badge"
+                [class.badge-success]="termHasStarted(term)"
+                [class.badge-primary]="!termHasStarted(term)"
+              >
+                {{ termHasStarted(term) ? 'جارية' : 'قادمة' }}
+              </span>
+            </div>
+            @if (canEditTerm(term)) {
+              <div class="panel-actions">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="openEditModal()">
+                  <span class="edit-ico" aria-hidden="true">✎</span>
+                  تعديل
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="confirmEndTerm()">
+                  إنهاء الدورة
+                </button>
+              </div>
+            }
           </div>
           <ul class="term-detail-list">
-            <li>
-              <span class="label">اسم الدورة</span>
+            <li [class.is-updated]="isRowUpdated('name')">
+              <span class="label">
+                اسم الدورة
+                @if (isRowUpdated('name')) {
+                  <span class="updated-tag">· مُحدَّث</span>
+                }
+              </span>
               <span class="value">{{ term.name }}</span>
             </li>
-            <li>
-              <span class="label">بداية الدورة</span>
+            <li [class.is-updated]="isRowUpdated('start')">
+              <span class="label">
+                بداية الدورة
+                @if (isRowUpdated('start')) {
+                  <span class="updated-tag">· مُحدَّث</span>
+                }
+              </span>
               <span class="value">{{ formatDate(term.startDate) }}</span>
             </li>
-            <li>
-              <span class="label">نهاية الدورة</span>
+            <li [class.is-updated]="isRowUpdated('end')">
+              <span class="label">
+                نهاية الدورة
+                @if (isRowUpdated('end')) {
+                  <span class="updated-tag">· مُحدَّث</span>
+                }
+              </span>
               <span class="value">{{ formatDate(term.endDate) }}</span>
             </li>
-            <li>
-              <span class="label">فترة التسجيل</span>
+            <li [class.is-updated]="isRowUpdated('reg')">
+              <span class="label">
+                فترة التسجيل
+                @if (isRowUpdated('reg')) {
+                  <span class="updated-tag">· مُحدَّث</span>
+                }
+              </span>
               <span class="value">
-                {{ formatDate(term.registerationStartDate) }} — {{ formatDate(term.registerationEndDate) }}
+                {{ formatDate(term.registerationStartDate) }} —
+                {{ formatDate(term.registerationEndDate) }}
               </span>
             </li>
-            <li>
-              <span class="label">الإجازات</span>
+            <li [class.is-updated]="isRowUpdated('holidays')">
+              <span class="label">
+                الإجازات
+                @if (isRowUpdated('holidays')) {
+                  <span class="updated-tag">· مُحدَّث</span>
+                }
+              </span>
               <span class="value" [class.muted]="!holidayLabels(term).length">
                 @if (holidayLabels(term).length) {
                   {{ holidayLabels(term).join(' · ') }}
@@ -127,6 +188,13 @@
   [visible]="showCreateModal()"
   (termCreated)="onTermCreated()"
   (closed)="closeCreateModal()"
+/>
+
+<app-edit-term-modal
+  [visible]="showEditModal()"
+  [term]="activeTerm()"
+  (saved)="onTermUpdated($event)"
+  (closed)="closeEditModal()"
 />
 
 <p-confirmdialog />
