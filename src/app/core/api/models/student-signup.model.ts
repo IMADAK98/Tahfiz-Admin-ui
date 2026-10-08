@@ -28,8 +28,10 @@ export interface CreatePendingStudentRequest {
   email: string;
   phone: string;
   educationStage: EducationStageValue | string;
-  identificationNumber: string;
-  passportNumber: string;
+  /** Optional. Omit when unused or blank — `""` collides on the partial unique index. */
+  identificationNumber?: string;
+  /** Optional. Omit when unused or blank — `""` collides on the partial unique index. */
+  passportNumber?: string;
   address: string;
   /** ISO date-time string */
   birthDate: string;

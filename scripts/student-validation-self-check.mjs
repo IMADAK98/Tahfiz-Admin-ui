@@ -85,13 +85,13 @@ function toIsoDateTime(dateInput) {
 }
 
 function buildCreateManualStudentPayload(form) {
-  return {
+  const identificationNumber = form.identificationNumber.trim();
+  const passportNumber = form.passportNumber.trim();
+  const payload = {
     name: form.fullName.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
     educationStage: form.educationStage,
-    identificationNumber: form.identificationNumber.trim(),
-    passportNumber: form.passportNumber.trim(),
     address: form.address.trim(),
     birthDate: toIsoDateTime(form.birthDate),
     parentPhone: form.parentPhone.trim(),
@@ -100,6 +100,9 @@ function buildCreateManualStudentPayload(form) {
     hifzQuality: form.hifzQuality,
     isHafiz: form.isHafiz === 'true',
   };
+  if (identificationNumber) payload.identificationNumber = identificationNumber;
+  if (passportNumber) payload.passportNumber = passportNumber;
+  return payload;
 }
 
 function mapStudentRequest(record) {
@@ -172,6 +175,14 @@ assert.equal(payload.educationStage, 'ELEMENTARY SCHOOL');
 assert.equal(payload.birthDate, '2013-01-01T00:00:00.000Z');
 assert.equal(payload.surahFrom, 1);
 assert.equal(payload.isHafiz, false);
+assert.equal(payload.identificationNumber, '1234567890');
+assert.equal(payload.passportNumber, 'P12345678');
+
+const blankPassport = buildCreateManualStudentPayload({ ...validForm, passportNumber: '  ' });
+assert.equal('passportNumber' in blankPassport, false);
+assert.equal(blankPassport.identificationNumber, '1234567890');
+const blankId = buildCreateManualStudentPayload({ ...validForm, identificationNumber: '' });
+assert.equal('identificationNumber' in blankId, false);
 
 const mapped = mapStudentRequest({
   id: '11',

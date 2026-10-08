@@ -133,3 +133,10 @@ List and detail «حذف» confirm with the ḥalaqa danger modal, then `DELETE 
 Done
 
 PUT `/study-plan-item/:id` accepts a raw item or an envelope `data` item, maps `to*`, and patches the plan list. Neither shape refetches `GET /study-plan/:id/details`. The dialog banner stays Arabic.
+
+## Angular Admin — omit blank identity on student signup
+
+Done
+
+Public signup and admin manual-create omit a blank `identificationNumber` / `passportNumber` instead of sending `""`.
+`check:student-signup-payload` asserts national-ID mode has no passport key and passport mode has no ID key.
