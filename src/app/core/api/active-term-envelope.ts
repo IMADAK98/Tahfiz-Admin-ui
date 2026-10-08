@@ -18,11 +18,3 @@ export function isNoActiveTermEnvelope(
   const bodyStatus = body?.statusCode ?? body?.status;
   return bodyStatus === 404;
 }
-
-/** Active-term read no longer returns the term the admin just tried to end. */
-export function activeTermReadDroppedTerm(
-  endedTermId: number,
-  activeTerm: { id: number } | null,
-): boolean {
-  return activeTerm == null || activeTerm.id !== endedTermId;
-}
