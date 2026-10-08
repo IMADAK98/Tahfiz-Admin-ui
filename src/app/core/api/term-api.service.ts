@@ -4,9 +4,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
-import { unwrapEnvelope } from './envelope.helpers';
+import { apiErrorFromBody } from './api-error';
+import { envelopeOk, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { ActiveTerm, CreateTermPayload, UpdateTermPayload } from './models/term.model';
+import { ActiveTerm, CreateTermPayload } from './models/term.model';
 
 @Injectable({ providedIn: 'root' })
 export class TermApiService {
@@ -31,11 +32,21 @@ export class TermApiService {
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  updateTerm(termId: number, payload: UpdateTermPayload): Observable<ActiveTerm> {
+  /**
+   * POST /term/{id}/end — no body. Success is the HTTP envelope, not `data`
+   * (completed term or null). 4xx stays on the global error toast.
+   */
+  endTerm(termId: number): Observable<void> {
     return this.http
-      .put<ApiEnvelope<ActiveTerm>>(`${this.apiBaseUrl}/term/${termId}`, payload, {
+      .post<ApiEnvelope<ActiveTerm | null> | null>(`${this.apiBaseUrl}/term/${termId}/end`, null, {
         observe: 'response',
       })
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .pipe(
+        map((res) => {
+          if (res.body && !envelopeOk(res.body, res.status)) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+        }),
+      );
   }
 }

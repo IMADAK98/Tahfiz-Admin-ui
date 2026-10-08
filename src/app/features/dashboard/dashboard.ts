@@ -61,9 +61,7 @@ export class DashboardComponent {
       },
       error: (error: unknown) => {
         this.loadState.set(DashboardLoadState.Error);
-        this.loadError.set(
-          error instanceof ApiError ? error.message : 'تعذّر تحميل الدورة النشطة',
-        );
+        this.loadError.set(error instanceof ApiError ? error.message : 'تعذّر تحميل الدورة النشطة');
       },
     });
   }

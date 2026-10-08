@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { readAppOrigin } from '../config/public-links';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
+import { isNoActiveTermEnvelope } from './active-term-envelope';
 import { unwrapEnvelope, unwrapEnvelopeOrNull } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { ActiveTerm } from './models/term.model';
@@ -39,7 +40,14 @@ export class CenterApiService {
       .get<ApiEnvelope<ActiveTerm | null>>(`${this.apiBaseUrl}/center/${centerId}/active-term`, {
         observe: 'response',
       })
-      .pipe(map((res) => unwrapEnvelopeOrNull(res.body, res.status)));
+      .pipe(
+        map((res) => {
+          if (isNoActiveTermEnvelope(res.body, res.status)) {
+            return null;
+          }
+          return unwrapEnvelopeOrNull(res.body, res.status);
+        }),
+      );
   }
 
   getDashboardCards(centerId: number): Observable<DashboardCards> {

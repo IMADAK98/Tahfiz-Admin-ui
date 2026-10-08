@@ -14,15 +14,6 @@ export interface ActiveTerm {
   deletedAt?: string | null;
 }
 
-/** PUT /term/{id} body — partial update only (no status field in OpenAPI). */
-export interface UpdateTermPayload {
-  startDate?: string;
-  endDate?: string;
-  registerationStartDate?: string;
-  registerationEndDate?: string;
-  holidayDates?: string[];
-}
-
 /** POST /term body — API typo registeration preserved. */
 export interface CreateTermPayload {
   name: string;
