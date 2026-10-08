@@ -70,7 +70,10 @@ export function validateStudentSignupForm(
   return errors;
 }
 
-/** Build Nest payload. Unused ID field sent as empty string (OpenAPI requires both keys). */
+/**
+ * Nest treats both identity fields as optional.
+ * Omit the unused one, and omit a blank used one — `""` collides on the partial unique index.
+ */
 export function buildPendingStudentPayload(form: StudentSignupFormValues): CreatePendingStudentRequest {
   const identificationNumber = form.usePassport ? '' : form.identificationNumber.trim();
   const passportNumber = form.usePassport ? form.passportNumber.trim() : '';
@@ -78,13 +81,11 @@ export function buildPendingStudentPayload(form: StudentSignupFormValues): Creat
   const surahFrom = clampSurah(form.surahFrom ?? 1);
   const surahTo = clampSurah(form.surahTo ?? surahFrom);
 
-  return {
+  const payload: CreatePendingStudentRequest = {
     name: form.name.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
     educationStage: form.educationStage || EducationStage.ElementarySchool,
-    identificationNumber,
-    passportNumber,
     address: form.address.trim(),
     birthDate: toIsoDateTime(form.birthDate),
     parentPhone: form.parentPhone.trim(),
@@ -94,6 +95,15 @@ export function buildPendingStudentPayload(form: StudentSignupFormValues): Creat
     isHafiz: form.memorization === 'khatm' || form.hifzQuality === HifzQuality.Hafiz,
     token: form.token.trim(),
   };
+
+  if (identificationNumber) {
+    payload.identificationNumber = identificationNumber;
+  }
+  if (passportNumber) {
+    payload.passportNumber = passportNumber;
+  }
+
+  return payload;
 }
 
 function clampSurah(n: number): number {

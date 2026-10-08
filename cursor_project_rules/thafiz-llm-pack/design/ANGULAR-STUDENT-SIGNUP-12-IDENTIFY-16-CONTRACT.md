@@ -24,7 +24,7 @@ Envelope: coerce ids string→number; HTTP 201 + body status 200 common; public 
 4. **Live gaps:** non-UUID token → often **500**; missing token → HTTP 200 + body status 400. Soft-fail client errors; show banner only when validate OK.  
 5. Admin generates link: `POST /center/{centerId}/generate-registration-link` (ADMIN/SYSTEM_ADMIN). Display/rewrite host to **`https://www.tahfiz.work/...`** even if API returns `tahfiz-client.vercel.app`.
 
-### `POST /pending-student-request` body (all **required**)
+### `POST /pending-student-request` body (required, except identity)
 
 | Field | Notes |
 |---|---|
@@ -32,8 +32,8 @@ Envelope: coerce ids string→number; HTTP 201 + body status 200 common; public 
 | `email` | email |
 | `phone` | string |
 | `educationStage` | `KINDERGARTEN` \| `ELEMENTARY SCHOOL` \| `MIDDLE SCHOOL` \| `HIGH SCHOOL` \| `UNIVERSITY` \| `POSTGRADUATE` (spaces in values) |
-| `identificationNumber` | string max 10 |
-| `passportNumber` | string max 10 |
+| `identificationNumber` | string max 10, optional — omit when unused or blank |
+| `passportNumber` | string max 10, optional — omit when unused or blank |
 | `address` | string |
 | `birthDate` | ISO date-time |
 | `parentPhone` | string |
@@ -42,7 +42,7 @@ Envelope: coerce ids string→number; HTTP 201 + body status 200 common; public 
 | `isHafiz` | boolean |
 | `token` | reg-link token string |
 
-Unused ID/passport key may be sent as `""` if UI collects one primary identifier — still send both keys.
+Send only the identifier the applicant chose. Nest marks both `@IsOptional`. Do not send `""` — it is stored and collides on the partial unique index.
 
 ### Success / error
 

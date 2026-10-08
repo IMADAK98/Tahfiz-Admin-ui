@@ -103,16 +103,17 @@ function toIsoDateTime(dateInput: string): string {
   return `${dateInput}T00:00:00.000Z`;
 }
 
+/** Omit a blank identity field. This is create, not a clear — do not send `""` or `null`. */
 export function buildCreateManualStudentPayload(
   form: StudentFormModel,
 ): CreateManualStudentPayload {
-  return {
+  const identificationNumber = form.identificationNumber.trim();
+  const passportNumber = form.passportNumber.trim();
+  const payload: CreateManualStudentPayload = {
     name: form.fullName.trim(),
     email: form.email.trim(),
     phone: form.phone.trim(),
     educationStage: form.educationStage as EducationStage,
-    identificationNumber: form.identificationNumber.trim(),
-    passportNumber: form.passportNumber.trim(),
     address: form.address.trim(),
     birthDate: toIsoDateTime(form.birthDate),
     parentPhone: form.parentPhone.trim(),
@@ -121,4 +122,11 @@ export function buildCreateManualStudentPayload(
     hifzQuality: form.hifzQuality as HifzQuality,
     isHafiz: yesNoToBool(form.isHafiz),
   };
+  if (identificationNumber) {
+    payload.identificationNumber = identificationNumber;
+  }
+  if (passportNumber) {
+    payload.passportNumber = passportNumber;
+  }
+  return payload;
 }

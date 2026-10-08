@@ -47,8 +47,10 @@ export interface CreateManualStudentPayload {
   email: string;
   phone: string;
   educationStage: EducationStage;
-  identificationNumber: string;
-  passportNumber: string;
+  /** Optional. Omit when blank — `""` collides on the partial unique index. */
+  identificationNumber?: string;
+  /** Optional. Omit when blank — `""` collides on the partial unique index. */
+  passportNumber?: string;
   address: string;
   birthDate: string;
   parentPhone: string;
