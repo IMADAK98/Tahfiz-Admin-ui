@@ -121,6 +121,13 @@ Done
 
 Create dialog no longer requires a student. `POST /halqa` still sends `studentsIds: []`. Teacher and the other field rules stay required. Empty picker copy is unchanged.
 
+## Angular Admin — delete teacher (حذف المعلّم)
+
+Done
+
+List and detail «حذف» confirm with the ḥalaqa danger modal, then `DELETE /teacher-profile/:profileId`.
+409 `TEACHER_HAS_ASSIGNED_HALAQAS` stays in the modal; success reloads the list or returns to it. Merge after Nest is live.
+
 ## Angular Admin — edit study-plan item (تعديل العنصر)
 
 Done

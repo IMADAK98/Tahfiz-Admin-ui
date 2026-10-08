@@ -7,9 +7,10 @@ import { InputText } from 'primeng/inputtext';
 import { ApiError } from '../../core/api/api-error';
 import { ActiveTeacher } from '../../core/api/models/teacher.model';
 import { AuthService } from '../../core/auth/auth.service';
-import { TeacherDetailViewModel, TeacherFormMode, teacherInitial } from './dto';
+import { canDeleteTeacher, TeacherDetailViewModel, TeacherFormMode, teacherInitial } from './dto';
 import { TeachersLoadState } from './enums';
 import { TEACHERS_I18N } from './i18n/teachers-i18n';
+import { DeleteTeacherModalComponent } from './delete-teacher-modal/delete-teacher-modal';
 import { TeacherFormModalComponent } from './teacher-form-modal/teacher-form-modal';
 import { TeachersService } from './teachers.service';
 
@@ -22,6 +23,7 @@ import { TeachersService } from './teachers.service';
     Button,
     InputText,
     TeacherFormModalComponent,
+    DeleteTeacherModalComponent,
   ],
   templateUrl: './teachers.html',
   styleUrl: './teachers.scss',
@@ -44,6 +46,9 @@ export class TeachersComponent {
   protected readonly formMode = signal<TeacherFormMode>('add');
   protected readonly editingTeacher = signal<TeacherDetailViewModel | null>(null);
   protected readonly editLoadingId = signal<number | null>(null);
+  protected readonly showDeleteModal = signal(false);
+  protected readonly deleteTarget = signal<{ name: string; profileId: number } | null>(null);
+  protected readonly deleteLoadingId = signal<number | null>(null);
 
   constructor() {
     this.reload();
@@ -125,5 +130,49 @@ export class TeachersComponent {
 
   protected goToDetail(teacher: ActiveTeacher): void {
     void this.router.navigate(['/admin/teachers', teacher.id]);
+  }
+
+  protected isSelf(teacherUserId: number): boolean {
+    const currentUserId = this.auth.getClaims()?.userId;
+    return currentUserId != null && currentUserId === teacherUserId;
+  }
+
+  protected isDeleteLoading(teacher: ActiveTeacher): boolean {
+    return this.deleteLoadingId() === teacher.id;
+  }
+
+  /**
+   * ponytail: the list row is a user id. Profile id comes from the same by-id fetch as edit.
+   * Missing profile → no modal (action stays hidden on the detail page, where the id is known).
+   */
+  protected openDeleteModal(teacher: ActiveTeacher): void {
+    if (this.isSelf(teacher.id) || this.deleteLoadingId() !== null) {
+      return;
+    }
+    this.deleteLoadingId.set(teacher.id);
+    this.teachersService.fetchTeacherDetail(teacher.id).subscribe({
+      next: (detail) => {
+        this.deleteLoadingId.set(null);
+        const profileId = detail.profileId;
+        if (!profileId || !canDeleteTeacher(profileId, detail.id, this.auth.getClaims()?.userId)) {
+          return;
+        }
+        this.deleteTarget.set({ name: detail.name, profileId });
+        this.showDeleteModal.set(true);
+      },
+      error: () => {
+        this.deleteLoadingId.set(null);
+      },
+    });
+  }
+
+  protected closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
+  }
+
+  protected onTeacherDeleted(): void {
+    this.closeDeleteModal();
+    this.reload();
   }
 }

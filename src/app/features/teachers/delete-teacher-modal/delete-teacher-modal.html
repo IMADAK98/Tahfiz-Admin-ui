@@ -1,0 +1,59 @@
+@if (visible()) {
+  <div class="modal-backdrop" role="presentation" (click)="onBackdropClick()">
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-teacher-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2 id="delete-teacher-title">حذف المعلّم</h2>
+        <button
+          type="button"
+          class="modal-close"
+          aria-label="إغلاق"
+          [disabled]="deleting()"
+          (click)="close()"
+        >
+          ×
+        </button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        @if (conflictHalqas().length) {
+          <ul class="delete-teacher-halqas">
+            @for (halqa of conflictHalqas(); track $index) {
+              <li>
+                @if (halqa.id) {
+                  <a [routerLink]="['/admin/halaqat', halqa.id]">{{ halqa.name }}</a>
+                } @else {
+                  <span>{{ halqa.name }}</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+        <p class="unassign-copy">
+          سيتم إيقاف حساب <strong>{{ teacherName() }}</strong> ولن يتمكّن من تسجيل الدخول. يبقى سجلّ
+          الحضور والتقدّم كما هو.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger"
+          [disabled]="deleting() || !profileId()"
+          (click)="confirm()"
+        >
+          {{ deleting() ? 'جاري الحذف…' : 'حذف' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="deleting()" (click)="close()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}

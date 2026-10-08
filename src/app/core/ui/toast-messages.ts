@@ -9,6 +9,7 @@ export const TOAST_I18N = {
     reEnrollmentRejected: 'toast.success.reEnrollmentRejected',
     teacherCreated: 'toast.success.teacherCreated',
     teacherUpdated: 'toast.success.teacherUpdated',
+    teacherDeleted: 'toast.success.teacherDeleted',
     teacherRequestApproved: 'toast.success.teacherRequestApproved',
     teacherRequestRejected: 'toast.success.teacherRequestRejected',
     studentCreated: 'toast.success.studentCreated',

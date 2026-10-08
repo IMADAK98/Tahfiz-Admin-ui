@@ -12,7 +12,8 @@ import {
   teacherWorkPeriodsLabel,
   yesNoLabel,
 } from '../teachers/enums';
-import { TeacherDetailViewModel, teacherInitial } from '../teachers/dto';
+import { canDeleteTeacher, TeacherDetailViewModel, teacherInitial } from '../teachers/dto';
+import { DeleteTeacherModalComponent } from '../teachers/delete-teacher-modal/delete-teacher-modal';
 import { TeacherFormModalComponent } from '../teachers/teacher-form-modal/teacher-form-modal';
 import { AssignedHalqaViewModel } from './dto';
 import { TeacherDetailLoadState } from './enums';
@@ -20,7 +21,7 @@ import { TeacherDetailService } from './teacher-detail.service';
 
 @Component({
   selector: 'app-teacher-detail',
-  imports: [RouterLink, Button, TeacherFormModalComponent],
+  imports: [RouterLink, Button, TeacherFormModalComponent, DeleteTeacherModalComponent],
   templateUrl: './teacher-detail.html',
   styleUrl: './teacher-detail.scss',
 })
@@ -48,6 +49,7 @@ export class TeacherDetailComponent {
   protected readonly detail = signal<TeacherDetailViewModel | null>(null);
   protected readonly halaqat = signal<AssignedHalqaViewModel[]>([]);
   protected readonly showEditModal = signal(false);
+  protected readonly showDeleteModal = signal(false);
 
   constructor() {
     this.reload();
@@ -79,7 +81,9 @@ export class TeacherDetailComponent {
       },
       error: (error: unknown) => {
         this.loadState.set(TeacherDetailLoadState.Error);
-        this.loadError.set(error instanceof ApiError ? error.message : 'تعذّر تحميل بيانات المعلّم');
+        this.loadError.set(
+          error instanceof ApiError ? error.message : 'تعذّر تحميل بيانات المعلّم',
+        );
       },
     });
   }
@@ -98,6 +102,30 @@ export class TeacherDetailComponent {
   }
 
   protected goToList(): void {
+    void this.router.navigate(['/admin/teachers']);
+  }
+
+  protected canDelete(): boolean {
+    const teacher = this.detail();
+    if (!teacher) {
+      return false;
+    }
+    return canDeleteTeacher(teacher.profileId, teacher.id, this.auth.getClaims()?.userId);
+  }
+
+  protected openDeleteModal(): void {
+    if (!this.canDelete()) {
+      return;
+    }
+    this.showDeleteModal.set(true);
+  }
+
+  protected closeDeleteModal(): void {
+    this.showDeleteModal.set(false);
+  }
+
+  protected onTeacherDeleted(): void {
+    this.showDeleteModal.set(false);
     void this.router.navigate(['/admin/teachers']);
   }
 }

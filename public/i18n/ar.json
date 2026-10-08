@@ -10,6 +10,7 @@
       "reEnrollmentRejected": "تم رفض طلب إعادة التسجيل",
       "teacherCreated": "تم إضافة المعلّم",
       "teacherUpdated": "تم تحديث بيانات المعلّم",
+      "teacherDeleted": "تم حذف المعلّم",
       "teacherRequestApproved": "تم قبول طلب المعلّم",
       "teacherRequestRejected": "تم رفض طلب المعلّم",
       "studentCreated": "تم تسجيل الطالب",
