@@ -14,9 +14,6 @@ export function validateCreateHalaqaForm(form: CreateHalaqaFormModel): Record<st
   if (!form.teacherId) {
     errors['teacherId'] = 'اختر المعلّم';
   }
-  if (!form.studentIds.length) {
-    errors['studentsIds'] = 'اختر طالباً واحداً على الأقل';
-  }
   if (form.studentLimit !== null && form.studentLimit < 1) {
     errors['studentLimit'] = 'عدد الطلاب المستهدف يجب أن يكون 1 على الأقل';
   }
