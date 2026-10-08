@@ -14,6 +14,7 @@
     "check:center-signup": "node scripts/center-signup-self-check.mjs",
     "check:field-errors": "node scripts/nest-field-errors-self-check.mjs",
     "check:term-validation": "node scripts/term-validation-self-check.mjs",
+    "check:edit-term": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/edit-term-self-check.mjs",
     "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs",
     "check:teacher-validation": "node scripts/teacher-validation-self-check.mjs",
     "check:surah-mapper": "node scripts/surah-mapper-self-check.mjs",

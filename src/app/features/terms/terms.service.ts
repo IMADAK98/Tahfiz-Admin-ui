@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CenterApiService } from '../../core/api/center-api.service';
-import { ActiveTerm } from '../../core/api/models/term.model';
+import { ActiveTerm, UpdateTermPayload } from '../../core/api/models/term.model';
 import { TermApiService } from '../../core/api/term-api.service';
 import { CreateTermFormModel, buildCreateTermPayload, validateCreateTermForm } from './dto';
 
@@ -28,6 +28,11 @@ export class TermsService {
       throw new Error(Object.values(errors)[0]);
     }
     return this.termApi.createTerm(buildCreateTermPayload(form, centerId));
+  }
+
+  /** PUT /term/{id}. Caller refetches the active term after success. */
+  updateTerm(termId: number, payload: UpdateTermPayload): Observable<ActiveTerm> {
+    return this.termApi.updateTerm(termId, payload);
   }
 
   /** POST /term/{id}/end. Caller refetches GET /center/:id/active-term after success. */

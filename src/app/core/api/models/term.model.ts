@@ -24,3 +24,13 @@ export interface CreateTermPayload {
   holidayDates: string[];
   centerId: number;
 }
+
+/** PUT /term/:id body — same spelling. startDate omitted once the term has started. */
+export interface UpdateTermPayload {
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  registerationStartDate?: string;
+  registerationEndDate?: string;
+  holidayDates?: string[];
+}
