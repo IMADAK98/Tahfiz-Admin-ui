@@ -140,3 +140,10 @@ Done
 
 Public signup and admin manual-create omit a blank `identificationNumber` / `passportNumber` instead of sending `""`.
 `check:student-signup-payload` asserts national-ID mode has no passport key and passport mode has no ID key.
+
+## Angular Admin — assign ḥalaqa save actually enrolls
+
+Done
+
+Assign popup and the three reject dialogs use native `(submit)` plus a `type="button"` click so حفظ / تأكيد الرفض call the handler instead of reloading the page.
+`check:reactive-forms` fails any `<form` that binds `(ngSubmit)` without `[formGroup]`.

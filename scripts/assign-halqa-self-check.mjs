@@ -331,6 +331,35 @@ if (assignHtml.includes('>\n          ×') || assignHtml.includes('>×<')) {
   throw new Error('do not project × into p-button');
 }
 
+const assignFormTag = assignHtml.match(/<form\b[^>]*>/)?.[0] ?? '';
+if (!/\(submit\)=/.test(assignFormTag) && !/\[formGroup\]/.test(assignFormTag)) {
+  throw new Error('assign dialog form must use (submit)= or [formGroup]');
+}
+if (/\(ngSubmit\)/.test(assignFormTag) && !/\[formGroup\]/.test(assignFormTag)) {
+  throw new Error('assign dialog must not use (ngSubmit) without [formGroup]');
+}
+const saveButton = [...assignHtml.matchAll(/<p-button\b[\s\S]*?\/>/g)]
+  .map((match) => match[0])
+  .find((tag) => tag.includes('i18n.save'));
+if (!saveButton) {
+  throw new Error('assign dialog must have a save p-button');
+}
+if (/type="submit"|\[type\]="'submit'"/.test(saveButton)) {
+  throw new Error('assign dialog save button must not be type=submit');
+}
+
+const assignTs = readFileSync(
+  join(root, 'src/app/features/students/assign-halqa-modal/assign-halqa-modal.ts'),
+  'utf8',
+);
+const onSubmitFn = assignTs.slice(
+  assignTs.indexOf('protected onSubmit('),
+  assignTs.indexOf('protected saveDisabled('),
+);
+if (!onSubmitFn.includes('event.preventDefault()') || !onSubmitFn.includes('if (this.submitting())')) {
+  throw new Error('assign onSubmit must preventDefault and ignore a second submit');
+}
+
 const ar = JSON.parse(readFileSync(join(root, 'public/i18n/ar.json'), 'utf8'));
 assert.equal(ar.students.assignHalqa.title, 'تعيين إلى حلقة؟');
 assert.equal(ar.students.assignHalqa.yes, 'نعم');

@@ -177,7 +177,7 @@
           ×
         </p-button>
       </div>
-      <form (ngSubmit)="confirmReject(request)">
+      <form (submit)="confirmReject($event, request)" novalidate>
         <div class="modal-body">
           <p class="reject-hint">رفض طلب <strong>{{ request.name }}</strong>.</p>
           <div class="input-group">
@@ -205,11 +205,12 @@
         </div>
         <div class="modal-footer">
           <p-button
-            type="submit"
+            type="button"
             label="تأكيد الرفض"
             severity="danger"
             [loading]="actingId() === request.id"
             [disabled]="actingId() !== null"
+            (onClick)="confirmReject($event, request)"
           />
           <p-button
             type="button"
