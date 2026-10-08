@@ -4,6 +4,7 @@ import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { DashboardCards } from '../../core/api/models/dashboard-cards.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
+import { activeTermReadDroppedTerm } from '../../core/api/active-term-envelope';
 import { ApiError } from '../../core/api/api-error';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
@@ -42,7 +43,7 @@ export class DashboardComponent {
     this.reload();
   }
 
-  protected reload(): void {
+  protected reload(endedTermId?: number): void {
     const centerId = this.auth.getClaims()?.centerId;
     if (!centerId) {
       this.loadState.set(DashboardLoadState.Error);
@@ -58,6 +59,9 @@ export class DashboardComponent {
         this.activeTerm.set(activeTerm);
         this.cards.set(cards);
         this.loadState.set(DashboardLoadState.Ready);
+        if (endedTermId != null && activeTermReadDroppedTerm(endedTermId, activeTerm)) {
+          this.toastMessage.notifySuccess(TOAST_I18N.success.termEnded);
+        }
       },
       error: (error: unknown) => {
         this.loadState.set(DashboardLoadState.Error);
@@ -150,8 +154,7 @@ export class DashboardComponent {
     this.termsService.endActiveTerm(term.id).subscribe({
       next: () => {
         this.endingTerm.set(false);
-        this.toastMessage.notifySuccess(TOAST_I18N.success.termEnded);
-        this.reload();
+        this.reload(term.id);
       },
       error: () => {
         this.endingTerm.set(false);

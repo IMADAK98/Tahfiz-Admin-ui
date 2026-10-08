@@ -37,8 +37,10 @@ export class TermsService {
   }
 
   /**
-   * ponytail: best documented path is PUT /term/{id} (dates/holidays only).
-   * OpenAPI UpdateTermDto omits status — COMPLETED transition TBD; try endDate=today then surface API message.
+   * PUT /term/{id} `{ endDate: today }` only. Nest UpdateTermDto has no status.
+   * TermLifecycleService marks COMPLETED only when endDate < today, and PUT
+   * rejects an earlier end date, so this 200 leaves the term ACTIVE for the
+   * rest of the UTC day. Callers must reread GET /center/:id/active-term.
    */
   endActiveTerm(termId: number): Observable<ActiveTerm> {
     const today = new Date().toISOString().slice(0, 10);

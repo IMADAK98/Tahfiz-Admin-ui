@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "check:envelope": "node scripts/envelope-self-check.mjs",
+    "check:active-term": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/active-term-envelope-self-check.mjs",
     "check:auth": "node scripts/auth-self-check.mjs",
     "check:login-submit": "node scripts/login-submit-self-check.mjs",
     "check:center-signup": "node scripts/center-signup-self-check.mjs",
