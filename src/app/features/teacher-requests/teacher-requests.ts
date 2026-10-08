@@ -150,7 +150,8 @@ export class TeacherRequestsComponent {
     this.activeRejectRequest.set(null);
   }
 
-  protected confirmReject(request: TeacherRequestViewModel): void {
+  protected confirmReject(event: Event, request: TeacherRequestViewModel): void {
+    event.preventDefault();
     if (this.actingId() !== null) {
       return;
     }

@@ -129,7 +129,8 @@ export class CenterRequestsComponent {
     this.activeRejectRequest.set(null);
   }
 
-  protected confirmReject(request: CenterRequestViewModel): void {
+  protected confirmReject(event: Event, request: CenterRequestViewModel): void {
+    event.preventDefault();
     if (this.actingId() !== null) {
       return;
     }

@@ -94,6 +94,9 @@ export class AssignHalqaModalComponent {
 
   protected onSubmit(event: Event): void {
     event.preventDefault();
+    if (this.submitting()) {
+      return;
+    }
     this.fields.clearAll();
     this.errorMessage.set(null);
 

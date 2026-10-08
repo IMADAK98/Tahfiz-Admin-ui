@@ -165,7 +165,8 @@ export class StudentRequestsComponent {
     this.activeRejectRequest.set(null);
   }
 
-  protected confirmReject(request: StudentRequestViewModel): void {
+  protected confirmReject(event: Event, request: StudentRequestViewModel): void {
+    event.preventDefault();
     if (this.actingId() !== null) {
       return;
     }

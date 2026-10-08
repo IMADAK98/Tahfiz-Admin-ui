@@ -78,7 +78,9 @@ assert.doesNotMatch(html, /<button\b/);
 assert.match(html, /بيانات المشرف/);
 assert.match(html, /بيانات المركز/);
 assert.match(html, /سبب الرفض/);
-assert.match(html, /\[type\]="'submit'"/);
+assert.match(html, /\(submit\)="confirmReject\(\$event, request\)"/);
+assert.doesNotMatch(html, /\(ngSubmit\)/);
+assert.doesNotMatch(html, /type="submit"|\[type\]="'submit'"/);
 assert.doesNotMatch(html, /studentsCount|termsCount|halaqatCount/);
 assert.match(html, /لوحة المؤشرات/);
 
