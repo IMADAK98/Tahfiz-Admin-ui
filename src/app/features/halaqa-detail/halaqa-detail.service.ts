@@ -13,6 +13,7 @@ import {
   EditHalaqaFormModel,
   HalaqaDetailViewModel,
   HalaqaStudentViewModel,
+  StudyPlanItemViewModel,
   StudyPlanViewModel,
   buildCreatePlanItemPayload,
   buildSurahNameMap,
@@ -22,6 +23,7 @@ import {
   mapHalqaStudent,
   mapHalaqaDetail,
   mapStudyPlanDetails,
+  mapStudyPlanItem,
   rosterQueryDate,
   validateEditHalaqaForm,
 } from './dto';
@@ -127,8 +129,11 @@ export class HalaqaDetailService {
     return this.studyPlanApi.unassignStudents(planId, { studentIds });
   }
 
-  updatePlanItem(itemId: number, form: PlanItemFormModel): Observable<unknown> {
-    return this.studyPlanApi.updateItem(itemId, buildUpdatePlanItemPayload(form));
+  /** Mapped item (including to*) or null when the PUT body had neither shape. */
+  updatePlanItem(itemId: number, form: PlanItemFormModel): Observable<StudyPlanItemViewModel | null> {
+    return this.studyPlanApi.updateItem(itemId, buildUpdatePlanItemPayload(form)).pipe(
+      map((record) => (record ? mapStudyPlanItem(record, new Map()) : null)),
+    );
   }
 
   buildCreatePlanPayload(

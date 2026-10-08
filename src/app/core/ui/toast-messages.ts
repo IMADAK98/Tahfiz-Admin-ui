@@ -53,6 +53,15 @@ export function containsArabic(text: string): boolean {
   return ARABIC_RE.test(text);
 }
 
+/** Dialog banner: keep an Arabic Nest message; anything else becomes the Arabic fallback. */
+export function arabicDialogMessage(message: string | null | undefined, fallback: string): string {
+  const trimmed = message?.trim() ?? '';
+  if (trimmed && containsArabic(trimmed)) {
+    return trimmed;
+  }
+  return fallback;
+}
+
 /** Interceptor: Arabic Nest body alone; short Latin gets «فشل الطلب» title + body or prefixed single line. */
 export function resolveServerErrorToastDisplay(
   serverMessage: string,

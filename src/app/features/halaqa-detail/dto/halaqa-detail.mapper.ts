@@ -107,7 +107,7 @@ export function mapStudyPlanSummaryItems(
   return (record.studyPlanItems ?? []).map((item) => mapStudyPlanItem(item, surahNames));
 }
 
-function mapStudyPlanItem(
+export function mapStudyPlanItem(
   item: StudyPlanItemApiRecord,
   surahNames: Map<number, string>,
 ): StudyPlanItemViewModel {

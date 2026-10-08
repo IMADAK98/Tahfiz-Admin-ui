@@ -4,13 +4,16 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
-import { unwrapEnvelope } from './envelope.helpers';
+import { catchHttpAsApiError, unwrapEnvelope } from './envelope.helpers';
+import { apiErrorFromBody } from './api-error';
+import { readStudyPlanItemBody } from './study-plan-item-response';
 import { ApiEnvelope } from './models/api-envelope.model';
 import {
   AssignStudentsPayload,
   CreateStudyPlanPayload,
   StudyPlanDetailsApiRecord,
   UnassignStudentsPayload,
+  StudyPlanItemApiRecord,
   UpdateStudyPlanItemPayload,
   UpdateStudyPlanPayload,
 } from './models/study-plan.model';
@@ -20,6 +23,7 @@ export class StudyPlanApiService {
   private readonly http = inject(HttpClient);
   private readonly apiBaseUrl = inject(API_BASE_URL);
 
+  /** Envelope only. `unwrapEnvelope` throws when `data` is missing. */
   getDetails(planId: number): Observable<StudyPlanDetailsApiRecord> {
     return this.http
       .get<ApiEnvelope<StudyPlanDetailsApiRecord>>(
@@ -78,13 +82,29 @@ export class StudyPlanApiService {
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  updateItem(itemId: number, payload: UpdateStudyPlanItemPayload): Observable<unknown> {
+  /**
+   * PUT /study-plan-item/:id. Live Nest returns the raw item; the follow-up
+   * wrap returns `{ data: item }`. Null item on 2xx → caller refetches details.
+   */
+  updateItem(
+    itemId: number,
+    payload: UpdateStudyPlanItemPayload,
+  ): Observable<StudyPlanItemApiRecord | null> {
     return this.http
-      .put<ApiEnvelope<unknown>>(
+      .put<unknown>(
         `${this.apiBaseUrl}/study-plan-item/${itemId}`,
         payload,
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .pipe(
+        map((res) => {
+          const read = readStudyPlanItemBody(res.body, res.status);
+          if (!read.ok) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return read.item;
+        }),
+        catchHttpAsApiError(),
+      );
   }
 }
