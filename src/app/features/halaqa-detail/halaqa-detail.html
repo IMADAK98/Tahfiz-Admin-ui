@@ -161,15 +161,26 @@
               <section class="plan-items">
                 <div class="plan-items-head">
                   <h4 class="plan-section-label">عناصر الخطة</h4>
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm plan-items-toggle"
-                    [attr.aria-expanded]="isPlanExpanded(plan.id)"
-                    (click)="togglePlanItems(plan.id)"
-                  >
-                    <span aria-hidden="true">{{ isPlanExpanded(plan.id) ? '▾' : '▸' }}</span>
-                    <span>{{ isPlanExpanded(plan.id) ? 'طيّ العناصر' : 'توسيع العناصر' }}</span>
-                  </button>
+                  <div class="plan-items-head-actions">
+                    @if (missingTypes(plan).length > 0) {
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm plan-item-add"
+                        (click)="openAddPlanItem(plan)"
+                      >
+                        إضافة عنصر
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm plan-items-toggle"
+                      [attr.aria-expanded]="isPlanExpanded(plan.id)"
+                      (click)="togglePlanItems(plan.id)"
+                    >
+                      <span aria-hidden="true">{{ isPlanExpanded(plan.id) ? '▾' : '▸' }}</span>
+                      <span>{{ isPlanExpanded(plan.id) ? 'طيّ العناصر' : 'توسيع العناصر' }}</span>
+                    </button>
+                  </div>
                 </div>
 
                 @if (isPlanExpanded(plan.id)) {
@@ -186,13 +197,24 @@
                             <span class="plan-item-amount">{{ item.amountLabel }}</span>
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          class="btn btn-secondary btn-sm plan-item-edit"
-                          (click)="openEditPlanItem(plan, item)"
-                        >
-                          تعديل
-                        </button>
+                        <div class="plan-item-actions">
+                          <button
+                            type="button"
+                            class="btn btn-secondary btn-sm plan-item-edit"
+                            (click)="openEditPlanItem(plan, item)"
+                          >
+                            تعديل
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-ghost btn-sm plan-item-delete"
+                            [disabled]="plan.items.length === 1"
+                            [attr.title]="plan.items.length === 1 ? 'لا يمكن حذف آخر عنصر' : null"
+                            (click)="openDeletePlanItem(plan, item)"
+                          >
+                            حذف
+                          </button>
+                        </div>
                       </li>
                     }
                   </ul>
@@ -251,6 +273,15 @@
   [item]="selectedPlanItem()"
   (saved)="onPlanItemSaved($event)"
   (closed)="closeEditPlanItemModal()"
+/>
+
+<app-add-plan-item-modal
+  [visible]="showAddPlanItemModal()"
+  [planId]="selectedPlan()?.id ?? null"
+  [planName]="selectedPlan()?.name ?? ''"
+  [availableTypes]="addAvailableTypes()"
+  (added)="onPlanItemAdded()"
+  (closed)="closeAddPlanItemModal()"
 />
 
 <app-assign-plan-students-modal
@@ -360,6 +391,35 @@
           {{ deletingPlan() ? 'جاري الحذف…' : 'تأكيد حذف' }}
         </button>
         <button type="button" class="btn btn-secondary" [disabled]="deletingPlan()" (click)="closeDeletePlanModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeletePlanItemModal()) {
+  <div class="modal-backdrop" role="presentation" (click)="closeDeletePlanItemModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-plan-item-title" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="delete-plan-item-title">حذف عنصر من الخطة</h2>
+        <button type="button" class="modal-close" aria-label="إغلاق" (click)="closeDeletePlanItemModal()">×</button>
+      </div>
+      <div class="modal-body">
+        @if (confirmError(); as message) {
+          <p class="form-error" role="alert">{{ message }}</p>
+        }
+        @if (selectedPlanItem(); as item) {
+          <p class="unassign-copy">
+            هل أنت متأكد من حذف عنصر <strong>{{ studyPlanItemTypeLabel(item.type) }}</strong> من الخطة <strong>{{ selectedPlan()?.name }}</strong>؟
+          </p>
+        }
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" [disabled]="deletingPlanItem()" (click)="confirmDeletePlanItem()">
+          {{ deletingPlanItem() ? 'جاري الحذف…' : 'تأكيد حذف' }}
+        </button>
+        <button type="button" class="btn btn-secondary" [disabled]="deletingPlanItem()" (click)="closeDeletePlanItemModal()">
           إلغاء
         </button>
       </div>

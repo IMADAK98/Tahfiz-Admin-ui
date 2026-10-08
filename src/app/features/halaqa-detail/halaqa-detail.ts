@@ -4,9 +4,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ApiError } from '../../core/api/api-error';
+import { StudyPlanItemType } from '../../core/api/models/study-plan.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { halqaCategoryLabel, halqaPeriodsLabel } from '../halaqat/enums';
+import { AddPlanItemModalComponent } from './add-plan-item-modal/add-plan-item-modal';
 import { AssignPlanStudentsModalComponent } from './assign-plan-students-modal/assign-plan-students-modal';
 import { CreatePlanModalComponent } from './create-plan-modal/create-plan-modal';
 import {
@@ -14,13 +16,21 @@ import {
   HalaqaStudentViewModel,
   StudyPlanItemViewModel,
   StudyPlanViewModel,
+  missingPlanItemTypes,
   personInitial,
+  planItemDeleteConfirmMessage,
 } from './dto';
 import { EditHalaqaModalComponent } from './edit-halaqa-modal/edit-halaqa-modal';
 import { EditPlanItemModalComponent } from './edit-plan-item-modal/edit-plan-item-modal';
 import { EditPlanNameModalComponent } from './edit-plan-name-modal/edit-plan-name-modal';
 import { EnrollStudentsModalComponent } from './enroll-students-modal/enroll-students-modal';
-import { HalaqaDetailLoadState, HalaqaDetailTab, studyPlanItemTypeBadgeClass } from './enums';
+import { HALAQA_DETAIL_I18N } from './i18n/halaqa-detail-i18n';
+import {
+  HalaqaDetailLoadState,
+  HalaqaDetailTab,
+  studyPlanItemTypeBadgeClass,
+  studyPlanItemTypeLabel,
+} from './enums';
 import { HalaqaDetailService } from './halaqa-detail.service';
 
 @Component({
@@ -33,6 +43,7 @@ import { HalaqaDetailService } from './halaqa-detail.service';
     CreatePlanModalComponent,
     EditPlanNameModalComponent,
     EditPlanItemModalComponent,
+    AddPlanItemModalComponent,
     AssignPlanStudentsModalComponent,
   ],
   templateUrl: './halaqa-detail.html',
@@ -49,6 +60,7 @@ export class HalaqaDetailComponent {
   protected readonly halqaPeriodsLabel = halqaPeriodsLabel;
   protected readonly personInitial = personInitial;
   protected readonly studyPlanItemTypeBadgeClass = studyPlanItemTypeBadgeClass;
+  protected readonly studyPlanItemTypeLabel = studyPlanItemTypeLabel;
 
   protected readonly halaqaId = toSignal(
     this.route.paramMap.pipe(map((params) => Number(params.get('id')) || 0)),
@@ -68,6 +80,8 @@ export class HalaqaDetailComponent {
   protected readonly showCreatePlanModal = signal(false);
   protected readonly showEditPlanNameModal = signal(false);
   protected readonly showEditPlanItemModal = signal(false);
+  protected readonly showAddPlanItemModal = signal(false);
+  protected readonly showDeletePlanItemModal = signal(false);
   protected readonly showAssignStudentsModal = signal(false);
   protected readonly showUnenrollModal = signal(false);
   protected readonly showDeleteHalqaModal = signal(false);
@@ -81,6 +95,8 @@ export class HalaqaDetailComponent {
   protected readonly unenrolling = signal(false);
   protected readonly unassigning = signal(false);
   protected readonly deletingPlan = signal(false);
+  protected readonly deletingPlanItem = signal(false);
+  protected readonly addAvailableTypes = signal<StudyPlanItemType[]>([]);
   protected readonly confirmError = signal<string | null>(null);
 
   protected readonly studentsCountLabel = computed(() => {
@@ -207,6 +223,74 @@ export class HalaqaDetailComponent {
     this.showEditPlanItemModal.set(false);
     this.selectedPlan.set(null);
     this.selectedPlanItem.set(null);
+  }
+
+  protected missingTypes(plan: StudyPlanViewModel): StudyPlanItemType[] {
+    return missingPlanItemTypes(plan.items);
+  }
+
+  protected openAddPlanItem(plan: StudyPlanViewModel): void {
+    const availableTypes = missingPlanItemTypes(plan.items);
+    if (!availableTypes.length) {
+      return;
+    }
+    this.selectedPlan.set(plan);
+    this.addAvailableTypes.set(availableTypes);
+    this.showAddPlanItemModal.set(true);
+  }
+
+  protected closeAddPlanItemModal(): void {
+    this.showAddPlanItemModal.set(false);
+    this.selectedPlan.set(null);
+    this.addAvailableTypes.set([]);
+  }
+
+  protected onPlanItemAdded(): void {
+    this.showAddPlanItemModal.set(false);
+    this.selectedPlan.set(null);
+    this.addAvailableTypes.set([]);
+    this.refreshPlans();
+  }
+
+  protected openDeletePlanItem(plan: StudyPlanViewModel, item: StudyPlanItemViewModel): void {
+    if (plan.items.length <= 1) {
+      return;
+    }
+    this.selectedPlan.set(plan);
+    this.selectedPlanItem.set(item);
+    this.confirmError.set(null);
+    this.showDeletePlanItemModal.set(true);
+  }
+
+  protected closeDeletePlanItemModal(): void {
+    this.showDeletePlanItemModal.set(false);
+    this.selectedPlan.set(null);
+    this.selectedPlanItem.set(null);
+    this.confirmError.set(null);
+  }
+
+  protected confirmDeletePlanItem(): void {
+    const item = this.selectedPlanItem();
+    if (!item || this.deletingPlanItem()) {
+      return;
+    }
+
+    this.deletingPlanItem.set(true);
+    this.confirmError.set(null);
+    this.detailService.deletePlanItem(item.id).subscribe({
+      next: () => {
+        this.deletingPlanItem.set(false);
+        this.showDeletePlanItemModal.set(false);
+        this.selectedPlan.set(null);
+        this.selectedPlanItem.set(null);
+        this.toastMessage.notifySuccess(HALAQA_DETAIL_I18N.success.planItemDeleted);
+        this.refreshPlans();
+      },
+      error: (error: unknown) => {
+        this.deletingPlanItem.set(false);
+        this.confirmError.set(planItemDeleteConfirmMessage(error));
+      },
+    });
   }
 
   protected onPlanItemSaved(item: StudyPlanItemViewModel | null): void {

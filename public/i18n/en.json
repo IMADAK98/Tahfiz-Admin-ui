@@ -139,7 +139,13 @@
     },
     "success": {
       "planCreated": "TODO: Plan created",
-      "studentsEnrolled": "TODO: Students enrolled in halaqa"
+      "studentsEnrolled": "TODO: Students enrolled in halaqa",
+      "planItemAdded": "TODO: Study plan item added",
+      "planItemDeleted": "TODO: Study plan item deleted"
+    },
+    "errors": {
+      "itemHasProgress": "TODO: This item cannot be deleted because students have progress recorded on it. Edit it instead.",
+      "itemIsLast": "TODO: The last item in the plan cannot be deleted."
     }
   },
   "studentSignup": {

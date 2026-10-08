@@ -53,6 +53,16 @@ export interface CreateStudyPlanItemPayload {
   amountValue: number;
 }
 
+/** POST /study-plan-item/:planId body. Nest computes to*; no plan id in the body. */
+export interface AddStudyPlanItemPayload {
+  type: StudyPlanItemType;
+  direction: StudyPlanDirection;
+  fromSurah: number;
+  fromAyah: number;
+  amountType: StudyPlanAmountType;
+  amountValue: number;
+}
+
 export interface CreateStudyPlanPayload {
   name: string;
   halqaId: number;

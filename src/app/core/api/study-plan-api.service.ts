@@ -9,6 +9,7 @@ import { apiErrorFromBody } from './api-error';
 import { readStudyPlanItemBody } from './study-plan-item-response';
 import { ApiEnvelope } from './models/api-envelope.model';
 import {
+  AddStudyPlanItemPayload,
   AssignStudentsPayload,
   CreateStudyPlanPayload,
   StudyPlanDetailsApiRecord,
@@ -80,6 +81,50 @@ export class StudyPlanApiService {
         withSkipGlobalErrorToast({ observe: 'response', body: payload }),
       )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  /**
+   * POST /study-plan-item/:planId. Tolerates today's raw 201 entity and the
+   * envelope `{ data: item }` (Nest fills to*).
+   */
+  createItem(
+    planId: number,
+    payload: AddStudyPlanItemPayload,
+  ): Observable<StudyPlanItemApiRecord | null> {
+    return this.http
+      .post<unknown>(
+        `${this.apiBaseUrl}/study-plan-item/${planId}`,
+        payload,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          const read = readStudyPlanItemBody(res.body, res.status);
+          if (!read.ok) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return read.item;
+        }),
+        catchHttpAsApiError(),
+      );
+  }
+
+  /**
+   * DELETE /study-plan-item/:id. Strict envelope: `data: null` succeeds;
+   * a string stub (no `data`) throws instead of looking like a delete.
+   */
+  deleteItem(itemId: number): Observable<void> {
+    return this.http
+      .delete<ApiEnvelope<null>>(
+        `${this.apiBaseUrl}/study-plan-item/${itemId}`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
+      )
+      .pipe(
+        map((res) => {
+          unwrapEnvelope(res.body, res.status);
+        }),
+        catchHttpAsApiError(),
+      );
   }
 
   /**
