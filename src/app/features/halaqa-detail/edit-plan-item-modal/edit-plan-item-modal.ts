@@ -5,13 +5,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
-import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
+import { createFieldErrorBag } from '../../../core/api/field-error-state';
 import { QuranApiService } from '../../../core/api/quran-api.service';
 import { SurahApiRecord } from '../../../core/api/models/study-plan.model';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
-import { TOAST_I18N } from '../../../core/ui/toast-messages';
+import { TOAST_I18N, arabicDialogMessage } from '../../../core/ui/toast-messages';
 import {
   PlanItemFormModel,
   StudyPlanItemViewModel,
@@ -59,7 +59,7 @@ export class EditPlanItemModalComponent {
   readonly visible = input.required<boolean>();
   readonly planName = input.required<string>();
   readonly item = input.required<StudyPlanItemViewModel | null>();
-  readonly saved = output<void>();
+  readonly saved = output<StudyPlanItemViewModel | null>();
   readonly closed = output<void>();
 
   protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
@@ -154,23 +154,31 @@ export class EditPlanItemModalComponent {
 
     this.submitting.set(true);
     this.detailService.updatePlanItem(item.id, value).subscribe({
-      next: () => {
+      next: (updated) => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
-        this.saved.emit();
+        this.saved.emit(updated);
       },
       error: (error: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(
-          nestSubmitBanner(
-            error,
-            this.fields,
-            this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner),
-            error instanceof ApiError ? error.message : '',
-          ),
-        );
+        this.errorMessage.set(this.bannerFor(error));
       },
     });
+  }
+
+  private bannerFor(error: unknown): string {
+    const unexpected = this.translate.instant(TOAST_I18N.errors.unexpected);
+    const fieldBanner = this.translate.instant(TOAST_I18N.errors.fieldErrorsBanner);
+    if (this.fields.apply(error)) {
+      const localized: Record<string, string> = {};
+      for (const [field, message] of Object.entries(this.fields.fieldErrors())) {
+        localized[field] = arabicDialogMessage(message, unexpected);
+      }
+      this.fields.applyMap(localized);
+      return fieldBanner;
+    }
+    const message = error instanceof ApiError ? error.message : '';
+    return arabicDialogMessage(message, unexpected);
   }
 
   private loadSurahs(): void {

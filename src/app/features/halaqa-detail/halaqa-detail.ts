@@ -209,10 +209,14 @@ export class HalaqaDetailComponent {
     this.selectedPlanItem.set(null);
   }
 
-  protected onPlanItemSaved(): void {
+  protected onPlanItemSaved(item: StudyPlanItemViewModel | null): void {
+    const planId = this.selectedPlan()?.id ?? null;
     this.showEditPlanItemModal.set(false);
     this.selectedPlan.set(null);
     this.selectedPlanItem.set(null);
+    if (item && planId != null && this.replacePlanItem(planId, item)) {
+      return;
+    }
     this.refreshPlans();
   }
 
@@ -373,6 +377,25 @@ export class HalaqaDetailComponent {
         this.confirmError.set(error instanceof ApiError ? error.message : '');
       },
     });
+  }
+
+  private replacePlanItem(planId: number, item: StudyPlanItemViewModel): boolean {
+    const plans = this.plans();
+    const plan = plans.find((candidate) => candidate.id === planId);
+    if (!plan?.items.some((existing) => existing.id === item.id)) {
+      return false;
+    }
+    this.plans.set(
+      plans.map((candidate) =>
+        candidate.id === planId
+          ? {
+              ...candidate,
+              items: candidate.items.map((existing) => (existing.id === item.id ? item : existing)),
+            }
+          : candidate,
+      ),
+    );
+    return true;
   }
 
   private refreshPlans(): void {

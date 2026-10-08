@@ -6,6 +6,7 @@ export {
   mapHalqaStudent,
   mapHalaqaDetail,
   mapStudyPlanDetails,
+  mapStudyPlanItem,
   mapStudyPlanSummaryItems,
   mapSurahSelectOptions,
   surahNameOf,

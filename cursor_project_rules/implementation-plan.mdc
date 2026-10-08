@@ -120,3 +120,9 @@ Dashboard «تفاصيل الدورة» opens an edit dialog (create submit rule
 Done
 
 Create dialog no longer requires a student. `POST /halqa` still sends `studentsIds: []`. Teacher and the other field rules stay required. Empty picker copy is unchanged.
+
+## Angular Admin — edit study-plan item (تعديل العنصر)
+
+Done
+
+PUT `/study-plan-item/:id` accepts a raw item or an envelope `data` item, maps `to*`, and patches the plan list. Neither shape refetches `GET /study-plan/:id/details`. The dialog banner stays Arabic.

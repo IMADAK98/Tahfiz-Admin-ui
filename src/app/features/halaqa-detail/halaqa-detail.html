@@ -249,7 +249,7 @@
   [visible]="showEditPlanItemModal()"
   [planName]="selectedPlan()?.name ?? ''"
   [item]="selectedPlanItem()"
-  (saved)="onPlanItemSaved()"
+  (saved)="onPlanItemSaved($event)"
   (closed)="closeEditPlanItemModal()"
 />
 
