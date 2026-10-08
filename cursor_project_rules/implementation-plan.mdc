@@ -114,3 +114,9 @@ Done
 Done
 
 Dashboard «تفاصيل الدورة» opens an edit dialog (create submit rules unchanged) that PUTs `/term/{id}` and refetches the active term. 409 with top-level `code` shows the in-dialog conflict banner; other errors show the localized message. Create and edit both block Friday/Saturday holidays on add.
+
+## Angular Admin — create ḥalaqa with zero students
+
+Done
+
+Create dialog no longer requires a student. `POST /halqa` still sends `studentsIds: []`. Teacher and the other field rules stay required. Empty picker copy is unchanged.
