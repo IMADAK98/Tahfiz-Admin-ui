@@ -23,7 +23,7 @@ export class AssignPlanStudentsModalComponent {
   readonly visible = input.required<boolean>();
   readonly plan = input.required<StudyPlanViewModel | null>();
   readonly rosterStudents = input.required<HalaqaStudentViewModel[]>();
-  readonly assigned = output<void>();
+  readonly assigned = output<number[]>();
   readonly closed = output<void>();
 
   protected readonly selectedStudentIds = new FormControl<number[]>([], { nonNullable: true });
@@ -93,11 +93,12 @@ export class AssignPlanStudentsModalComponent {
 
     this.submitting.set(true);
     this.fields.clearAll();
-    this.detailService.assignStudentsToPlan(plan.id, this.selectedStudentIds.value).subscribe({
+    const studentIds = [...this.selectedStudentIds.value];
+    this.detailService.assignStudentsToPlan(plan.id, studentIds).subscribe({
       next: () => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
-        this.assigned.emit();
+        this.assigned.emit(studentIds);
       },
       error: (error: unknown) => {
         this.submitting.set(false);

@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { catchHttpAsApiError, unwrapEnvelope } from './envelope.helpers';
 import { apiErrorFromBody } from './api-error';
+import { readAssignedStudyPlan } from './study-plan-assign-response';
 import { readStudyPlanItemBody } from './study-plan-item-response';
 import { ApiEnvelope } from './models/api-envelope.model';
 import {
@@ -63,14 +64,30 @@ export class StudyPlanApiService {
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  assignStudents(planId: number, payload: AssignStudentsPayload): Observable<unknown> {
+  /**
+   * POST /study-plan/:id/assign-students. Accepts a raw plan, `{ data: plan }`,
+   * or `{ data: null }`. A string stub throws instead of looking like a save.
+   */
+  assignStudents(
+    planId: number,
+    payload: AssignStudentsPayload,
+  ): Observable<StudyPlanDetailsApiRecord | null> {
     return this.http
-      .post<ApiEnvelope<unknown>>(
+      .post<unknown>(
         `${this.apiBaseUrl}/study-plan/${planId}/assign-students`,
         payload,
         withSkipGlobalErrorToast({ observe: 'response' }),
       )
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .pipe(
+        map((res) => {
+          const read = readAssignedStudyPlan(res.body, res.status);
+          if (!read.ok) {
+            throw apiErrorFromBody(res.body, res.status);
+          }
+          return read.plan;
+        }),
+        catchHttpAsApiError(),
+      );
   }
 
   /** Live contract: DELETE with body `{ studentIds: number[] }`. */

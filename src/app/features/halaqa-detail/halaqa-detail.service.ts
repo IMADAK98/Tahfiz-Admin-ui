@@ -122,7 +122,7 @@ export class HalaqaDetailService {
     return this.studyPlanApi.delete(planId);
   }
 
-  assignStudentsToPlan(planId: number, studentIds: number[]): Observable<unknown> {
+  assignStudentsToPlan(planId: number, studentIds: number[]) {
     return this.studyPlanApi.assignStudents(planId, { studentIds });
   }
 

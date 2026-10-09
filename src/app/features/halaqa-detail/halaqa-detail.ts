@@ -19,6 +19,8 @@ import {
   missingPlanItemTypes,
   personInitial,
   planItemDeleteConfirmMessage,
+  plansWithStudents,
+  plansWithoutItem,
 } from './dto';
 import { EditHalaqaModalComponent } from './edit-halaqa-modal/edit-halaqa-modal';
 import { EditPlanItemModalComponent } from './edit-plan-item-modal/edit-plan-item-modal';
@@ -270,10 +272,12 @@ export class HalaqaDetailComponent {
   }
 
   protected confirmDeletePlanItem(): void {
+    const plan = this.selectedPlan();
     const item = this.selectedPlanItem();
-    if (!item || this.deletingPlanItem()) {
+    if (!plan || !item || this.deletingPlanItem()) {
       return;
     }
+    const planId = plan.id;
 
     this.deletingPlanItem.set(true);
     this.confirmError.set(null);
@@ -284,7 +288,8 @@ export class HalaqaDetailComponent {
         this.selectedPlan.set(null);
         this.selectedPlanItem.set(null);
         this.toastMessage.notifySuccess(HALAQA_DETAIL_I18N.success.planItemDeleted);
-        this.refreshPlans();
+        this.plans.set(plansWithoutItem(this.plans(), planId, item.id));
+        this.refreshPlans({ planId, omitItemId: item.id });
       },
       error: (error: unknown) => {
         this.deletingPlanItem.set(false);
@@ -314,10 +319,16 @@ export class HalaqaDetailComponent {
     this.selectedPlan.set(null);
   }
 
-  protected onStudentsAssigned(): void {
+  protected onStudentsAssigned(studentIds: number[]): void {
+    const planId = this.selectedPlan()?.id ?? null;
     this.showAssignStudentsModal.set(false);
     this.selectedPlan.set(null);
-    this.refreshPlans();
+    if (planId != null && studentIds.length) {
+      const wanted = new Set(studentIds);
+      const additions = this.students().filter((student) => wanted.has(student.id));
+      this.plans.set(plansWithStudents(this.plans(), planId, additions));
+    }
+    this.refreshPlans(planId == null ? undefined : { planId, studentIds });
   }
 
   protected openUnassignPlanStudent(plan: StudyPlanViewModel, student: HalaqaStudentViewModel): void {
@@ -482,16 +493,39 @@ export class HalaqaDetailComponent {
     return true;
   }
 
-  private refreshPlans(): void {
+  /**
+   * ponytail: the details refetch can still be the pre-write body. Re-apply the
+   * success patch on that one response so a deleted item or an empty students
+   * array cannot flash back. Later refreshPlans() calls trust the server.
+   */
+  private refreshPlans(settle?: {
+    planId?: number;
+    omitItemId?: number;
+    studentIds?: number[];
+  }): void {
     const halqaId = this.halaqaId();
     if (!halqaId) {
       return;
     }
 
+    const planId = settle?.planId;
+    const omitItemId = settle?.omitItemId;
+    const studentIds = settle?.studentIds ?? [];
     this.detailService.reloadPlans(halqaId).subscribe({
-      next: (plans) => this.plans.set(plans),
+      next: (plans) => {
+        let nextPlans = plans;
+        if (planId != null && omitItemId != null) {
+          nextPlans = plansWithoutItem(nextPlans, planId, omitItemId);
+        }
+        if (planId != null && studentIds.length) {
+          const wanted = new Set(studentIds);
+          const additions = this.students().filter((student) => wanted.has(student.id));
+          nextPlans = plansWithStudents(nextPlans, planId, additions);
+        }
+        this.plans.set(nextPlans);
+      },
       error: () => {
-        /* global interceptor surfaces load errors */
+        /* local patch already applied; interceptor surfaces load errors */
       },
     });
   }

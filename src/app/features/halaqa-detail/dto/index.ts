@@ -40,4 +40,5 @@ export {
   STUDY_PLAN_ITEM_LAST_ITEM,
   planItemDeleteConfirmMessage,
 } from './plan-item-delete';
+export { plansWithStudents, plansWithoutItem } from './plan-list-patch';
 export { coerceId, personDisplayName, personInitial, rosterQueryDate, todayIsoDate } from './person.helpers';

@@ -154,3 +154,10 @@ Done
 
 Assign popup and the three reject dialogs use native `(submit)` plus a `type="button"` click so حفظ / تأكيد الرفض call the handler instead of reloading the page.
 `check:reactive-forms` fails any `<form` that binds `(ngSubmit)` without `[formGroup]`.
+
+## Angular Admin — plans tab delete and assign refresh
+
+Done
+
+Plan-item delete removes the row from the plans signal on success, then refetches without putting that id back. Assign-students accepts a raw plan or `data: null` and appends the checked roster students before the details refetch.
+`check:plan-tab-refresh` locks both patches to the success path.
