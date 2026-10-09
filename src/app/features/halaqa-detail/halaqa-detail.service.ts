@@ -15,6 +15,7 @@ import {
   HalaqaStudentViewModel,
   StudyPlanItemViewModel,
   StudyPlanViewModel,
+  buildAddPlanItemPayload,
   buildCreatePlanItemPayload,
   buildSurahNameMap,
   buildUpdateHalqaPayload,
@@ -134,6 +135,16 @@ export class HalaqaDetailService {
     return this.studyPlanApi.updateItem(itemId, buildUpdatePlanItemPayload(form)).pipe(
       map((record) => (record ? mapStudyPlanItem(record, new Map()) : null)),
     );
+  }
+
+  addPlanItem(planId: number, form: PlanItemFormModel): Observable<StudyPlanItemViewModel | null> {
+    return this.studyPlanApi.createItem(planId, buildAddPlanItemPayload(form)).pipe(
+      map((record) => (record ? mapStudyPlanItem(record, new Map()) : null)),
+    );
+  }
+
+  deletePlanItem(itemId: number): Observable<void> {
+    return this.studyPlanApi.deleteItem(itemId);
   }
 
   buildCreatePlanPayload(

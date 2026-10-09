@@ -335,6 +335,13 @@
   }
 }
 
+.plan-items-head-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .plan-items-toggle {
   display: inline-flex;
   align-items: center;
@@ -403,6 +410,24 @@
   font-weight: 800;
   font-size: 0.875rem;
   color: var(--color-primary);
+}
+
+.plan-item-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.plan-item-delete {
+  color: var(--color-secondary);
+  font-weight: 700;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 
 .badge-warning {
@@ -659,7 +684,7 @@
     grid-template-columns: auto 1fr;
   }
 
-  .plan-item-edit {
+  .plan-item-actions {
     grid-column: 1 / -1;
     justify-self: start;
   }

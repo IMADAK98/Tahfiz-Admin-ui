@@ -143,7 +143,13 @@
     },
     "success": {
       "planCreated": "تم إنشاء الخطة",
-      "studentsEnrolled": "تم تسجيل الطلاب في الحلقة"
+      "studentsEnrolled": "تم تسجيل الطلاب في الحلقة",
+      "planItemAdded": "تمت إضافة عنصر الخطة",
+      "planItemDeleted": "تم حذف عنصر الخطة"
+    },
+    "errors": {
+      "itemHasProgress": "لا يمكن حذف هذا العنصر لأن للطلاب تقدّمًا مسجّلًا عليه. يمكنك تعديله بدلًا من ذلك.",
+      "itemIsLast": "لا يمكن حذف آخر عنصر في الخطة."
     }
   },
   "studentSignup": {

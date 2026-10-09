@@ -141,6 +141,13 @@ Done
 Public signup and admin manual-create omit a blank `identificationNumber` / `passportNumber` instead of sending `""`.
 `check:student-signup-payload` asserts national-ID mode has no passport key and passport mode has no ID key.
 
+## Angular Admin — add and delete study-plan items
+
+Done
+
+تفاصيل الحلقة → الخطط: «إضافة عنصر» only for missing حفظ/تثبيت/مراجعة types, POST six fields, delete confirm maps the two 409 codes.
+`check:plan-item-crud` locks method order, payload keys, `[formGroup]`, and the Arabic conflict copy. Merge after Nest deploys.
+
 ## Angular Admin — assign ḥalaqa save actually enrolls
 
 Done

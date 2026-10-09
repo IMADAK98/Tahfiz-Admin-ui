@@ -1,4 +1,5 @@
-import {
+import type {
+  AddStudyPlanItemPayload,
   CreateStudyPlanItemPayload,
   StudyPlanAmountType,
   StudyPlanDirection,
@@ -6,7 +7,9 @@ import {
   UpdateStudyPlanItemPayload,
 } from '../../../core/api/models/study-plan.model';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
-import { StudyPlanItemViewModel } from './halaqa-detail.mapper';
+import type { StudyPlanItemViewModel } from './halaqa-detail.mapper';
+
+const PLAN_ITEM_TYPE_ORDER: readonly StudyPlanItemType[] = ['HIFZ', 'TATHBEET', 'MURAJAA'];
 
 export interface PlanItemFormModel {
   type: StudyPlanItemType;
@@ -19,9 +22,17 @@ export interface PlanItemFormModel {
   amountValue: number;
 }
 
-export function createEmptyPlanItemForm(): PlanItemFormModel {
+/** Types not already on the plan, in حفظ → تثبيت → مراجعة order. */
+export function missingPlanItemTypes(
+  items: readonly { type: StudyPlanItemType }[],
+): StudyPlanItemType[] {
+  const used = new Set(items.map((item) => item.type));
+  return PLAN_ITEM_TYPE_ORDER.filter((type) => !used.has(type));
+}
+
+export function createEmptyPlanItemForm(type: StudyPlanItemType = 'HIFZ'): PlanItemFormModel {
   return {
-    type: 'HIFZ',
+    type,
     direction: 'NORMAL',
     fromSurah: 1,
     fromAyah: 1,
@@ -75,6 +86,18 @@ export function buildCreatePlanItemPayload(form: PlanItemFormModel): CreateStudy
     payload.toAyah = form.toAyah;
   }
   return payload;
+}
+
+/** Six keys only. Nest computes the end range; do not send to* or a plan id. */
+export function buildAddPlanItemPayload(form: PlanItemFormModel): AddStudyPlanItemPayload {
+  return {
+    type: form.type,
+    direction: form.direction,
+    fromSurah: Number(form.fromSurah),
+    fromAyah: Number(form.fromAyah),
+    amountType: form.amountType,
+    amountValue: Number(form.amountValue),
+  };
 }
 
 export function buildUpdatePlanItemPayload(form: PlanItemFormModel): UpdateStudyPlanItemPayload {
