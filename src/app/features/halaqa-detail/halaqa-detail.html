@@ -288,7 +288,7 @@
   [visible]="showAssignStudentsModal()"
   [plan]="selectedPlan()"
   [rosterStudents]="students()"
-  (assigned)="onStudentsAssigned()"
+  (assigned)="onStudentsAssigned($event)"
   (closed)="closeAssignStudentsModal()"
 />
 

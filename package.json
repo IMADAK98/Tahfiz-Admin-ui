@@ -27,6 +27,7 @@
     "check:profile-credentials": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/profile-credentials-self-check.mjs",
     "check:study-plan-item": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/study-plan-item-response-self-check.mjs",
     "check:plan-item-crud": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/plan-item-crud-self-check.mjs",
+    "check:plan-tab-refresh": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/plan-tab-refresh-self-check.mjs",
     "check:teacher-delete": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/teacher-delete-self-check.mjs",
     "check:student-signup-payload": "node scripts/student-signup-payload-self-check.mjs"
   },
