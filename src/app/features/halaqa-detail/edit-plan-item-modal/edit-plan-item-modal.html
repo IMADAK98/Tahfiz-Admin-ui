@@ -17,7 +17,9 @@
           <p class="form-error" role="alert">{{ message }}</p>
         }
 
-        <p class="plan-item-context">خطة: <strong>{{ planName() }}</strong></p>
+        <p class="plan-item-context">
+          خطة: <strong>{{ planName() }}</strong>
+        </p>
 
         <div class="plan-item-form-grid">
           <div class="input-group">
@@ -49,16 +51,28 @@
         <div class="plan-item-range-grid">
           <div class="input-group">
             <label for="edit-from-surah">من سورة</label>
-            <p-select
-              inputId="edit-from-surah"
-              [options]="surahOptions()"
-              optionLabel="label"
-              optionValue="number"
-              formControlName="fromSurah"
-              (onChange)="onFromSurahChange($event.value)"
-              [fluid]="true"
-              appendTo="body"
-            />
+            @if (surahSelectReady()) {
+              <p-select
+                inputId="edit-from-surah"
+                [options]="surahOptions()"
+                optionLabel="label"
+                optionValue="number"
+                formControlName="fromSurah"
+                (onChange)="onFromSurahChange($event.value)"
+                [fluid]="true"
+                appendTo="body"
+              />
+            } @else {
+              <input
+                pInputText
+                class="input"
+                fluid
+                id="edit-from-surah"
+                type="text"
+                readonly
+                [value]="fromSurahStandIn()"
+              />
+            }
             <app-field-error
               [message]="fieldError('fromSurahNumber', 'fromSurah')"
               errorId="edit-from-surah-error"
@@ -77,21 +91,45 @@
             <app-field-error [message]="fieldError('fromAyah')" errorId="edit-from-ayah-error" />
           </div>
           <div class="input-group">
-            <label for="edit-to-surah">إلى سورة <span class="hint-inline">(عرض فقط)</span></label>
-            <p-select
-              inputId="edit-to-surah"
-              [options]="surahOptions()"
-              optionLabel="label"
-              optionValue="number"
-              formControlName="toSurah"
-              placeholder="—"
-              [fluid]="true"
-              appendTo="body"
-            />
+            <label for="edit-to-surah">
+              إلى سورة <span class="hint-inline">({{ computedOnSave | translate }})</span>
+            </label>
+            @if (surahSelectReady()) {
+              <p-select
+                inputId="edit-to-surah"
+                [options]="surahOptions()"
+                optionLabel="label"
+                optionValue="number"
+                formControlName="toSurah"
+                placeholder="—"
+                [fluid]="true"
+                appendTo="body"
+              />
+            } @else {
+              <input
+                pInputText
+                class="input"
+                fluid
+                id="edit-to-surah"
+                type="text"
+                readonly
+                [value]="toSurahStandIn()"
+              />
+            }
           </div>
           <div class="input-group">
-            <label for="edit-to-ayah">إلى آية <span class="hint-inline">(عرض فقط)</span></label>
-            <input pInputText class="input" fluid id="edit-to-ayah" type="text" [value]="model().toAyah ?? '—'" readonly />
+            <label for="edit-to-ayah">
+              إلى آية <span class="hint-inline">({{ computedOnSave | translate }})</span>
+            </label>
+            <input
+              pInputText
+              class="input"
+              fluid
+              id="edit-to-ayah"
+              type="text"
+              [value]="model().toAyah ?? '—'"
+              readonly
+            />
           </div>
         </div>
 
@@ -107,7 +145,10 @@
               [fluid]="true"
               appendTo="body"
             />
-            <app-field-error [message]="fieldError('amountType')" errorId="edit-amount-type-error" />
+            <app-field-error
+              [message]="fieldError('amountType')"
+              errorId="edit-amount-type-error"
+            />
           </div>
           <div class="input-group">
             <label for="edit-amount-value">القيمة</label>

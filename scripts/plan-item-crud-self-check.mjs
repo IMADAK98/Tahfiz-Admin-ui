@@ -20,24 +20,16 @@ export async function resolve(specifier, context, nextResolve) {
 `;
 register('data:text/javascript,' + encodeURIComponent(hook));
 
-const { missingPlanItemTypes, buildAddPlanItemPayload, createEmptyPlanItemForm } = await import(
-  '../src/app/features/halaqa-detail/dto/plan-item-form.model.ts'
-);
-const {
-  PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE,
-  PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE,
-  planItemDeleteConfirmMessage,
-} = await import('../src/app/features/halaqa-detail/dto/plan-item-delete.ts');
+const { missingPlanItemTypes, buildAddPlanItemPayload, createEmptyPlanItemForm } =
+  await import('../src/app/features/halaqa-detail/dto/plan-item-form.model.ts');
+const { PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE, planItemDeleteConfirmMessage } =
+  await import('../src/app/features/halaqa-detail/dto/plan-item-delete.ts');
 
 assert.deepEqual(missingPlanItemTypes([]), ['HIFZ', 'TATHBEET', 'MURAJAA']);
 assert.deepEqual(missingPlanItemTypes([{ type: 'TATHBEET' }]), ['HIFZ', 'MURAJAA']);
 assert.deepEqual(missingPlanItemTypes([{ type: 'MURAJAA' }, { type: 'HIFZ' }]), ['TATHBEET']);
 assert.deepEqual(
-  missingPlanItemTypes([
-    { type: 'HIFZ' },
-    { type: 'TATHBEET' },
-    { type: 'MURAJAA' },
-  ]),
+  missingPlanItemTypes([{ type: 'HIFZ' }, { type: 'TATHBEET' }, { type: 'MURAJAA' }]),
   [],
 );
 assert.equal(createEmptyPlanItemForm().type, 'HIFZ');
@@ -125,15 +117,24 @@ assert.doesNotMatch(addTs, /\bFormsModule\b/);
 assert.doesNotMatch(addTs, /إلى/);
 
 const ar = JSON.parse(readFileSync(join(repo, 'public/i18n/ar.json'), 'utf8'));
-assert.equal(ar.halaqaDetail.errors.itemHasProgress, PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE);
+assert.equal(ar.halaqaDetail.errors.itemHasProgress, undefined);
 assert.equal(ar.halaqaDetail.errors.itemIsLast, PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE);
-assert.equal(
-  PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE,
-  'لا يمكن حذف هذا العنصر لأن للطلاب تقدّمًا مسجّلًا عليه. يمكنك تعديله بدلًا من ذلك.',
-);
 assert.equal(PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE, 'لا يمكن حذف آخر عنصر في الخطة.');
-assert.equal(typeof ar.halaqaDetail.success.planItemAdded, 'string');
-assert.equal(typeof ar.halaqaDetail.success.planItemDeleted, 'string');
+assert.equal(ar.halaqaDetail.success.planItemAdded, 'تمت إضافة عنصر الخطة');
+assert.equal(ar.halaqaDetail.success.planItemDeleted, 'تم حذف العنصر');
+assert.equal(ar.halaqaDetail.success.planDeleted, 'تم حذف الخطة');
+assert.equal(ar.halaqaDetail.success.studentsAssigned, 'تمت إضافة الطلاب إلى الخطة');
+assert.equal(ar.halaqaDetail.success.studentUnassigned, 'تمت إزالة الطالب من الخطة');
+assert.equal(ar.halaqaDetail.confirm.progressKept, 'سيُحفظ سجل التقدّم السابق كما هو.');
+assert.equal(ar.halaqaDetail.edit.computedOnSave, 'تُحسب تلقائيًا عند الحفظ');
+assert.equal((page.match(/i18n\.confirm\.progressKept/g) ?? []).length, 2);
+
+const deleteSrc = readFileSync(
+  join(repo, 'src/app/features/halaqa-detail/dto/plan-item-delete.ts'),
+  'utf8',
+);
+assert.doesNotMatch(deleteSrc, /STUDY_PLAN_ITEM_HAS_PROGRESS/);
+assert.match(deleteSrc, /STUDY_PLAN_ITEM_LAST_ITEM/);
 
 const progress = {
   name: 'ApiError',
@@ -147,7 +148,7 @@ const progress = {
     code: 'STUDY_PLAN_ITEM_HAS_PROGRESS',
   },
 };
-assert.equal(planItemDeleteConfirmMessage(progress), PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE);
+assert.equal(planItemDeleteConfirmMessage(progress), 'حدث خطأ غير متوقع. حاول مرة أخرى.');
 
 const last = {
   name: 'ApiError',
@@ -206,7 +207,10 @@ assert.equal(
   'حدث خطأ غير متوقع. حاول مرة أخرى.',
 );
 
-const service = readFileSync(join(repo, 'src/app/features/halaqa-detail/halaqa-detail.service.ts'), 'utf8');
+const service = readFileSync(
+  join(repo, 'src/app/features/halaqa-detail/halaqa-detail.service.ts'),
+  'utf8',
+);
 assert.match(service, /createItem\(planId, buildAddPlanItemPayload\(form\)\)/);
 assert.match(service, /deleteItem\(itemId\)/);
 

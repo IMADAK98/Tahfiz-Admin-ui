@@ -161,3 +161,10 @@ Done
 
 Plan-item delete removes the row from the plans signal on success, then refetches without putting that id back. Assign-students accepts a raw plan or `data: null` and appends the checked roster students before the details refetch.
 `check:plan-tab-refresh` locks both patches to the success path.
+
+## Angular Admin — plans tab smoke nits
+
+Done
+
+Specific success toasts replace «تم الحفظ» for item delete, plan delete, assign, and unassign, and both delete confirms say past progress is kept.
+Edit dialog writes من سورة only after the surah list is ready. Plan delete and unassign patch the plans signal before the details refetch, and that refetch cannot put the removed row back.

@@ -1,5 +1,23 @@
 /** Immediate plans-tab patches. The signal must change before the details refetch. */
 
+export function plansWithoutPlan<T extends { id: number }>(
+  plans: readonly T[],
+  planId: number,
+): T[] {
+  return plans.filter((plan) => plan.id !== planId);
+}
+
+export function plansWithoutStudent<
+  T extends { id: number; students: ReadonlyArray<{ id: number }> },
+>(plans: readonly T[], planId: number, studentId: number): T[] {
+  return plans.map((plan) => {
+    if (plan.id !== planId || !plan.students.some((student) => student.id === studentId)) {
+      return plan;
+    }
+    return { ...plan, students: plan.students.filter((student) => student.id !== studentId) };
+  });
+}
+
 export function plansWithoutItem<T extends { id: number; items: ReadonlyArray<{ id: number }> }>(
   plans: readonly T[],
   planId: number,

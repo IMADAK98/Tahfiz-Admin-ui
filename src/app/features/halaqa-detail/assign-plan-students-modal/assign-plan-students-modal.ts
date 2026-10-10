@@ -97,7 +97,7 @@ export class AssignPlanStudentsModalComponent {
     this.detailService.assignStudentsToPlan(plan.id, studentIds).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
+        this.toastMessage.notifySuccess(HALAQA_DETAIL_I18N.success.studentsAssigned);
         this.assigned.emit(studentIds);
       },
       error: (error: unknown) => {

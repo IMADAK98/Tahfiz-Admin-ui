@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { map } from 'rxjs/operators';
 import { ApiError } from '../../core/api/api-error';
 import { StudyPlanItemType } from '../../core/api/models/study-plan.model';
@@ -21,6 +22,8 @@ import {
   planItemDeleteConfirmMessage,
   plansWithStudents,
   plansWithoutItem,
+  plansWithoutPlan,
+  plansWithoutStudent,
 } from './dto';
 import { EditHalaqaModalComponent } from './edit-halaqa-modal/edit-halaqa-modal';
 import { EditPlanItemModalComponent } from './edit-plan-item-modal/edit-plan-item-modal';
@@ -39,6 +42,7 @@ import { HalaqaDetailService } from './halaqa-detail.service';
   selector: 'app-halaqa-detail',
   imports: [
     NgClass,
+    TranslatePipe,
     RouterLink,
     EditHalaqaModalComponent,
     EnrollStudentsModalComponent,
@@ -63,6 +67,7 @@ export class HalaqaDetailComponent {
   protected readonly personInitial = personInitial;
   protected readonly studyPlanItemTypeBadgeClass = studyPlanItemTypeBadgeClass;
   protected readonly studyPlanItemTypeLabel = studyPlanItemTypeLabel;
+  protected readonly i18n = HALAQA_DETAIL_I18N;
 
   protected readonly halaqaId = toSignal(
     this.route.paramMap.pipe(map((params) => Number(params.get('id')) || 0)),
@@ -351,17 +356,20 @@ export class HalaqaDetailComponent {
     if (!plan || !student) {
       return;
     }
+    const planId = plan.id;
+    const studentId = student.id;
 
     this.unassigning.set(true);
     this.confirmError.set(null);
-    this.detailService.unassignStudentsFromPlan(plan.id, [student.id]).subscribe({
+    this.detailService.unassignStudentsFromPlan(planId, [studentId]).subscribe({
       next: () => {
         this.unassigning.set(false);
         this.showUnassignPlanModal.set(false);
         this.selectedPlan.set(null);
         this.selectedStudent.set(null);
-        this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
-        this.refreshPlans();
+        this.toastMessage.notifySuccess(HALAQA_DETAIL_I18N.success.studentUnassigned);
+        this.plans.set(plansWithoutStudent(this.plans(), planId, studentId));
+        this.refreshPlans({ planId, omitStudentId: studentId });
       },
       error: (error: unknown) => {
         this.unassigning.set(false);
@@ -387,16 +395,18 @@ export class HalaqaDetailComponent {
     if (!plan) {
       return;
     }
+    const planId = plan.id;
 
     this.deletingPlan.set(true);
     this.confirmError.set(null);
-    this.detailService.deletePlan(plan.id).subscribe({
+    this.detailService.deletePlan(planId).subscribe({
       next: () => {
         this.deletingPlan.set(false);
         this.showDeletePlanModal.set(false);
         this.selectedPlan.set(null);
-        this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
-        this.refreshPlans();
+        this.toastMessage.notifySuccess(HALAQA_DETAIL_I18N.success.planDeleted);
+        this.plans.set(plansWithoutPlan(this.plans(), planId));
+        this.refreshPlans({ omitPlanId: planId });
       },
       error: (error: unknown) => {
         this.deletingPlan.set(false);
@@ -495,12 +505,14 @@ export class HalaqaDetailComponent {
 
   /**
    * ponytail: the details refetch can still be the pre-write body. Re-apply the
-   * success patch on that one response so a deleted item or an empty students
-   * array cannot flash back. Later refreshPlans() calls trust the server.
+   * success patch on that one response so a deleted plan, item, or student
+   * cannot flash back. Later refreshPlans() calls trust the server.
    */
   private refreshPlans(settle?: {
     planId?: number;
     omitItemId?: number;
+    omitPlanId?: number;
+    omitStudentId?: number;
     studentIds?: number[];
   }): void {
     const halqaId = this.halaqaId();
@@ -510,12 +522,20 @@ export class HalaqaDetailComponent {
 
     const planId = settle?.planId;
     const omitItemId = settle?.omitItemId;
+    const omitPlanId = settle?.omitPlanId;
+    const omitStudentId = settle?.omitStudentId;
     const studentIds = settle?.studentIds ?? [];
     this.detailService.reloadPlans(halqaId).subscribe({
       next: (plans) => {
         let nextPlans = plans;
+        if (omitPlanId != null) {
+          nextPlans = plansWithoutPlan(nextPlans, omitPlanId);
+        }
         if (planId != null && omitItemId != null) {
           nextPlans = plansWithoutItem(nextPlans, planId, omitItemId);
+        }
+        if (planId != null && omitStudentId != null) {
+          nextPlans = plansWithoutStudent(nextPlans, planId, omitStudentId);
         }
         if (planId != null && studentIds.length) {
           const wanted = new Set(studentIds);

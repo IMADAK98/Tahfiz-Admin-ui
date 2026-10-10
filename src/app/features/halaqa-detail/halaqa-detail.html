@@ -385,6 +385,7 @@
         <p class="unassign-copy">
           هل أنت متأكد من حذف الخطة <strong>{{ selectedPlan()?.name }}</strong>؟
         </p>
+        <p class="unassign-copy">{{ i18n.confirm.progressKept | translate }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" [disabled]="deletingPlan()" (click)="confirmDeletePlan()">
@@ -413,6 +414,7 @@
           <p class="unassign-copy">
             هل أنت متأكد من حذف عنصر <strong>{{ studyPlanItemTypeLabel(item.type) }}</strong> من الخطة <strong>{{ selectedPlan()?.name }}</strong>؟
           </p>
+          <p class="unassign-copy">{{ i18n.confirm.progressKept | translate }}</p>
         }
       </div>
       <div class="modal-footer">

@@ -145,10 +145,18 @@
       "planCreated": "تم إنشاء الخطة",
       "studentsEnrolled": "تم تسجيل الطلاب في الحلقة",
       "planItemAdded": "تمت إضافة عنصر الخطة",
-      "planItemDeleted": "تم حذف عنصر الخطة"
+      "planItemDeleted": "تم حذف العنصر",
+      "planDeleted": "تم حذف الخطة",
+      "studentsAssigned": "تمت إضافة الطلاب إلى الخطة",
+      "studentUnassigned": "تمت إزالة الطالب من الخطة"
+    },
+    "confirm": {
+      "progressKept": "سيُحفظ سجل التقدّم السابق كما هو."
+    },
+    "edit": {
+      "computedOnSave": "تُحسب تلقائيًا عند الحفظ"
     },
     "errors": {
-      "itemHasProgress": "لا يمكن حذف هذا العنصر لأن للطلاب تقدّمًا مسجّلًا عليه. يمكنك تعديله بدلًا من ذلك.",
       "itemIsLast": "لا يمكن حذف آخر عنصر في الخطة."
     }
   },

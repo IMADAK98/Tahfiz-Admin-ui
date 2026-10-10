@@ -34,11 +34,14 @@ export {
   type PlanItemFormModel,
 } from './plan-item-form.model';
 export {
-  PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE,
   PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE,
-  STUDY_PLAN_ITEM_HAS_PROGRESS,
   STUDY_PLAN_ITEM_LAST_ITEM,
   planItemDeleteConfirmMessage,
 } from './plan-item-delete';
-export { plansWithStudents, plansWithoutItem } from './plan-list-patch';
+export {
+  plansWithStudents,
+  plansWithoutItem,
+  plansWithoutPlan,
+  plansWithoutStudent,
+} from './plan-list-patch';
 export { coerceId, personDisplayName, personInitial, rosterQueryDate, todayIsoDate } from './person.helpers';

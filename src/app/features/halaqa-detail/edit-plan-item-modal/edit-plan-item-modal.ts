@@ -1,7 +1,16 @@
-import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../../core/api/api-error';
@@ -18,8 +27,10 @@ import {
   ayahNumbersOf,
   createPlanItemFormFromView,
   mapSurahSelectOptions,
+  surahSelectLabel,
   validatePlanItemForm,
 } from '../dto';
+import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
 import {
   STUDY_PLAN_AMOUNT_TYPE_OPTIONS,
   STUDY_PLAN_DIRECTION_OPTIONS,
@@ -46,7 +57,7 @@ const emptyPlanItemView: StudyPlanItemViewModel = {
 
 @Component({
   selector: 'app-edit-plan-item-modal',
-  imports: [ReactiveFormsModule, InputText, Select, FieldErrorComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputText, Select, FieldErrorComponent],
   templateUrl: './edit-plan-item-modal.html',
 })
 export class EditPlanItemModalComponent {
@@ -66,10 +77,15 @@ export class EditPlanItemModalComponent {
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
   protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
   protected readonly form = formGroupOf(this.fb, createPlanItemFormFromView(emptyPlanItemView));
+  protected readonly computedOnSave = HALAQA_DETAIL_I18N.edit.computedOnSave;
   protected readonly surahs = signal<SurahApiRecord[]>([]);
+  /** True only after fromSurah is written while options exist, so p-select never mounts empty. */
+  protected readonly surahSelectReady = signal(false);
   protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  private preparedItemId: number | null = null;
+  private surahsRequested = false;
   private readonly fields = createFieldErrorBag();
 
   protected fieldError(...fieldNames: string[]): string | undefined {
@@ -89,6 +105,22 @@ export class EditPlanItemModalComponent {
 
   protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
 
+  protected fromSurahStandIn(): string {
+    const current = this.item();
+    if (!current?.fromSurahNumber) {
+      return '';
+    }
+    return surahSelectLabel(current.fromSurahNumber, current.fromSurahName);
+  }
+
+  protected toSurahStandIn(): string {
+    const current = this.item();
+    if (!current?.toSurahNumber) {
+      return '—';
+    }
+    return surahSelectLabel(current.toSurahNumber, current.toSurahName ?? '');
+  }
+
   constructor() {
     const nestNames: Record<string, string[]> = {
       fromSurah: ['fromSurahNumber', 'fromSurah'],
@@ -98,20 +130,19 @@ export class EditPlanItemModalComponent {
         this.clearFieldError(...(nestNames[name] ?? [name]));
       });
     }
+    this.fetchSurahs();
     effect(() => {
       const item = this.item();
-      if (!this.visible() || !item) {
+      const open = this.visible();
+      const surahCount = this.surahs().length;
+      if (!open || !item) {
+        untracked(() => {
+          this.preparedItemId = null;
+          this.surahSelectReady.set(false);
+        });
         return;
       }
-      untracked(() => {
-        this.form.reset(createPlanItemFormFromView(item));
-        this.form.controls['toSurah'].disable({ emitEvent: false });
-        this.form.controls['toAyah'].disable({ emitEvent: false });
-        this.fields.clearAll();
-        this.errorMessage.set(null);
-        this.loadSurahs();
-        this.loadAyahs(item.fromSurahNumber);
-      });
+      untracked(() => this.applyItem(item, surahCount));
     });
   }
 
@@ -181,10 +212,45 @@ export class EditPlanItemModalComponent {
     return arabicDialogMessage(message, unexpected);
   }
 
-  private loadSurahs(): void {
+  /**
+   * p-select paints blank when the control value is set before its options exist.
+   * Write fromSurah only once the list is in the signal, and keep the select
+   * unmounted until that write so the saved name shows with no empty flash.
+   */
+  private applyItem(item: StudyPlanItemViewModel, surahCount: number): void {
+    const opening = this.preparedItemId !== item.id;
+    if (opening) {
+      this.surahSelectReady.set(false);
+      this.form.reset(createPlanItemFormFromView(item));
+      this.form.controls['toSurah'].disable({ emitEvent: false });
+      this.form.controls['toAyah'].disable({ emitEvent: false });
+      this.fields.clearAll();
+      this.errorMessage.set(null);
+      this.loadAyahs(item.fromSurahNumber);
+      this.preparedItemId = item.id;
+    }
+    if (surahCount > 0 && !this.surahSelectReady()) {
+      this.form.controls['fromSurah'].setValue(item.fromSurahNumber, { emitEvent: false });
+      this.form.controls['toSurah'].setValue(item.toSurahNumber, { emitEvent: false });
+      this.surahSelectReady.set(true);
+      return;
+    }
+    if (opening) {
+      this.fetchSurahs();
+    }
+  }
+
+  private fetchSurahs(): void {
+    if (this.surahsRequested || this.surahs().length) {
+      return;
+    }
+    this.surahsRequested = true;
     this.quranApi.getSurahs().subscribe({
       next: (surahs) => this.surahs.set(surahs),
-      error: () => this.surahs.set([]),
+      error: () => {
+        this.surahsRequested = false;
+        this.surahs.set([]);
+      },
     });
   }
 
