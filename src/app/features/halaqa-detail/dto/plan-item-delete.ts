@@ -1,12 +1,5 @@
-/** Nest 409 when students already have progress on the item. */
-export const STUDY_PLAN_ITEM_HAS_PROGRESS = 'STUDY_PLAN_ITEM_HAS_PROGRESS';
-
 /** Nest 409 when the item is the plan's only item. */
 export const STUDY_PLAN_ITEM_LAST_ITEM = 'STUDY_PLAN_ITEM_LAST_ITEM';
-
-/** Keep equal to public/i18n/ar.json halaqaDetail.errors.itemHasProgress. */
-export const PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE =
-  'لا يمكن حذف هذا العنصر لأن للطلاب تقدّمًا مسجّلًا عليه. يمكنك تعديله بدلًا من ذلك.';
 
 /** Keep equal to public/i18n/ar.json halaqaDetail.errors.itemIsLast. */
 export const PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE = 'لا يمكن حذف آخر عنصر في الخطة.';
@@ -15,7 +8,7 @@ const PLAN_ITEM_DELETE_UNEXPECTED_MESSAGE = 'حدث خطأ غير متوقع. ح
 
 /**
  * Confirm-modal copy for DELETE /study-plan-item/:id.
- * Known 409 codes use the fixed Arabic lines; anything else keeps an Arabic Nest
+ * The last-item 409 uses the fixed Arabic line. Anything else keeps an Arabic Nest
  * message or the generic fallback. Same rule as `arabicDialogMessage`.
  * No imports so the self-check can load this file under type-stripping.
  */
@@ -26,9 +19,6 @@ export function planItemDeleteConfirmMessage(
   const body = nestBody(error);
   if (statusOf(error, body) === 409) {
     const code = codeOf(error, body);
-    if (code === STUDY_PLAN_ITEM_HAS_PROGRESS) {
-      return PLAN_ITEM_DELETE_HAS_PROGRESS_MESSAGE;
-    }
     if (code === STUDY_PLAN_ITEM_LAST_ITEM) {
       return PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE;
     }
@@ -94,9 +84,6 @@ function codeOf(error: unknown, body: Record<string, unknown> | null): string | 
     return rawCode.trim();
   }
   const message = messageOf(error, body);
-  if (message.includes(STUDY_PLAN_ITEM_HAS_PROGRESS)) {
-    return STUDY_PLAN_ITEM_HAS_PROGRESS;
-  }
   if (message.includes(STUDY_PLAN_ITEM_LAST_ITEM)) {
     return STUDY_PLAN_ITEM_LAST_ITEM;
   }

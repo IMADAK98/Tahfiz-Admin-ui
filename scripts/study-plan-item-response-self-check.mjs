@@ -69,6 +69,25 @@ const modal = readFileSync(
 );
 assert.match(modal, /arabicDialogMessage/);
 assert.doesNotMatch(modal, /Missing response data/);
+assert.match(modal, /surahSelectReady/);
+assert.match(modal, /fromSurahNumber/);
+const readyAt = modal.indexOf('surahCount > 0 && !this.surahSelectReady()');
+assert.ok(readyAt >= 0);
+const readyBlock = modal.slice(readyAt, readyAt + 400);
+assert.match(readyBlock, /setValue\(item\.fromSurahNumber/);
+assert.match(readyBlock, /surahSelectReady\.set\(true\)/);
+assert.doesNotMatch(modal, /\bFormsModule\b/);
+
+const editHtml = readFileSync(
+  join(root, '../src/app/features/halaqa-detail/edit-plan-item-modal/edit-plan-item-modal.html'),
+  'utf8',
+);
+assert.match(editHtml, /surahSelectReady\(\)/);
+assert.match(editHtml, /fromSurahStandIn\(\)/);
+assert.match(editHtml, /computedOnSave/);
+assert.match(editHtml, /\[formGroup\]="form"/);
+assert.doesNotMatch(editHtml, /عرض فقط/);
+assert.doesNotMatch(editHtml, /\(ngSubmit\)|FormsModule|\bngModel\b/);
 
 const mapper = readFileSync(
   join(root, '../src/app/features/halaqa-detail/dto/halaqa-detail.mapper.ts'),

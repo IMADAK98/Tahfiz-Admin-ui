@@ -17,9 +17,17 @@ export const HALAQA_DETAIL_I18N = {
     studentsEnrolled: 'halaqaDetail.success.studentsEnrolled',
     planItemAdded: 'halaqaDetail.success.planItemAdded',
     planItemDeleted: 'halaqaDetail.success.planItemDeleted',
+    planDeleted: 'halaqaDetail.success.planDeleted',
+    studentsAssigned: 'halaqaDetail.success.studentsAssigned',
+    studentUnassigned: 'halaqaDetail.success.studentUnassigned',
+  },
+  confirm: {
+    progressKept: 'halaqaDetail.confirm.progressKept',
+  },
+  edit: {
+    computedOnSave: 'halaqaDetail.edit.computedOnSave',
   },
   errors: {
-    itemHasProgress: 'halaqaDetail.errors.itemHasProgress',
     itemIsLast: 'halaqaDetail.errors.itemIsLast',
   },
 } as const;

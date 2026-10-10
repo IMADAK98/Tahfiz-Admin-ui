@@ -141,10 +141,18 @@
       "planCreated": "TODO: Plan created",
       "studentsEnrolled": "TODO: Students enrolled in halaqa",
       "planItemAdded": "TODO: Study plan item added",
-      "planItemDeleted": "TODO: Study plan item deleted"
+      "planItemDeleted": "TODO: Item deleted",
+      "planDeleted": "TODO: Plan deleted",
+      "studentsAssigned": "TODO: Students added to the plan",
+      "studentUnassigned": "TODO: Student removed from the plan"
+    },
+    "confirm": {
+      "progressKept": "TODO: Past progress is kept as-is."
+    },
+    "edit": {
+      "computedOnSave": "TODO: Calculated automatically on save"
     },
     "errors": {
-      "itemHasProgress": "TODO: This item cannot be deleted because students have progress recorded on it. Edit it instead.",
       "itemIsLast": "TODO: The last item in the plan cannot be deleted."
     }
   },
