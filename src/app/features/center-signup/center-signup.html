@@ -153,15 +153,10 @@
 
             <div class="input-group">
               <label for="adminBirthDate">تاريخ الميلاد <span class="req">*</span></label>
-              <p-datepicker
+              <app-date-field
                 inputId="adminBirthDate"
-                name="adminBirthDate"
-                [formControl]="adminBirthDate"
-                dateFormat="yy-mm-dd"
-                [showIcon]="true"
-                [maxDate]="today"
-                appendTo="body"
-                fluid
+                formControlName="adminBirthDate"
+                [max]="todayIso"
                 [disabled]="submitting()"
               />
               @if (fieldError('adminBirthDate'); as msg) {

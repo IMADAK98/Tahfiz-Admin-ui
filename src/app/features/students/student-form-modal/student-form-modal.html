@@ -171,16 +171,12 @@
             </div>
             <div class="input-group">
               <label for="sf-birthdate">تاريخ الميلاد</label>
-              <input
-                pInputText
-                class="input"
-                id="sf-birthdate"
-                name="birthDate"
-                type="date"
-                required
+              <app-date-field
+                inputId="sf-birthdate"
                 formControlName="birthDate"
-                fluid
+                [required]="true"
                 [disabled]="submitting()"
+                [invalid]="!!fieldError('birthDate')"
               />
               <app-field-error [message]="fieldError('birthDate')" errorId="sf-birthdate-error" />
             </div>

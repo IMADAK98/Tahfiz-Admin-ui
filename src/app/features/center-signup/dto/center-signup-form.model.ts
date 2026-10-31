@@ -31,13 +31,6 @@ export function createEmptyCenterSignupForm(): CenterSignupFormModel {
   };
 }
 
-export function toIsoDate(value: Date): string {
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, '0');
-  const day = String(value.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
 /** Nest DTO keys so messages land under the input, not the top banner. */
 export function validateCenterSignupForm(form: CenterSignupFormModel): Record<string, string> {
   const errors: Record<string, string> = {};

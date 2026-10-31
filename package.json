@@ -14,7 +14,7 @@
     "check:center-signup": "node scripts/center-signup-self-check.mjs",
     "check:field-errors": "node scripts/nest-field-errors-self-check.mjs",
     "check:term-validation": "node scripts/term-validation-self-check.mjs",
-    "check:edit-term": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/edit-term-self-check.mjs",
+    "check:edit-term": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts-extension.mjs scripts/edit-term-self-check.mjs",
     "check:halaqa-validation": "node scripts/halaqa-validation-self-check.mjs",
     "check:teacher-validation": "node scripts/teacher-validation-self-check.mjs",
     "check:surah-mapper": "node scripts/surah-mapper-self-check.mjs",
@@ -59,9 +59,11 @@
     "@angular/cli": "^22.1.6",
     "@angular/compiler-cli": "^22.1.0",
     "@tailwindcss/postcss": "^4.3.3",
+    "jsdom": "^26.1.0",
     "postcss": "^8.5.28",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.2",
+    "vitest": "^4.0.8"
   }
 }

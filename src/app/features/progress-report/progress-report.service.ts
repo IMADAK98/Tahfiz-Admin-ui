@@ -10,6 +10,7 @@ import {
 } from '../../core/api/models/progress.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { AuthService } from '../../core/auth/auth.service';
+import { toLocalYearMonth } from '../../core/utils/local-date';
 import { HalqaSelectOption } from './dto/progress-report-filters.dto';
 import { addDays, parseIsoDate, toIsoDate } from './week-date.util';
 
@@ -92,9 +93,7 @@ export class ProgressReportService {
 
 /** Month input value YYYY-MM from a Date. */
 export function toYearMonth(d: Date = new Date()): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  return `${y}-${m}`;
+  return toLocalYearMonth(d);
 }
 
 export function formatDayLabelAr(iso: string): string {

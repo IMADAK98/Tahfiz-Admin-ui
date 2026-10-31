@@ -107,14 +107,12 @@
               </div>
               <div class="input-group">
                 <label for="tf-birthdate">تاريخ الميلاد</label>
-                <input
-                  pInputText class="input" fluid
-                  id="tf-birthdate"
-                  name="birthDate"
-                  type="date"
-                  required
+                <app-date-field
+                  inputId="tf-birthdate"
                   formControlName="birthDate"
+                  [required]="true"
                   [disabled]="submitting()"
+                  [invalid]="!!fieldError('birthDate')"
                 />
                 <app-field-error [message]="fieldError('birthDate')" errorId="tf-birthdate-error" />
               </div>

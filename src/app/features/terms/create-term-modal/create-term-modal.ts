@@ -6,11 +6,13 @@ import { InputText } from 'primeng/inputtext';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { DateFieldComponent } from '../../../core/ui/date-field/date-field';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { AuthService } from '../../../core/auth/auth.service';
 import {
   CreateTermFormModel,
+  WEEKEND_HOLIDAY_DAYS,
   WEEKEND_HOLIDAY_ERROR,
   canPickHolidayDates,
   createEmptyCreateTermForm,
@@ -20,7 +22,7 @@ import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-create-term-modal',
-  imports: [ReactiveFormsModule, InputText, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, FieldErrorComponent, DateFieldComponent],
   templateUrl: './create-term-modal.html',
   styleUrl: './create-term-modal.scss',
 })
@@ -35,6 +37,7 @@ export class CreateTermModalComponent {
   readonly termCreated = output<void>();
   readonly closed = output<void>();
 
+  protected readonly weekendDays = WEEKEND_HOLIDAY_DAYS;
   protected readonly form = formGroupOf(this.fb, createEmptyCreateTermForm());
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -59,6 +62,9 @@ export class CreateTermModalComponent {
     for (const [name, control] of Object.entries(this.form.controls)) {
       control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
         this.clearFieldError(name);
+        if (name === 'holidayDates') {
+          this.flagWeekendHolidays(this.model().holidayDates);
+        }
       });
     }
   }
@@ -81,30 +87,14 @@ export class CreateTermModalComponent {
     this.closed.emit();
   }
 
-  protected addHoliday(): void {
-    const value = this.model();
-    const date = value.pendingHolidayDate;
-    if (!date || !this.holidaysEnabled()) {
-      return;
+  private flagWeekendHolidays(dates: readonly string[]): boolean {
+    for (const date of dates) {
+      if (isWeekendHoliday(date)) {
+        this.fields.applyMap({ holidayDates: WEEKEND_HOLIDAY_ERROR });
+        return true;
+      }
     }
-    if (isWeekendHoliday(date)) {
-      this.fields.applyMap({ holidayDates: WEEKEND_HOLIDAY_ERROR });
-      return;
-    }
-    if (date < value.startDate || date > value.endDate) {
-      this.fields.applyMap({ holidayDates: 'يجب أن تقع أيام الإجازة ضمن فترة الدورة' });
-      return;
-    }
-    if (value.holidayDates.includes(date)) {
-      this.fields.applyMap({ holidayDates: 'هذا التاريخ مضاف مسبقاً' });
-      return;
-    }
-    this.form.patchValue({
-      holidayDates: [...value.holidayDates, date].sort(),
-      pendingHolidayDate: '',
-    });
-    this.clearFieldError('holidayDates');
-    this.errorMessage.set(null);
+    return false;
   }
 
   protected removeHoliday(date: string): void {
@@ -138,6 +128,9 @@ export class CreateTermModalComponent {
     }
 
     const value = this.model();
+    if (this.flagWeekendHolidays(value.holidayDates)) {
+      return;
+    }
     if (this.fields.applyMap(this.termsService.validateForm(value))) {
       return;
     }

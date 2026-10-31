@@ -1,0 +1,4 @@
+/* Popup is appended to body. PrimeNG flips prev/next with :dir(rtl); force the panel itself. */
+html[dir='rtl'] .tahfiz-datepicker-panel {
+  direction: rtl;
+}

@@ -98,20 +98,14 @@
                 </span>
               }
             </div>
-            <input
-              pInputText
-              class="input"
-              fluid
-              id="edit-term-start"
-              name="startDate"
-              type="date"
+            <app-date-field
+              inputId="edit-term-start"
               formControlName="startDate"
-              required
-              [attr.min]="startLocked() ? null : todayMin()"
+              [required]="true"
+              [min]="startLocked() ? null : todayMin()"
               [class.is-locked]="startLocked()"
-              [class.is-invalid]="fieldError('startDate')"
-              [attr.aria-invalid]="fieldError('startDate') ? true : null"
-              [attr.aria-describedby]="startLocked() ? 'edit-term-start-hint' : null"
+              [invalid]="!!fieldError('startDate')"
+              [describedBy]="startLocked() ? 'edit-term-start-hint' : ''"
             />
             @if (startLocked()) {
               <p class="field-hint" id="edit-term-start-hint">
@@ -134,18 +128,12 @@
           </div>
           <div class="input-group">
             <label for="edit-term-end">تاريخ النهاية</label>
-            <input
-              pInputText
-              class="input"
-              fluid
-              id="edit-term-end"
-              name="endDate"
-              type="date"
+            <app-date-field
+              inputId="edit-term-end"
               formControlName="endDate"
-              required
-              [attr.min]="endMin()"
-              [class.is-invalid]="fieldError('endDate')"
-              [attr.aria-invalid]="fieldError('endDate') ? true : null"
+              [required]="true"
+              [min]="endMin()"
+              [invalid]="!!fieldError('endDate')"
             />
             <app-field-error [message]="fieldError('endDate')" errorId="edit-term-end-error" />
           </div>
@@ -154,17 +142,11 @@
         <div class="form-grid-2">
           <div class="input-group">
             <label for="edit-term-reg-start">بداية التسجيل</label>
-            <input
-              pInputText
-              class="input"
-              fluid
-              id="edit-term-reg-start"
-              name="registerationStartDate"
-              type="date"
+            <app-date-field
+              inputId="edit-term-reg-start"
               formControlName="registerationStartDate"
-              required
-              [class.is-invalid]="fieldError('registerationStartDate')"
-              [attr.aria-invalid]="fieldError('registerationStartDate') ? true : null"
+              [required]="true"
+              [invalid]="!!fieldError('registerationStartDate')"
             />
             <app-field-error
               [message]="fieldError('registerationStartDate')"
@@ -173,18 +155,12 @@
           </div>
           <div class="input-group">
             <label for="edit-term-reg-end">نهاية التسجيل</label>
-            <input
-              pInputText
-              class="input"
-              fluid
-              id="edit-term-reg-end"
-              name="registerationEndDate"
-              type="date"
+            <app-date-field
+              inputId="edit-term-reg-end"
               formControlName="registerationEndDate"
-              required
-              [attr.max]="validation().endValid ? model().endDate : null"
-              [class.is-invalid]="fieldError('registerationEndDate')"
-              [attr.aria-invalid]="fieldError('registerationEndDate') ? true : null"
+              [required]="true"
+              [max]="validation().endValid ? model().endDate : null"
+              [invalid]="!!fieldError('registerationEndDate')"
             />
             <app-field-error
               [message]="fieldError('registerationEndDate')"
@@ -212,33 +188,17 @@
             }
           </div>
           <div class="holiday-box">
-            <div class="holiday-adder">
-              <input
-                pInputText
-                class="input"
-                fluid
-                id="edit-term-holiday"
-                type="date"
-                name="pendingHolidayDate"
-                formControlName="pendingHolidayDate"
-                [attr.min]="model().startDate || null"
-                [attr.max]="validation().endValid ? model().endDate : null"
-                aria-label="تاريخ إجازة"
-                [class.is-invalid]="adderError()"
-                (keydown.enter)="onHolidayEnter($event)"
-              />
-              <button
-                type="button"
-                class="btn btn-secondary btn-sm"
-                (click)="addHoliday()"
-                [disabled]="submitting()"
-              >
-                + إضافة
-              </button>
-            </div>
-            @if (adderError(); as adder) {
-              <p class="adder-error" role="alert">{{ adder }}</p>
-            }
+            <app-date-field
+              inputId="edit-term-holiday"
+              formControlName="holidayDates"
+              [multiple]="true"
+              [min]="model().startDate || null"
+              [max]="validation().endValid ? model().endDate : null"
+              [disabledDays]="weekendDays"
+              [disabledDates]="lockedHolidayDates()"
+              [invalid]="!!fieldError('holidayDates')"
+              placeholder="اختر أيام الإجازة"
+            />
             <div class="chip-list" aria-label="الإجازات المحددة">
               @for (chip of holidayChips(); track chip.date) {
                 <span

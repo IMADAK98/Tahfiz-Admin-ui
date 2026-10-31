@@ -8,6 +8,7 @@ import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-error-state';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { DateFieldComponent } from '../../../core/ui/date-field/date-field';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, HIFZ_QUALITY_OPTIONS, STUDENT_YES_NO_OPTIONS } from '../enums';
@@ -24,6 +25,7 @@ import { StudentsService } from '../students.service';
     InputText,
     Select,
     FieldErrorComponent,
+    DateFieldComponent,
     AssignHalqaModalComponent,
   ],
   templateUrl: './student-form-modal.html',

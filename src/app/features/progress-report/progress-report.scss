@@ -116,6 +116,12 @@
   white-space: nowrap;
 }
 
+.pr-report__field--context app-date-field {
+  flex: 0 1 280px;
+  width: auto;
+  max-width: 280px;
+}
+
 .pr-report__date-input {
   flex: 0 1 220px;
   width: auto;

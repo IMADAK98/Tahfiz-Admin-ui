@@ -1,5 +1,7 @@
 /** Edit-term rules from EDIT-DAWRA.md. Create submit rules stay in create-term-validation. */
 
+import { toLocalIsoDate } from '../../../core/utils/local-date';
+
 const ARABIC_MONTHS = [
   'يناير',
   'فبراير',
@@ -16,6 +18,9 @@ const ARABIC_MONTHS = [
 ];
 
 export const WEEKEND_HOLIDAY_ERROR = 'لا يمكن إضافة إجازة يوم الجمعة أو السبت';
+
+/** Friday and Saturday. `isWeekendHoliday` uses these UTC weekdays of the calendar day. */
+export const WEEKEND_HOLIDAY_DAYS: readonly number[] = [5, 6];
 
 export interface EditTermFormFields {
   name: string;
@@ -69,16 +74,13 @@ export function sliceIsoDate(value: string | null | undefined): string {
 }
 
 export function todayIsoDate(now = new Date()): string {
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return toLocalIsoDate(now);
 }
 
 /** Friday/Saturday in UTC so the calendar day does not depend on the browser zone. */
 export function isWeekendHoliday(isoDate: string): boolean {
   const day = new Date(`${isoDate}T00:00:00Z`).getUTCDay();
-  return day === 5 || day === 6;
+  return WEEKEND_HOLIDAY_DAYS.includes(day);
 }
 
 export function formatArabicDate(isoDate: string): string {
