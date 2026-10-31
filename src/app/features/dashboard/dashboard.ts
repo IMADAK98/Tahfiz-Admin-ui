@@ -12,6 +12,7 @@ import { CreateTermModalComponent } from '../terms/create-term-modal/create-term
 import { EditTermModalComponent } from '../terms/edit-term-modal/edit-term-modal';
 import { TermsService } from '../terms/terms.service';
 import { DashboardLoadState } from './enums/dashboard-load-state.enum';
+import { toLocalIsoDate } from '../../core/utils/local-date';
 import { DashboardService } from './dashboard.service';
 
 @Component({
@@ -139,10 +140,7 @@ export class DashboardComponent {
     if (Number.isNaN(parsed.getTime())) {
       return value;
     }
-    const year = parsed.getFullYear();
-    const month = String(parsed.getMonth() + 1).padStart(2, '0');
-    const day = String(parsed.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return toLocalIsoDate(parsed);
   }
 
   protected holidayLabels(term: ActiveTerm): string[] {
@@ -169,11 +167,7 @@ export class DashboardComponent {
   }
 
   private todayIsoDate(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return toLocalIsoDate(new Date());
   }
 
   private endActiveTerm(term: ActiveTerm): void {

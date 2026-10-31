@@ -10,6 +10,7 @@ import { Select } from 'primeng/select';
 import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { RegisterTokenValidation } from '../../core/api/models/student-signup.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
+import { DateFieldComponent } from '../../core/ui/date-field/date-field';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
 import { EDUCATION_STAGE_OPTIONS, EducationStage } from './enums/education-stage.enum';
@@ -22,7 +23,16 @@ import { StudentSignupService } from './student-signup.service';
 
 @Component({
   selector: 'app-student-signup',
-  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, InputText, Select, FieldErrorComponent],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    Button,
+    Checkbox,
+    InputText,
+    Select,
+    FieldErrorComponent,
+    DateFieldComponent,
+  ],
   templateUrl: './student-signup.html',
   styleUrl: './student-signup.scss',
 })

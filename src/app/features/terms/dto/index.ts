@@ -8,6 +8,7 @@ export {
   editTermFormFromTerm,
   formatArabicDate,
   holidayAddError,
+  WEEKEND_HOLIDAY_DAYS,
   WEEKEND_HOLIDAY_ERROR,
   inspectEditTermForm,
   isFrozenHoliday,

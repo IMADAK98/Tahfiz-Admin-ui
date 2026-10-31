@@ -86,6 +86,13 @@
           },
           "defaultConfiguration": "production"
         },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "buildTarget": "tahfiz-admin:build:development"
+          }
+        },
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {

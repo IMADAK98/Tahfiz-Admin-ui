@@ -9,6 +9,7 @@ import { createFieldErrorBag, nestSubmitBanner } from '../../../core/api/field-e
 import { AuthService } from '../../../core/auth/auth.service';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { DateFieldComponent } from '../../../core/ui/date-field/date-field';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { TeacherAgeGroup, TeacherWorkPeriod } from '../../../core/api/models/teacher.model';
@@ -30,7 +31,14 @@ import { TeachersService } from '../teachers.service';
 
 @Component({
   selector: 'app-teacher-form-modal',
-  imports: [ReactiveFormsModule, Button, InputText, Select, FieldErrorComponent],
+  imports: [
+    ReactiveFormsModule,
+    Button,
+    InputText,
+    Select,
+    FieldErrorComponent,
+    DateFieldComponent,
+  ],
   templateUrl: './teacher-form-modal.html',
   styleUrl: './teacher-form-modal.scss',
 })

@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .p-datepicker {
+  width: 100%;
+}
+
+:host(.is-locked) ::ng-deep .p-datepicker-input {
+  background: color-mix(in srgb, var(--color-border) 35%, var(--color-surface));
+  color: var(--color-muted);
+  border-style: dashed;
+  cursor: not-allowed;
+}

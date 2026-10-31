@@ -28,27 +28,23 @@
         <div class="form-grid-2">
           <div class="input-group">
             <label for="start">تاريخ البداية</label>
-            <input
-              pInputText class="input" fluid
-              id="start"
-              name="startDate"
-              type="date"
+            <app-date-field
+              inputId="start"
               formControlName="startDate"
-              required
+              [required]="true"
               [disabled]="submitting()"
+              [invalid]="!!fieldError('startDate')"
             />
             <app-field-error [message]="fieldError('startDate')" errorId="start-error" />
           </div>
           <div class="input-group">
             <label for="end">تاريخ النهاية</label>
-            <input
-              pInputText class="input" fluid
-              id="end"
-              name="endDate"
-              type="date"
+            <app-date-field
+              inputId="end"
               formControlName="endDate"
-              required
+              [required]="true"
               [disabled]="submitting()"
+              [invalid]="!!fieldError('endDate')"
             />
             <app-field-error [message]="fieldError('endDate')" errorId="end-error" />
           </div>
@@ -57,14 +53,12 @@
         <div class="form-grid-2">
           <div class="input-group">
             <label for="reg-start">بداية التسجيل</label>
-            <input
-              pInputText class="input" fluid
-              id="reg-start"
-              name="registerationStartDate"
-              type="date"
+            <app-date-field
+              inputId="reg-start"
               formControlName="registerationStartDate"
-              required
+              [required]="true"
               [disabled]="submitting()"
+              [invalid]="!!fieldError('registerationStartDate')"
             />
             <app-field-error
               [message]="fieldError('registerationStartDate')"
@@ -73,14 +67,12 @@
           </div>
           <div class="input-group">
             <label for="reg-end">نهاية التسجيل</label>
-            <input
-              pInputText class="input" fluid
-              id="reg-end"
-              name="registerationEndDate"
-              type="date"
+            <app-date-field
+              inputId="reg-end"
               formControlName="registerationEndDate"
-              required
+              [required]="true"
               [disabled]="submitting()"
+              [invalid]="!!fieldError('registerationEndDate')"
             />
             <app-field-error
               [message]="fieldError('registerationEndDate')"
@@ -90,7 +82,7 @@
         </div>
 
         <div class="input-group">
-          <label for="holidays">أيام الإجازات</label>
+          <label for="holiday-dates">أيام الإجازات</label>
           <span class="hint" id="holidays-hint">
             @if (holidaysEnabled()) {
               أضف أيام الإجازة ضمن فترة الدورة.
@@ -98,23 +90,19 @@
               حدّد تواريخ بداية ونهاية الدورة أولاً، ثم أضف أيام الإجازة.
             }
           </span>
-          <div class="holiday-box" [class.enabled]="holidaysEnabled()" id="holidays">
+          <div class="holiday-box" [class.enabled]="holidaysEnabled()">
             @if (holidaysEnabled()) {
-              <div class="holiday-add-row">
-                <input
-                  pInputText class="input" fluid
-                  type="date"
-                  name="pendingHolidayDate"
-                  formControlName="pendingHolidayDate"
-                  [min]="model().startDate"
-                  [max]="model().endDate"
-                  aria-label="تاريخ إجازة"
-                  [disabled]="submitting()"
-                />
-                <button type="button" class="btn btn-secondary btn-sm" (click)="addHoliday()" [disabled]="submitting()">
-                  + إضافة
-                </button>
-              </div>
+              <app-date-field
+                inputId="holiday-dates"
+                formControlName="holidayDates"
+                [multiple]="true"
+                [min]="model().startDate"
+                [max]="model().endDate"
+                [disabledDays]="weekendDays"
+                [disabled]="submitting()"
+                [invalid]="!!fieldError('holidayDates')"
+                placeholder="اختر أيام الإجازة"
+              />
             }
             @if (model().holidayDates.length) {
               <div class="chip-list" aria-label="الإجازات المحددة">

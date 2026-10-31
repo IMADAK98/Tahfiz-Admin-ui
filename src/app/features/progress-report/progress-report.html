@@ -108,27 +108,13 @@
       @if (period() === 'day') {
         <div class="pr-report__field pr-report__field--context">
           <label for="pr-day">اليوم</label>
-          <input
-            id="pr-day"
-            type="date"
-            pInputText
-            class="pr-report__date-input"
-            fluid
-            [formControl]="dateControl"
-          />
+          <app-date-field inputId="pr-day" [formControl]="dateControl" />
         </div>
       }
       @if (period() === 'month') {
         <div class="pr-report__field pr-report__field--context">
           <label for="pr-month">الشهر</label>
-          <input
-            id="pr-month"
-            type="month"
-            pInputText
-            class="pr-report__date-input"
-            fluid
-            [formControl]="dateControl"
-          />
+          <app-date-field inputId="pr-month" [formControl]="dateControl" view="month" />
         </div>
       }
     </div>

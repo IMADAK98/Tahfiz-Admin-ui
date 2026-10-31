@@ -1,15 +1,13 @@
 /** Sunday-start week helpers (Saudi Sun–Thu). Calendar-local. */
 
+import { parseLocalIsoDate, toLocalIsoDate } from '../../core/utils/local-date';
+
 export function toIsoDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return toLocalIsoDate(d);
 }
 
 export function parseIsoDate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
+  return parseLocalIsoDate(iso);
 }
 
 export function startOfWeekSunday(ref: Date = new Date()): Date {

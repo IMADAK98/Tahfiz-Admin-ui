@@ -1,4 +1,8 @@
-import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -9,6 +13,7 @@ import { providePrimeNG } from 'primeng/config';
 import { firstValueFrom } from 'rxjs';
 import { routes } from './app.routes';
 import { TahfizPreset } from '../styles/primeng-theme';
+import { arabicPrimeNgTranslation } from './core/ui/primeng-ar-locale';
 import { API_BASE_URL } from './core/config/api-config';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { errorToastInterceptor } from './core/http/error-toast.interceptor';
@@ -49,6 +54,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       license: environment.primeUiLicense,
+      translation: arabicPrimeNgTranslation,
       overlayAppendTo: 'body',
       overlayOptions: {
         appendTo: 'body',

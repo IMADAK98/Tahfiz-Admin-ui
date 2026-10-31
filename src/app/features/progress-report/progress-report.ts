@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { DateFieldComponent } from '../../core/ui/date-field/date-field';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -42,7 +43,7 @@ const MONTH_AR = [
 
 @Component({
   selector: 'app-progress-report',
-  imports: [ReactiveFormsModule, Button, InputText, Select],
+  imports: [ReactiveFormsModule, Button, InputText, Select, DateFieldComponent],
   templateUrl: './progress-report.html',
   styleUrl: './progress-report.scss',
 })
@@ -64,11 +65,17 @@ export class ProgressReportComponent implements OnInit {
   protected readonly table = signal<ProgressReportResponse | null>(null);
   protected readonly halqaControl = new FormControl<number | null>(null);
   protected readonly searchControl = new FormControl('', { nonNullable: true });
-  protected readonly dateControl = new FormControl(toIsoDate(startOfWeekSunday()), { nonNullable: true });
+  protected readonly dateControl = new FormControl(toIsoDate(startOfWeekSunday()), {
+    nonNullable: true,
+  });
 
   constructor() {
-    this.halqaControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => this.onHalqaChange(id));
-    this.searchControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((query) => this.studentQuery.set(query));
+    this.halqaControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((id) => this.onHalqaChange(id));
+    this.searchControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((query) => this.studentQuery.set(query));
     this.dateControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       if (!value) {
         return;
@@ -253,11 +260,7 @@ export class ProgressReportComponent implements OnInit {
   }
 }
 
-function migrateDateContext(
-  from: ProgressPeriod,
-  ctx: string,
-  to: ProgressPeriod,
-): string {
+function migrateDateContext(from: ProgressPeriod, ctx: string, to: ProgressPeriod): string {
   let anchor: Date;
   if (from === 'month') {
     const [y, m] = ctx.split('-').map(Number);

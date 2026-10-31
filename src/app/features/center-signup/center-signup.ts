@@ -5,15 +5,15 @@ import { RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
 import { Checkbox } from 'primeng/checkbox';
-import { DatePicker } from 'primeng/datepicker';
 import { InputText } from 'primeng/inputtext';
 import { createFieldErrorBag, nestSubmitBanner } from '../../core/api/field-error-state';
 import { formGroupOf } from '../../core/forms/form-group-of';
+import { DateFieldComponent } from '../../core/ui/date-field/date-field';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
+import { toLocalIsoDate } from '../../core/utils/local-date';
 import {
   CenterSignupFormModel,
   createEmptyCenterSignupForm,
-  toIsoDate,
   validateCenterSignupForm,
 } from './dto/center-signup-form.model';
 import { IdentityDocumentType } from './enums/identity-document-type.enum';
@@ -21,7 +21,7 @@ import { CenterSignupService } from './center-signup.service';
 
 @Component({
   selector: 'app-center-signup',
-  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, DatePicker, InputText],
+  imports: [ReactiveFormsModule, RouterLink, Button, Checkbox, DateFieldComponent, InputText],
   templateUrl: './center-signup.html',
   styleUrl: './center-signup.scss',
 })
@@ -31,10 +31,9 @@ export class CenterSignupComponent {
   private readonly fb = inject(FormBuilder);
 
   protected readonly IdentityDocumentType = IdentityDocumentType;
-  protected readonly today = new Date();
+  protected readonly todayIso = toLocalIsoDate(new Date());
   protected readonly form = formGroupOf(this.fb, createEmptyCenterSignupForm());
   protected readonly usePassport = new FormControl(false, { nonNullable: true });
-  protected readonly adminBirthDate = new FormControl<Date | null>(null);
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -62,9 +61,6 @@ export class CenterSignupComponent {
         this.clearFieldError(name);
       });
     }
-    this.adminBirthDate.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
-      this.clearFieldError('adminBirthDate');
-    });
   }
 
   onIdModeChange(): void {
@@ -82,8 +78,6 @@ export class CenterSignupComponent {
   }
 
   onSubmit(): void {
-    const birth = this.adminBirthDate.value;
-    this.form.controls['adminBirthDate'].setValue(birth ? toIsoDate(birth) : '');
     this.fields.clearAll();
     this.errorMessage.set(null);
     const value = this.model();

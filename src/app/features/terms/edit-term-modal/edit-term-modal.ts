@@ -20,25 +20,28 @@ import { ActiveTerm } from '../../../core/api/models/term.model';
 import { readTermEditConflict } from '../../../core/api/term-edit-conflict';
 import { formGroupOf } from '../../../core/forms/form-group-of';
 import { ToastMessageService } from '../../../core/toast/toast-message.service';
+import { DateFieldComponent } from '../../../core/ui/date-field/date-field';
 import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import { createEmptyCreateTermForm } from '../dto';
 import {
+  WEEKEND_HOLIDAY_DAYS,
+  WEEKEND_HOLIDAY_ERROR,
   buildUpdateTermPayload,
   changedTermRows,
   editTermFormFromTerm,
   formatArabicDate,
-  holidayAddError,
   inspectEditTermForm,
   isFrozenHoliday,
   isTermStartLocked,
+  isWeekendHoliday,
   todayIsoDate,
 } from '../dto/edit-term-validation';
 import { TermsService } from '../terms.service';
 
 @Component({
   selector: 'app-edit-term-modal',
-  imports: [ReactiveFormsModule, InputText, FieldErrorComponent],
+  imports: [ReactiveFormsModule, InputText, FieldErrorComponent, DateFieldComponent],
   templateUrl: './edit-term-modal.html',
   styleUrl: './edit-term-modal.scss',
 })
@@ -60,11 +63,11 @@ export class EditTermModalComponent {
   private today = todayIsoDate();
   private originalHolidayDates: string[] = [];
 
+  protected readonly weekendDays = WEEKEND_HOLIDAY_DAYS;
   protected readonly form = formGroupOf(this.fb, createEmptyCreateTermForm());
   protected readonly submitting = signal(false);
   protected readonly startLocked = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly adderError = signal<string | null>(null);
   protected readonly conflictOpen = signal(false);
   protected readonly conflictDates = signal<string[]>([]);
 
@@ -84,6 +87,13 @@ export class EditTermModalComponent {
   protected readonly showFrozenLegend = computed(() => {
     this.formTick();
     return this.originalHolidayDates.some((date) => date < this.today);
+  });
+
+  protected readonly lockedHolidayDates = computed(() => {
+    this.formTick();
+    return this.originalHolidayDates.filter((date) =>
+      isFrozenHoliday(date, this.originalHolidayDates, this.today),
+    );
   });
 
   protected readonly holidayChips = computed(() => {
@@ -112,8 +122,8 @@ export class EditTermModalComponent {
     for (const [name, control] of Object.entries(this.form.controls)) {
       control.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
         this.fields.clear(name);
-        if (name === 'pendingHolidayDate') {
-          this.adderError.set(null);
+        if (name === 'holidayDates' && !this.restoreFrozenHolidays()) {
+          this.flagNewWeekendHolidays();
         }
         this.formTick.update((count) => count + 1);
       });
@@ -173,26 +183,6 @@ export class EditTermModalComponent {
     this.closed.emit();
   }
 
-  protected addHoliday(): void {
-    const value = this.model();
-    const message = holidayAddError(value.pendingHolidayDate, value, this.validation().endValid);
-    this.adderError.set(message || null);
-    if (message) {
-      return;
-    }
-    this.form.patchValue({
-      holidayDates: [...value.holidayDates, value.pendingHolidayDate].sort(),
-      pendingHolidayDate: '',
-    });
-    this.adderError.set(null);
-    this.fields.clear('holidayDates');
-  }
-
-  protected onHolidayEnter(event: Event): void {
-    event.preventDefault();
-    this.addHoliday();
-  }
-
   protected removeHoliday(date: string): void {
     if (this.submitting() || isFrozenHoliday(date, this.originalHolidayDates, this.today)) {
       return;
@@ -214,7 +204,7 @@ export class EditTermModalComponent {
       today: this.today,
       startLocked: this.startLocked(),
     });
-    if (Object.keys(inspection.errors).length || !term) {
+    if (Object.keys(inspection.errors).length || !term || this.flagNewWeekendHolidays()) {
       this.formTick.update((count) => count + 1);
       return;
     }
@@ -223,7 +213,6 @@ export class EditTermModalComponent {
     this.conflictDates.set([]);
     this.errorMessage.set(null);
     this.fields.clearAll();
-    this.adderError.set(null);
     const payload = buildUpdateTermPayload(value, this.startLocked());
     this.setSubmitting(true);
     this.termsService.updateTerm(term.id, payload).subscribe({
@@ -248,11 +237,33 @@ export class EditTermModalComponent {
     this.setSubmitting(false);
     this.fields.clearAll();
     this.errorMessage.set(null);
-    this.adderError.set(null);
     this.conflictOpen.set(false);
     this.conflictDates.set([]);
     this.formTick.update((count) => count + 1);
     setTimeout(() => this.nameInput()?.nativeElement.focus());
+  }
+
+  private restoreFrozenHolidays(): boolean {
+    const current = this.model().holidayDates;
+    const missing = this.originalHolidayDates.filter(
+      (date) =>
+        isFrozenHoliday(date, this.originalHolidayDates, this.today) && !current.includes(date),
+    );
+    if (!missing.length) {
+      return false;
+    }
+    this.form.controls['holidayDates'].setValue([...current, ...missing].sort());
+    return true;
+  }
+
+  private flagNewWeekendHolidays(): boolean {
+    for (const date of this.model().holidayDates) {
+      if (isWeekendHoliday(date) && !this.originalHolidayDates.includes(date)) {
+        this.fields.applyMap({ holidayDates: WEEKEND_HOLIDAY_ERROR });
+        return true;
+      }
+    }
+    return false;
   }
 
   private setSubmitting(busy: boolean): void {
