@@ -1,7 +1,9 @@
+import { DOCUMENT } from '@angular/common';
 import {
   afterNextRender,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -11,6 +13,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ChevronLeft } from '@primeicons/angular/chevron-left';
+import { ChevronRight } from '@primeicons/angular/chevron-right';
 import { DatePicker } from 'primeng/datepicker';
 import {
   parseLocalIsoDate,
@@ -25,7 +29,7 @@ export type DateFieldValue = string | string[] | null;
 
 @Component({
   selector: 'app-date-field',
-  imports: [DatePicker],
+  imports: [DatePicker, ChevronLeft, ChevronRight],
   templateUrl: './date-field.html',
   styleUrl: './date-field.scss',
   providers: [
@@ -51,6 +55,8 @@ export class DateFieldComponent implements ControlValueAccessor {
   readonly describedBy = input('');
 
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly picker = viewChild(DatePicker);
   private readonly formDisabled = signal(false);
   private emptySentinel: '' | null = '';
@@ -99,6 +105,25 @@ export class DateFieldComponent implements ControlValueAccessor {
       picker.onTodayButtonClick = (event: Event) => this.applyToday(event);
       picker.onClearButtonClick = (event: Event) => this.applyClear(event);
     });
+    // Dialogs (PrimeNG Dialog and edit-term) listen for Escape on document
+    // bubble. Capture runs first, including when focus is inside the portaled
+    // panel, so one Escape closes only this popup.
+    afterNextRender(() => {
+      const onKeydown = (event: KeyboardEvent) => this.closeOverlayOnEscape(event);
+      this.document.addEventListener('keydown', onKeydown, true);
+      this.destroyRef.onDestroy(() =>
+        this.document.removeEventListener('keydown', onKeydown, true),
+      );
+    });
+  }
+
+  private closeOverlayOnEscape(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this.picker()?.overlayVisible()) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    this.picker()?.hideOverlay();
   }
 
   writeValue(value: DateFieldValue): void {
