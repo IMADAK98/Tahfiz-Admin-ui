@@ -25,8 +25,6 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
 const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
   '/admin/re-enrollment': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
   '/admin/re-enrollment-requests': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
-  '/admin/center-profile': 'عرض فقط · GET /center/{id}',
-  '/admin/profile': 'عرض فقط · GET /users/{id}',
 };
 
 const SIDEBAR_COLLAPSED_KEY = 'tahfiz.admin.sidebarCollapsed';
