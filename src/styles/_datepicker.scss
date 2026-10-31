@@ -1,4 +1,20 @@
-/* Popup is appended to body. PrimeNG flips prev/next with :dir(rtl); force the panel itself. */
+/*
+ * Panel is portaled to body and stays rtl (weekday columns start on the right).
+ * PrimeNG swaps the nav buttons with flex `order` under :dir(rtl), assuming an
+ * LTR flex line. On this rtl line that swap puts the forward button on the
+ * right edge. Reset order so previous stays first (right edge) and mirror the
+ * chevrons so they point outward. Same buttons step years and decades.
+ */
 html[dir='rtl'] .tahfiz-datepicker-panel {
   direction: rtl;
+
+  .p-datepicker-prev-button,
+  .p-datepicker-next-button {
+    order: 0;
+  }
+
+  .p-datepicker-prev-button svg,
+  .p-datepicker-next-button svg {
+    transform: scaleX(-1);
+  }
 }
