@@ -44,4 +44,6 @@ export const arabicPrimeNgTranslation: Translation = {
   nextMonth: 'الشهر التالي',
   prevYear: 'السنة السابقة',
   nextYear: 'السنة التالية',
+  prevDecade: 'العقد السابق',
+  nextDecade: 'العقد التالي',
 };

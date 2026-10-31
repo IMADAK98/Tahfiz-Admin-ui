@@ -94,6 +94,10 @@ export class DateFieldComponent implements ControlValueAccessor {
       picker.registerOnChange((value: Date | Date[] | null) => this.onPickerChange(value));
       picker.registerOnTouched(() => this.markTouched());
       picker.writeValue(this.pickerValue);
+      // PrimeNG's Today forces selectable:true and clamps onto min/max, so Fri/Sat
+      // and out-of-range days get written. Own the two footer buttons instead.
+      picker.onTodayButtonClick = (event: Event) => this.applyToday(event);
+      picker.onClearButtonClick = (event: Event) => this.applyClear(event);
     });
   }
 
@@ -131,6 +135,79 @@ export class DateFieldComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
+  private applyToday(event: Event): void {
+    event.preventDefault();
+    if (this.pickerDisabled()) {
+      return;
+    }
+    const today = new Date();
+    if (this.view() === 'month') {
+      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      if (!this.isMonthAllowed(monthStart)) {
+        return;
+      }
+      this.commitPicker(monthStart, true);
+      return;
+    }
+    const day = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    if (!this.isDayAllowed(day)) {
+      return;
+    }
+    if (this.multiple()) {
+      const current = Array.isArray(this.pickerValue) ? this.pickerValue : [];
+      const iso = toLocalIsoDate(day);
+      if (!current.some((date) => toLocalIsoDate(date) === iso)) {
+        this.commitPicker([...current, day], false);
+      }
+      return;
+    }
+    this.commitPicker(day, true);
+  }
+
+  private applyClear(event: Event): void {
+    event.preventDefault();
+    if (this.pickerDisabled()) {
+      return;
+    }
+    this.commitPicker(null, true);
+  }
+
+  private commitPicker(value: Date | Date[] | null, close: boolean): void {
+    this.onPickerChange(value);
+    this.picker()?.writeValue(this.pickerValue);
+    if (close) {
+      this.picker()?.hideOverlay();
+    }
+  }
+
+  private isDayAllowed(date: Date): boolean {
+    const min = boundDate(this.min());
+    const max = boundDate(this.max());
+    if (min && date < startOfDay(min)) {
+      return false;
+    }
+    if (max && date > startOfDay(max)) {
+      return false;
+    }
+    if (this.disabledDays()?.includes(date.getDay())) {
+      return false;
+    }
+    return !(this.disabledDates() ?? []).includes(toLocalIsoDate(date));
+  }
+
+  private isMonthAllowed(date: Date): boolean {
+    const month = toLocalYearMonth(date);
+    const min = this.min()?.slice(0, 7);
+    const max = this.max()?.slice(0, 7);
+    if (min && month < min) {
+      return false;
+    }
+    if (max && month > max) {
+      return false;
+    }
+    return true;
+  }
+
   private normalize(value: DateFieldValue): DateFieldValue {
     if (Array.isArray(value) || this.multiple()) {
       return uniqueSorted(Array.isArray(value) ? value : []);
@@ -160,6 +237,10 @@ export class DateFieldComponent implements ControlValueAccessor {
 
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_MONTH = /^\d{4}-\d{2}$/;
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
 
 function boundDate(value: string | null | undefined): Date | undefined {
   if (!value) {
