@@ -17,4 +17,17 @@
   appendTo="body"
   panelStyleClass="tahfiz-datepicker-panel"
   (onBlur)="markTouched()"
-/>
+>
+  <!--
+    Previous stays on the right edge (see _datepicker.scss). PrimeNG's default
+    chevron-left / chevron-right then point inward. Swap the glyphs; a CSS
+    scaleX on the svg host is not reliable (the icon IS the svg, and transform
+    does not compose with later unlayered .p-icon rules).
+  -->
+  <ng-template #previousicon>
+    <svg data-p-icon="chevron-right" />
+  </ng-template>
+  <ng-template #nexticon>
+    <svg data-p-icon="chevron-left" />
+  </ng-template>
+</p-datepicker>

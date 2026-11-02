@@ -270,8 +270,8 @@ describe('DateFieldComponent', () => {
     const next = panel!.querySelector('.p-datepicker-next-button') as HTMLButtonElement;
     expect(prev.getAttribute('aria-label')).toBe('الشهر السابق');
     expect(next.getAttribute('aria-label')).toBe('الشهر التالي');
-    expect(prev.querySelector('[data-p-icon="chevron-left"]')).toBeTruthy();
-    expect(next.querySelector('[data-p-icon="chevron-right"]')).toBeTruthy();
+    expect(prev.querySelector('[data-p-icon="chevron-right"]')).toBeTruthy();
+    expect(next.querySelector('[data-p-icon="chevron-left"]')).toBeTruthy();
     expect(prev.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
     const bar = panel!.querySelector('.p-datepicker-buttonbar');
@@ -304,6 +304,8 @@ describe('DateFieldComponent', () => {
     const yearNext = monthPanel!.querySelector('.p-datepicker-next-button') as HTMLButtonElement;
     expect(yearPrev.getAttribute('aria-label')).toBe('السنة السابقة');
     expect(yearNext.getAttribute('aria-label')).toBe('السنة التالية');
+    expect(yearPrev.querySelector('[data-p-icon="chevron-right"]')).toBeTruthy();
+    expect(yearNext.querySelector('[data-p-icon="chevron-left"]')).toBeTruthy();
     expect(
       yearPrev.compareDocumentPosition(yearNext) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
@@ -316,5 +318,46 @@ describe('DateFieldComponent', () => {
     yearNext.click();
     fixture.detectChanges();
     expect(yearLabel()).toBe('2026');
+
+    const yearTitle = monthPanel!.querySelector('.p-datepicker-select-year') as HTMLButtonElement;
+    yearTitle.click();
+    fixture.detectChanges();
+    const decadePrev = monthPanel!.querySelector('.p-datepicker-prev-button') as HTMLButtonElement;
+    const decadeNext = monthPanel!.querySelector('.p-datepicker-next-button') as HTMLButtonElement;
+    expect(decadePrev.getAttribute('aria-label')).toBe('العقد السابق');
+    expect(decadeNext.getAttribute('aria-label')).toBe('العقد التالي');
+    expect(decadePrev.querySelector('[data-p-icon="chevron-right"]')).toBeTruthy();
+    expect(decadeNext.querySelector('[data-p-icon="chevron-left"]')).toBeTruthy();
+  });
+
+  it('escape closes the open popup and does not reach document bubble listeners', async () => {
+    pickerAt(0).updateFocus = () => {};
+    const input = fixture.nativeElement.querySelector('#day') as HTMLInputElement;
+    input.focus();
+    input.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(pickerAt(0).overlayVisible()).toBe(true);
+
+    let bubbled = 0;
+    const onBubble = () => {
+      bubbled += 1;
+    };
+    document.addEventListener('keydown', onBubble);
+
+    const panel = document.querySelector('.tahfiz-datepicker-panel') as HTMLElement;
+    panel.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    expect(bubbled).toBe(0);
+    expect(pickerAt(0).overlayVisible()).toBe(false);
+    expect(document.activeElement).toBe(input);
+
+    document.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+    );
+    expect(bubbled).toBe(1);
+    document.removeEventListener('keydown', onBubble);
   });
 });
