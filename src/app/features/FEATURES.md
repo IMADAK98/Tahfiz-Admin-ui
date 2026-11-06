@@ -32,10 +32,14 @@ Slim SYSTEM_ADMIN shell (not center-admin sidebar): طلبات المراكز + 
 | `students/` | `/admin/students` | `10` | Implemented |
 | `student-requests/` | `/admin/student-requests` | `11` | Implemented |
 | `re-enrollment/` | `/admin/re-enrollment` | `15` | Implemented |
-| `reports-attendance/` | `/admin/reports/attendance` | `13` | Placeholder |
+| `attendance-report/` | `/admin/reports/attendance` | `13b` | Implemented (Option 2, Nest B) |
 | `reports-progress/` | `/admin/reports/progress` | `14` | Placeholder |
 | `center-profile/` | `/admin/center-profile` | `22` | Implemented |
 | `profile/` | `/admin/profile` | `23` | Implemented (view-only + credential dialogs) |
+
+## Attendance report — Nest build B
+
+`/admin/reports/attendance` is Option 2. The dropdown defaults to «كل الحلقات النشطة» and calls live `GET /attendance/weekly-table?weekStartDate` with `halqaId` omitted (Nest #40, `5fa08515`). That set matches `GET /halqa/dropdown`: every active ḥalaqa, including one on a non-active term. Choosing one ḥalaqa sets `halqaId`. All-active rows carry `halqa` for the under-label; a single-ḥalaqa response leaves that off the row and the screen copies the top-level `halqa`. CSV is built in the browser. `LEAVE` stays معذور.
 
 ## Teachers set — live API notes
 

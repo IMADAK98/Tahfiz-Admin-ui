@@ -1,32 +1,26 @@
 <section class="att-report" dir="rtl" lang="ar">
-  <header class="att-report__header">
-    <div>
-      <p class="att-report__eyebrow">قراءة فقط — التسجيل اليومي من تطبيق المعلّم</p>
-      <h1 class="att-report__title">تقرير الحضور</h1>
-    </div>
-    <div class="att-report__header-actions">
-      <p-button
-        type="button"
-        label="تصدير CSV"
-        severity="secondary"
-        [outlined]="true"
-        [disabled]="loading() || !dayHeaders().length"
-        (onClick)="exportCsv()"
-      />
-    </div>
-  </header>
+  <div class="att-report__header">
+    <p-button
+      type="button"
+      label="تصدير CSV"
+      severity="secondary"
+      [outlined]="true"
+      [disabled]="loading() || !rows().length"
+      (onClick)="exportCsv()"
+    />
+  </div>
 
-  <div class="att-report__filters" role="search" aria-label="فلاتر التقرير — حلقة وأسبوع وبحث">
+  <div class="att-report__filters" role="search" aria-label="فلاتر التقرير — أسبوع وبحث وحلقة اختيارية">
     <div class="att-report__field">
       <label for="att-halqa">الحلقة</label>
       <p-select
         inputId="att-halqa"
         [options]="halqaOptions()"
         optionLabel="name"
-        optionValue="id"
-        placeholder="اختر الحلقة"
+        optionValue="value"
         [formControl]="halqaControl"
         styleClass="w-full"
+        appendTo="body"
       />
     </div>
 
@@ -68,30 +62,21 @@
     </div>
   </div>
 
+  @if (filterError()) {
+    <p class="att-report__error" role="alert">{{ filterError() }}</p>
+  }
   @if (errorMessage()) {
     <p class="att-report__error" role="alert">{{ errorMessage() }}</p>
   }
 
-  @if (bootstrapping() || loading()) {
+  @if (loading()) {
     <p class="att-report__status" role="status">جاري التحميل…</p>
   }
 
-  @if (!bootstrapping() && !loading() && selectedHalqaId() && showEmptyMarks()) {
-    <div class="att-report__empty">
-      <h2>لا علامات حضور بعد</h2>
-      <p>
-        لا توجد علامات حضور في هذا الأسبوع. هذا <strong>لا يعني</strong> عدم وجود طلاب. الجدول يبقى
-        للتصفية والقراءة؛ الإدخال اليومي من تطبيق المعلّم.
-      </p>
-    </div>
-  }
-
-  @if (!bootstrapping() && !loading() && selectedHalqaId() && table() && !showEmptyMarks()) {
+  @if (!loading() && table() && !errorMessage()) {
     <div class="att-report__meta">
-      @if (selectedHalqaName(); as hn) {
-        <span class="badge badge-neutral">{{ hn }}@if (termName()) { · {{ termName() }} }</span>
-      }
-      <span class="badge badge-primary">أسبوع أحد–خميس</span>
+      <span class="badge badge-primary">{{ scopeLabel() }}</span>
+      <span class="badge badge-neutral">أسبوع أحد–خميس</span>
       <span class="badge badge-neutral">{{ studentCountLabel() }}</span>
     </div>
 
@@ -103,47 +88,77 @@
       <span class="cell-blank">خلية فارغة = بلا علامة</span>
     </div>
 
-    <div class="att-report__table-wrap">
-      <table class="att-report__table" aria-label="جدول الحضور الأسبوعي">
-        <thead>
-          <tr>
-            <th>الطالب</th>
-            @for (h of dayHeaders(); track h.date) {
-              <th class="day-head" [class.is-holiday]="h.isHoliday" [attr.title]="h.holidayHint">
-                <span class="dow">{{ h.dowAr }}</span>
-                <span class="dom">{{ h.dayOfMonth }}@if (h.isHoliday) { · عطلة }</span>
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.studentId) {
+    @if (showEmptyMarks()) {
+      <div class="att-report__empty">
+        <h2>لا علامات حضور بعد</h2>
+        <p>
+          لا توجد علامات حضور في هذا الأسبوع. هذا <strong>لا يعني</strong> عدم وجود طلاب. الجدول يبقى
+          للتصفية والقراءة؛ الإدخال اليومي من تطبيق المعلّم.
+        </p>
+      </div>
+    }
+
+    @if (rows().length) {
+      <div class="att-report__table-wrap">
+        <table class="att-report__table" [attr.aria-label]="'جدول الحضور الأسبوعي — ' + scopeLabel()">
+          <thead>
             <tr>
-              <td class="name-cell"><strong>{{ row.studentName }}</strong></td>
-              @for (cell of row.cells; track cell.date) {
-                <td>
-                  @if (cell.chipClass) {
-                    <span class="chip-att" [class]="cell.chipClass">{{ cell.label }}</span>
-                  } @else {
-                    <span
-                      class="cell-blank"
-                      [attr.title]="cell.isHoliday ? 'يوم عطلة — بلا علامة' : null"
-                      >{{ cell.label }}</span
-                    >
-                  }
-                </td>
+              <th>الطالب</th>
+              @for (header of dayHeaders(); track header.date) {
+                <th class="day-head" [class.is-holiday]="header.isHoliday" [attr.title]="header.holidayHint">
+                  <span class="dow">{{ header.dowAr }}</span>
+                  <span class="dom">{{ header.dayOfMonth }}@if (header.isHoliday) { · عطلة }</span>
+                </th>
               }
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.trackId) {
+              <tr>
+                <td class="name-cell">
+                  <strong>{{ row.studentName }}</strong>
+                  @if (row.halqaName) {
+                    <span class="halaqa-under">{{ row.halqaName }}</span>
+                  }
+                </td>
+                @for (cell of row.cells; track cell.date) {
+                  <td>
+                    @if (cell.chipClass) {
+                      <span class="chip-att" [class]="cell.chipClass">{{ cell.label }}</span>
+                    } @else {
+                      <span
+                        class="cell-blank"
+                        [attr.title]="cell.isHoliday ? 'يوم عطلة — بلا علامة' : null"
+                        >{{ cell.label }}</span
+                      >
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (showNoSearchHits()) {
+      <div class="att-report__empty">
+        <h2>لا يوجد طالب بهذا الاسم</h2>
+        <p>جرّب اسماً آخر، أو امسح البحث لعرض كل الطلاب في النطاق الحالي.</p>
+      </div>
+    } @else if (showNoActiveHalqas()) {
+      <div class="att-report__empty">
+        <h2>لا حلقات نشطة</h2>
+        <p>لا توجد حلقات نشطة في هذا المركز.</p>
+      </div>
+    } @else if (showNoStudents()) {
+      <div class="att-report__empty">
+        <h2>لا طلاب في هذا الأسبوع</h2>
+        <p>لا يوجد طلاب في النطاق المختار ضمن هذا الأسبوع.</p>
+      </div>
+    }
   }
 
-  @if (!bootstrapping() && !loading() && !selectedHalqaId() && halqaOptions().length === 0) {
-    <div class="att-report__empty">
-      <h2>لا حلقات في الدورة النشطة</h2>
-      <p>أضف حلقة للدورة الحالية ثم عد إلى تقرير الحضور.</p>
-    </div>
-  }
+  <p class="att-report__note">
+    إدارة المركز: تصفية وقراءة فقط. لا يمكن تعديل الحضور من الويب — يُعدَّل من تطبيق المعلّم إن لزم.
+    الحلقات المعروضة هنا هي الحلقات <strong>النشطة</strong> فقط.
+  </p>
 </section>

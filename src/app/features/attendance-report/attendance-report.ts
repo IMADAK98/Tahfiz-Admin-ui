@@ -5,16 +5,18 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
 import { ApiError } from '../../core/api/api-error';
-import { WeeklyAttendanceTable } from '../../core/api/models/attendance.model';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { buildAttendanceWeeklyCsv, downloadCsv } from './attendance-report-csv';
 import { AttendanceReportService } from './attendance-report.service';
 import {
+  ALL_ACTIVE_HALAQAT,
+  ALL_ACTIVE_HALAQAT_LABEL,
   AttendanceDayHeaderVm,
   AttendanceRowVm,
-  HalqaSelectOption,
+  HalqaFilterOption,
 } from './dto/attendance-report-filters.dto';
+import { CenterWeeklyTable, formatStudentCountAr, withAllActiveHalqaOption } from './dto/center-weekly-table.mapper';
 import { isMarkedAttendanceStatus, mapAttendanceStatus } from './enums/attendance-status.enum';
 import {
   addDays,
@@ -35,115 +37,130 @@ export class AttendanceReportComponent implements OnInit {
   private readonly report = inject(AttendanceReportService);
   private readonly toast = inject(ToastMessageService);
   private readonly translate = inject(TranslateService);
+  private loadGeneration = 0;
 
   protected readonly loading = signal(false);
-  protected readonly bootstrapping = signal(true);
+  protected readonly halqaFilterReady = signal(false);
+  protected readonly filterError = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly termName = signal<string | null>(null);
-  protected readonly halqaOptions = signal<HalqaSelectOption[]>([]);
-  protected readonly selectedHalqaId = signal<number | null>(null);
+  protected readonly halqaOptions = signal<HalqaFilterOption[]>(withAllActiveHalqaOption([]));
+  protected readonly selectedHalqaValue = signal(ALL_ACTIVE_HALAQAT);
   protected readonly weekStartDate = signal(toIsoDate(startOfWeekSunday()));
   protected readonly studentQuery = signal('');
-  protected readonly table = signal<WeeklyAttendanceTable | null>(null);
-  protected readonly halqaControl = new FormControl<number | null>(null);
+  protected readonly table = signal<CenterWeeklyTable | null>(null);
+  protected readonly halqaControl = new FormControl(ALL_ACTIVE_HALAQAT, { nonNullable: true });
   protected readonly searchControl = new FormControl('', { nonNullable: true });
 
   constructor() {
-    this.halqaControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => this.onHalqaChange(id));
-    this.searchControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((query) => this.studentQuery.set(query));
+    this.halqaControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((value) => this.onHalqaChange(value));
+    this.searchControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((query) => this.studentQuery.set(query));
   }
 
   protected readonly weekLabel = computed(() => formatWeekLabelAr(this.weekStartDate()));
 
-  protected readonly selectedHalqaName = computed(() => {
-    const id = this.selectedHalqaId();
-    return this.halqaOptions().find((h) => h.id === id)?.name ?? this.table()?.halqa?.name ?? null;
+  protected readonly scopeLabel = computed(() => {
+    const value = this.selectedHalqaValue();
+    if (value === ALL_ACTIVE_HALAQAT) {
+      return ALL_ACTIVE_HALAQAT_LABEL;
+    }
+    return this.halqaOptions().find((option) => option.value === value)?.name ?? ALL_ACTIVE_HALAQAT_LABEL;
   });
 
   protected readonly dayHeaders = computed<AttendanceDayHeaderVm[]>(() => {
     const cols = this.table()?.columns ?? [];
-    return cols.map((c) => ({
-      date: c.date,
-      dayOfWeekEn: c.dayOfWeek,
-      dowAr: dowArFromIso(c.date),
-      dayOfMonth: dayOfMonthFromIso(c.date),
-      isHoliday: !!c.isHoliday,
-      holidayHint: c.isHoliday ? 'عطلة' : null,
+    return cols.map((column) => ({
+      date: column.date,
+      dayOfWeekEn: column.dayOfWeek,
+      dowAr: dowArFromIso(column.date),
+      dayOfMonth: dayOfMonthFromIso(column.date),
+      isHoliday: !!column.isHoliday,
+      holidayHint: column.isHoliday ? 'عطلة' : null,
     }));
   });
 
+  protected readonly allRows = computed<AttendanceRowVm[]>(() => this.toRows(this.table()));
+
   protected readonly rows = computed<AttendanceRowVm[]>(() => {
-    const data = this.table();
-    if (!data) {
-      return [];
+    const query = this.studentQuery().trim().toLowerCase();
+    const all = this.allRows();
+    if (!query) {
+      return all;
     }
-    const q = this.studentQuery().trim().toLowerCase();
-    const headers = this.dayHeaders();
-    return data.students
-      .filter((s) => !q || (s.student?.name ?? '').toLowerCase().includes(q))
-      .map((s) => {
-        const byDate = new Map((s.days ?? []).map((d) => [d.date, d]));
-        const cells = headers.map((h) => {
-          const cell = byDate.get(h.date);
-          const status = cell?.status ?? 'NOT_MARKED';
-          const holiday = h.isHoliday || !!cell?.isHoliday || status === 'HOLIDAY';
-          const view = mapAttendanceStatus(status, holiday);
-          return {
-            date: h.date,
-            statusRaw: status,
-            viewKind: view.kind,
-            label: view.label,
-            chipClass: view.chipClass,
-            isHoliday: holiday,
-          };
-        });
-        return {
-          studentId: s.student.id,
-          studentName: s.student.name,
-          cells,
-        };
-      });
+    return all.filter((row) => row.studentName.toLowerCase().includes(query));
   });
 
-  /** Empty = no marks yet (roster may still exist). */
+  /** Rows exist, but every visible cell is still unmarked. */
   protected readonly showEmptyMarks = computed(() => {
-    if (this.loading() || this.bootstrapping()) {
+    if (this.loading() || !this.table() || !this.rows().length) {
       return false;
     }
-    if (!this.selectedHalqaId() || !this.table()) {
-      return false;
-    }
-    const allCells = this.rows().flatMap((r) => r.cells);
-    if (allCells.length === 0) {
-      return true;
-    }
-    return !allCells.some((c) => isMarkedAttendanceStatus(c.statusRaw));
+    return !this.rows().some((row) => row.cells.some((cell) => isMarkedAttendanceStatus(cell.statusRaw)));
   });
 
-  protected readonly studentCountLabel = computed(() => `${this.rows().length} طالب`);
+  protected readonly studentCountLabel = computed(() => formatStudentCountAr(this.rows().length));
+
+  protected readonly showNoSearchHits = computed(() => {
+    return (
+      !this.loading() &&
+      !!this.table() &&
+      !this.errorMessage() &&
+      !!this.studentQuery().trim() &&
+      this.allRows().length > 0 &&
+      this.rows().length === 0
+    );
+  });
+
+  protected readonly showNoActiveHalqas = computed(() => {
+    return (
+      this.halqaFilterReady() &&
+      !this.loading() &&
+      !this.filterError() &&
+      !this.errorMessage() &&
+      !!this.table() &&
+      this.halqaOptions().length <= 1 &&
+      this.allRows().length === 0 &&
+      !this.studentQuery().trim()
+    );
+  });
+
+  protected readonly showNoStudents = computed(() => {
+    return (
+      this.halqaFilterReady() &&
+      !this.loading() &&
+      !this.errorMessage() &&
+      !!this.table() &&
+      this.halqaOptions().length > 1 &&
+      this.allRows().length === 0 &&
+      !this.studentQuery().trim()
+    );
+  });
 
   ngOnInit(): void {
-    this.bootstrapping.set(true);
-    this.report.bootstrapHalqas().subscribe({
-      next: ({ term, halqas }) => {
-        this.termName.set(term?.name ?? null);
-        this.halqaOptions.set(halqas);
-        if (halqas.length > 0) {
-          this.halqaControl.setValue(halqas[0].id);
+    this.reloadTable();
+    this.report.loadHalqaFilterOptions().subscribe({
+      next: (options) => {
+        this.halqaOptions.set(options);
+        this.halqaFilterReady.set(true);
+        const selected = this.selectedHalqaValue();
+        if (!options.some((option) => option.value === selected)) {
+          this.halqaControl.setValue(ALL_ACTIVE_HALAQAT);
         }
-        this.bootstrapping.set(false);
       },
       error: (err: unknown) => {
-        this.bootstrapping.set(false);
+        this.halqaFilterReady.set(true);
         const msg = err instanceof ApiError ? err.message : 'تعذر تحميل الحلقات';
-        this.errorMessage.set(msg);
+        this.filterError.set(msg);
         this.toast.notifyErrorBody(msg);
       },
     });
   }
 
-  onHalqaChange(id: number | null): void {
-    this.selectedHalqaId.set(id);
+  onHalqaChange(value: string): void {
+    this.selectedHalqaValue.set(value);
     this.reloadTable();
   }
 
@@ -160,39 +177,79 @@ export class AttendanceReportComponent implements OnInit {
   exportCsv(): void {
     const headers = this.dayHeaders();
     const dataRows = this.rows();
-    if (!headers.length) {
+    if (!headers.length || !dataRows.length) {
       this.toast.notifyWarnBody(this.translate.instant('attendanceReport.exportEmpty'));
       return;
     }
     const csv = buildAttendanceWeeklyCsv(headers, dataRows, {
-      halqaName: this.selectedHalqaName() ?? undefined,
+      halqaName: this.scopeLabel(),
       weekLabel: this.weekLabel(),
     });
-    const halqa = (this.selectedHalqaName() ?? 'halqa').replace(/\s+/g, '-');
-    downloadCsv(`attendance-${halqa}-${this.weekStartDate()}.csv`, csv);
+    const slug =
+      this.selectedHalqaValue() === ALL_ACTIVE_HALAQAT
+        ? 'all-active'
+        : this.scopeLabel().replace(/\s+/g, '-');
+    downloadCsv(`attendance-${slug}-${this.weekStartDate()}.csv`, csv);
     this.toast.show('success', this.translate.instant('attendanceReport.exportOk'));
   }
 
   private reloadTable(): void {
-    const halqaId = this.selectedHalqaId();
-    if (halqaId == null) {
-      this.table.set(null);
-      return;
-    }
+    const generation = ++this.loadGeneration;
+    const weekStartDate = this.weekStartDate();
+    const halqaValue = this.selectedHalqaValue();
     this.loading.set(true);
     this.errorMessage.set(null);
-    this.report.loadWeeklyTable(halqaId, this.weekStartDate()).subscribe({
+    this.report.loadCenterWeeklyTable(weekStartDate, halqaValue).subscribe({
       next: (data) => {
+        if (generation !== this.loadGeneration) {
+          return;
+        }
         this.table.set(data);
         this.loading.set(false);
       },
       error: (err: unknown) => {
+        if (generation !== this.loadGeneration) {
+          return;
+        }
         this.loading.set(false);
         this.table.set(null);
         const msg = err instanceof ApiError ? err.message : 'تعذر تحميل جدول الحضور';
         this.errorMessage.set(msg);
         this.toast.notifyErrorBody(msg);
       },
+    });
+  }
+
+  private toRows(data: CenterWeeklyTable | null): AttendanceRowVm[] {
+    if (!data) {
+      return [];
+    }
+    const headers = this.dayHeaders();
+    return data.students.map((studentRow, index) => {
+      const byDate = new Map(studentRow.days.map((day) => [day.date, day]));
+      const cells = headers.map((header) => {
+        const cell = byDate.get(header.date);
+        const status = cell?.status ?? 'NOT_MARKED';
+        const holiday = header.isHoliday || !!cell?.isHoliday || status === 'HOLIDAY';
+        const view = mapAttendanceStatus(status, holiday);
+        return {
+          date: header.date,
+          statusRaw: status,
+          viewKind: view.kind,
+          label: view.label,
+          chipClass: view.chipClass,
+          isHoliday: holiday,
+        };
+      });
+      const halqaId = studentRow.halqa?.id || null;
+      return {
+        trackId: `${halqaId ?? 0}-${studentRow.student.id}-${index}`,
+        studentId: studentRow.student.id,
+        studentName: studentRow.student.name,
+        halqaId,
+        halqaName: studentRow.halqa?.name || null,
+        cells,
+      };
     });
   }
 }

@@ -38,13 +38,13 @@ export function isMarkedAttendanceStatus(status: string | null | undefined): boo
   return !!status && MARKED.has(status);
 }
 
-/** Nest LEAVE → معذور. HOLIDAY / blank stay non-marked. */
+/** Nest LEAVE → معذور. Unmarked / holiday cells render «—». */
 export function mapAttendanceStatus(
   status: string | null | undefined,
   isHoliday = false,
 ): AttendanceStatusView {
   if (isHoliday || status === AttendanceStatusUi.Holiday) {
-    return { kind: 'holiday', label: '', chipClass: null };
+    return { kind: 'holiday', label: '—', chipClass: null };
   }
   switch (status) {
     case AttendanceStatusUi.Present:
@@ -61,8 +61,8 @@ export function mapAttendanceStatus(
     case null:
     case undefined:
     case '':
-      return { kind: 'blank', label: '', chipClass: null };
+      return { kind: 'blank', label: '—', chipClass: null };
     default:
-      return { kind: 'blank', label: '', chipClass: null };
+      return { kind: 'blank', label: '—', chipClass: null };
   }
 }

@@ -29,7 +29,8 @@
     "check:plan-item-crud": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/plan-item-crud-self-check.mjs",
     "check:plan-tab-refresh": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/plan-tab-refresh-self-check.mjs",
     "check:teacher-delete": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/teacher-delete-self-check.mjs",
-    "check:student-signup-payload": "node scripts/student-signup-payload-self-check.mjs"
+    "check:student-signup-payload": "node scripts/student-signup-payload-self-check.mjs",
+    "check:attendance-center-weekly": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-ts-extension.mjs scripts/attendance-center-weekly-self-check.mjs"
   },
   "private": true,
   "engines": {

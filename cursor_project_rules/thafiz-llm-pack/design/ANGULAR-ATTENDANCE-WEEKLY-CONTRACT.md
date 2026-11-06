@@ -1,8 +1,12 @@
 # Angular FE contract — Attendance weekly table (screen 13)
 
-**Nest truth:** `localization-refactor` + live `tahfiz.onrender.com`.  
-**Primary endpoint:** `GET /attendance/halqa/{halqaId}/weekly-table?weekStartDate=YYYY-MM-DD`  
-**Week start:** must be **Sunday** (Saudi Sun–Thu). Optional `studentId` for single-row drill-down.
+**Nest truth:** `localization-refactor` @ `5fa08515`, live on `tahfiz.onrender.com` (Nest #40).  
+**Admin Option 2:** `GET /attendance/weekly-table?weekStartDate=YYYY-MM-DD&halqaId?`  
+Omit or blank `halqaId` → every active ḥalaqa in the caller center, including ḥalaqāt whose term is not active (same set as `GET /halqa/dropdown`). Top-level `halqa` is `null`; each student row has `halqa: { id, name }`; server sorts by ḥalaqa name then student name.  
+Set `halqaId` → that ḥalaqa only. Top-level `halqa` is `{ id, name }`. Student rows omit `halqa` (same shape as the per-ḥalaqa route).  
+Filter list: `GET /halqa/dropdown` → `{ id, name, category }[]`. Path constant: `CENTER_WEEKLY_TABLE_PATH`. Do not fan out the per-ḥalaqa route. Do not narrow all-active to the active term.  
+**Per-ḥalaqa endpoint (still live):** `GET /attendance/halqa/{halqaId}/weekly-table?weekStartDate=YYYY-MM-DD`  
+**Week start:** must be **Sunday** (Saudi Sun–Thu). Optional `studentId` for single-row drill-down on the per-ḥalaqa route.
 
 Bearer required. Admin web = **read-only** grid. Writes = teacher mobile `POST/PUT /attendance/bulk` (out of this screen).
 

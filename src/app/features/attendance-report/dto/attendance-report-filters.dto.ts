@@ -1,12 +1,18 @@
-/** UI filters — ḥalaqa + Sunday week + student search (no date-range). */
+/** Sentinel for «كل الحلقات النشطة». Not a Nest id — omit `halqaId` when this is selected. */
+export const ALL_ACTIVE_HALAQAT = 'all';
+
+export const ALL_ACTIVE_HALAQAT_LABEL = 'كل الحلقات النشطة';
+
+/** UI filters — optional ḥalaqa + Sunday week + student search (no date-range). */
 export interface AttendanceReportFilters {
-  halqaId: number | null;
+  /** `ALL_ACTIVE_HALAQAT` or a numeric id string. */
+  halqaValue: string;
   weekStartDate: string;
   studentQuery: string;
 }
 
-export interface HalqaSelectOption {
-  id: number;
+export interface HalqaFilterOption {
+  value: string;
   name: string;
 }
 
@@ -29,7 +35,10 @@ export interface AttendanceCellVm {
 }
 
 export interface AttendanceRowVm {
+  trackId: string;
   studentId: number;
   studentName: string;
+  halqaId: number | null;
+  halqaName: string | null;
   cells: AttendanceCellVm[];
 }
