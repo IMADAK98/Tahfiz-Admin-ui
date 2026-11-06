@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
+import { CENTER_WEEKLY_TABLE_PATH, centerWeeklyHalqaIdParam } from './attendance-weekly-query';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { HalqaByTermItem, WeeklyAttendanceTable } from './models/attendance.model';
@@ -34,6 +35,35 @@ export class AttendanceApiService {
       .get<ApiEnvelope<WeeklyAttendanceTable>>(
         `${this.apiBaseUrl}/attendance/halqa/${encodeURIComponent(String(halqaId))}/weekly-table`,
         withSkipGlobalErrorToast({ observe: 'response', params }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  /**
+   * Center-wide Sun–Thu grid (Nest build B).
+   * Omit `halqaId` → all active ḥalaqāt in the caller center.
+   * The path lives in `CENTER_WEEKLY_TABLE_PATH`.
+   */
+  getCenterWeeklyTable(weekStartDate: string, halqaId?: number | null): Observable<unknown> {
+    let params = new HttpParams().set('weekStartDate', weekStartDate);
+    const halqaParam = centerWeeklyHalqaIdParam(halqaId);
+    if (halqaParam) {
+      params = params.set('halqaId', halqaParam);
+    }
+    return this.http
+      .get<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}${CENTER_WEEKLY_TABLE_PATH}`,
+        withSkipGlobalErrorToast({ observe: 'response', params }),
+      )
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  /** Active ḥalaqāt in the caller center. `GET /halqa/dropdown`. */
+  getHalqaDropdown(): Observable<unknown> {
+    return this.http
+      .get<ApiEnvelope<unknown>>(
+        `${this.apiBaseUrl}/halqa/dropdown`,
+        withSkipGlobalErrorToast({ observe: 'response' }),
       )
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }

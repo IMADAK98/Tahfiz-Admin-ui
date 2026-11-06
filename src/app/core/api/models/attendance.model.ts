@@ -1,6 +1,8 @@
 /**
- * Live Nest shapes (discovery 2026-09) + OpenAPI Attendance tag.
- * GET /attendance/halqa/{halqaId}/weekly-table?weekStartDate=YYYY-MM-DD (Sunday).
+ * Weekly grid DTO. Nest #40 (`5fa08515`).
+ * `GET /attendance/weekly-table?weekStartDate=&halqaId?` and the per-ḥalaqa path.
+ * Omit `halqaId`: `halqa` is null and each student row includes `halqa`.
+ * Set `halqaId`: `halqa` is set and student rows omit `halqa`.
  */
 
 /** OpenAPI enum — EXCUSED not in swagger; kept for UI/mobile معذور. */
@@ -42,10 +44,13 @@ export interface WeeklyTableStudentRef {
 export interface WeeklyTableStudentRow {
   student: WeeklyTableStudentRef;
   days: WeeklyTableDayCell[];
+  /** Center-wide grid only. The single-ḥalaqa route omits this. */
+  halqa?: AttendanceHalqaRef | null;
 }
 
 export interface WeeklyAttendanceTable {
-  halqa: AttendanceHalqaRef;
+  /** Null when `GET /attendance/weekly-table` omits `halqaId`. */
+  halqa: AttendanceHalqaRef | null;
   weekStartDate: string;
   weekEndDate: string;
   columns: WeeklyTableColumn[];

@@ -14,11 +14,12 @@ export function buildAttendanceWeeklyCsv(
   if (meta?.halqaName || meta?.weekLabel) {
     lines.push(csvRow([meta.halqaName ?? '', meta.weekLabel ?? '']));
   }
-  lines.push(csvRow(['الطالب', ...dayTitles]));
+  lines.push(csvRow(['الطالب', 'الحلقة', ...dayTitles]));
   for (const row of rows) {
     lines.push(
       csvRow([
         row.studentName,
+        row.halqaName ?? '',
         ...row.cells.map((c) => (c.viewKind === 'blank' || c.viewKind === 'holiday' ? '' : c.label)),
       ]),
     );

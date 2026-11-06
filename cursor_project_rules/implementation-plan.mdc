@@ -162,6 +162,12 @@ Done
 Plan-item delete removes the row from the plans signal on success, then refetches without putting that id back. Assign-students accepts a raw plan or `data: null` and appends the checked roster students before the details refetch.
 `check:plan-tab-refresh` locks both patches to the success path.
 
+## Angular Admin — attendance Option 2 (كل الحلقات النشطة)
+
+Done
+
+`/admin/reports/attendance` defaults to «كل الحلقات النشطة» and optionally filters one ḥalaqa on the same grid. It calls live `GET /attendance/weekly-table` (omit `halqaId` = all active, including non-active terms — same set as `GET /halqa/dropdown`, Nest #40 `5fa08515`). CSV stays client-side.
+
 ## Angular Admin — plans tab smoke nits
 
 Done
