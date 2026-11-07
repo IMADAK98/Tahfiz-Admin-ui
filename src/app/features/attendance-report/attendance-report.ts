@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { ApiError } from '../../core/api/api-error';
 import { TranslateService } from '@ngx-translate/core';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
@@ -17,7 +17,6 @@ import {
   attendanceHalqaAfterTermChange,
   attendanceWeekForTerm,
   explicitTermFailureMessage,
-  includeInactiveHalqas,
   parseReportTermQuery,
   pickerTerms,
   reportTermBlockedReason,
@@ -90,16 +89,22 @@ export class AttendanceReportComponent {
     this.searchControl.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe((query) => this.studentQuery.set(query));
-    this.route.queryParamMap
-      .pipe(
-        switchMap((params) => {
-          const raw = params.get(REPORT_TERM_QUERY_PARAM);
-          return this.terms.loadForQuery(parseReportTermQuery(raw)).pipe(map((catalog) => ({ raw, catalog })));
-        }),
-        takeUntilDestroyed(),
+    this.terms
+      .changes(
+        this.route.queryParamMap.pipe(
+          map((params) => parseReportTermQuery(params.get(REPORT_TERM_QUERY_PARAM))),
+        ),
       )
-      .subscribe(({ raw, catalog }) => this.applyTerm(raw, catalog));
+      .pipe(takeUntilDestroyed())
+      .subscribe((catalog) =>
+        this.applyTerm(this.route.snapshot.queryParamMap.get(REPORT_TERM_QUERY_PARAM), catalog),
+      );
   }
+
+  protected readonly listFailed = computed(() => {
+    const state = this.selection().state;
+    return state === 'list-failed' || state === 'explicit-unresolved';
+  });
 
   protected readonly weekLabel = computed(() => formatWeekLabelAr(this.weekStartDate()));
 
@@ -189,6 +194,10 @@ export class AttendanceReportComponent {
     );
   });
 
+  retryTermList(): void {
+    this.terms.retryList();
+  }
+
   onTermSelected(termId: number): void {
     void this.router.navigate([], {
       relativeTo: this.route,
@@ -244,7 +253,7 @@ export class AttendanceReportComponent {
     this.selectedTermId.set(term?.id ?? null);
     this.termHeading.set(termHeading(term));
     this.termReadOnly.set(isCompletedTerm(term?.status));
-    this.blockedReason.set(reportTermBlockedReason(selection));
+    this.blockedReason.set(reportTermBlockedReason(selection, catalog.listErrorMessage));
     if (this.syncTermUrl(raw, selection)) {
       return;
     }
@@ -263,7 +272,7 @@ export class AttendanceReportComponent {
     this.halqaFilterReady.set(false);
     this.filterError.set(null);
     this.errorMessage.set(null);
-    this.report.loadHalqaFilterOptions(term.id, includeInactiveHalqas(term), attendanceAllLabel(term)).subscribe({
+    this.report.loadHalqaFilterOptions(term.id, attendanceAllLabel(term)).subscribe({
       next: (options) => {
         if (generation !== this.termApplyGeneration) {
           return;

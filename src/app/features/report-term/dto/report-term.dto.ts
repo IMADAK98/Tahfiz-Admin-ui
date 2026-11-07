@@ -22,11 +22,7 @@ export type ReportTermQuery =
 export interface ReportTermCatalog {
   /** Null when GET /term failed. */
   terms: ReportTermRef[] | null;
-  /** Same id as the explicit URL, from GET /term/:id, when the list did not resolve it. */
-  explicitTerm: ReportTermRef | null;
-  activeFromBootstrap: ReportTermRef | null;
   listErrorMessage: string | null;
-  bootstrapErrorMessage: string | null;
 }
 
 export type ReportTermSelection =
@@ -34,6 +30,7 @@ export type ReportTermSelection =
   | { state: 'explicit-missing'; termId: number }
   | { state: 'explicit-invalid' }
   | { state: 'explicit-unresolved'; termId: number }
+  | { state: 'list-failed' }
   | { state: 'no-active' };
 
 /** Map a confirmed term payload. Rows without id, name, status, or dates are dropped. */

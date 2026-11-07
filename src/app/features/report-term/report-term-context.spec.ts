@@ -12,6 +12,7 @@ import { TermApiService } from '../../core/api/term-api.service';
 import { API_BASE_URL } from '../../core/config/api-config';
 import { AuthService } from '../../core/auth/auth.service';
 import { normalizePercent } from '../progress-report/enums/progress-plan-item-type.enum';
+import { reportTermBlockedReason, resolveReportTerm } from './report-term-context';
 import { ReportTermPickerComponent } from './report-term-picker';
 import { ReportTermService } from './report-term.service';
 
@@ -109,15 +110,17 @@ describe('mocked report term HTTP contract', () => {
     halqa.flush({ status: 200, data: { halqa: { id: 27, name: 'H1' }, students: [], columns: [] } });
   });
 
-  it('sends includeInactive=true only for the historical ḥalaqa list', () => {
-    attendance.getHalqasByTerm(29, true).subscribe();
-    attendance.getHalqasByTerm(40, false).subscribe();
-    const historical = http.expectOne(requestUrl('/halqa/by-term/29'));
-    const current = http.expectOne(requestUrl('/halqa/by-term/40'));
-    expect(historical.request.params.get('includeInactive')).toBe('true');
-    expect(current.request.params.has('includeInactive')).toBe(false);
-    historical.flush({ status: 200, data: [{ id: 27, name: 'H1' }] });
-    current.flush({ status: 200, data: [{ id: 27, name: 'H1' }] });
+  it('does not send includeInactive for a completed or active term', () => {
+    attendance.getHalqasByTerm(29).subscribe();
+    progress.getHalqasByTerm(40).subscribe();
+    const completed = http.expectOne(requestUrl('/halqa/by-term/29'));
+    const active = http.expectOne(requestUrl('/halqa/by-term/40'));
+    expect(completed.request.params.has('includeInactive')).toBe(false);
+    expect(active.request.params.has('includeInactive')).toBe(false);
+    expect(completed.request.urlWithParams).not.toContain('includeInactive');
+    expect(active.request.urlWithParams).not.toContain('includeInactive');
+    completed.flush({ status: 200, data: [{ id: 27, name: 'H1' }] });
+    active.flush({ status: 200, data: [{ id: 27, name: 'H1' }] });
   });
 
   it('reads GET /term as a bare array and rejects an envelope', () => {
@@ -176,7 +179,6 @@ describe('mocked report term HTTP contract', () => {
     terms.loadForQuery({ kind: 'absent' }).subscribe((catalog) => {
       ids = catalog.terms?.map((term) => term.id) ?? [];
       statuses = catalog.terms?.map((term) => term.status) ?? [];
-      expect(catalog.activeFromBootstrap).toBeNull();
     });
     http.expectOne(requestUrl('/term')).flush([termListRow()]);
     http.expectNone(`${api}/center/1/active-term`);
@@ -200,6 +202,35 @@ describe('mocked report term HTTP contract', () => {
     http.expectNone(`${api}/term/29`);
     expect(resolved).toBe(29);
     expect(startDate).toBe('2026-11-03');
+  });
+
+  it('keeps an explicit term id when the list fails and retries without term detail', () => {
+    let state = '';
+    let message = '';
+    terms.loadForQuery({ kind: 'explicit', termId: 29 }).subscribe((catalog) => {
+      const selection = resolveReportTerm({ kind: 'explicit', termId: 29 }, catalog);
+      state = selection.state;
+      message = reportTermBlockedReason(selection, catalog.listErrorMessage) ?? '';
+    });
+    http.expectOne(requestUrl('/term')).flush({ message: 'down' }, { status: 500, statusText: 'Server Error' });
+    http.expectNone(requestUrl('/term/29'));
+    http.expectNone(`${api}/center/1/active-term`);
+    http.expectNone(requestUrl('/halqa/by-term/29'));
+    http.expectNone(requestUrl('/reports/progress'));
+    http.expectNone(requestUrl('/attendance/weekly-table'));
+    expect(state).toBe('explicit-unresolved');
+    expect(message).toContain('29');
+    expect(message).toContain('أعد المحاولة');
+    expect(message).not.toMatch(/نشطة|مكتملة/);
+
+    terms.retryList();
+    let recovered = 0;
+    terms.loadForQuery({ kind: 'explicit', termId: 29 }).subscribe((catalog) => {
+      const selection = resolveReportTerm({ kind: 'explicit', termId: 29 }, catalog);
+      recovered = selection.state === 'selected' ? selection.term.id : 0;
+    });
+    http.expectOne(requestUrl('/term')).flush([termListRow()]);
+    expect(recovered).toBe(29);
   });
 });
 

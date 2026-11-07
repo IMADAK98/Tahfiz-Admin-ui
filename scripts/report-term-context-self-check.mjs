@@ -7,7 +7,6 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { centerWeeklyQueryParams, halqaWeeklyQueryParams } from '../src/app/core/api/attendance-weekly-query.ts';
-import { halqaByTermParams } from '../src/app/core/api/halqa-by-term-query.ts';
 import { progressReportQueryParams } from '../src/app/core/api/progress-report-query.ts';
 import { readTermList } from '../src/app/core/api/term-list.ts';
 import { buildAttendanceWeeklyCsv } from '../src/app/features/attendance-report/attendance-report-csv.ts';
@@ -19,7 +18,6 @@ import {
   attendanceHalqaAfterTermChange,
   attendanceWeekForTerm,
   explicitTermFailureMessage,
-  includeInactiveHalqas,
   parseReportTermQuery,
   progressDateForTerm,
   progressHalqaAfterTermChange,
@@ -48,7 +46,7 @@ const sliced29 = toReportTermRef({
 assert.equal(sliced29?.startDate, '2026-11-03');
 assert.equal(sliced29?.endDate, '2026-11-07');
 const term29 = sliced29;
-const catalog = { terms: [term29, active], explicitTerm: null, activeFromBootstrap: null, listErrorMessage: null, bootstrapErrorMessage: null };
+const catalog = { terms: [term29, active], listErrorMessage: null };
 
 assert.deepEqual(parseReportTermQuery(null), { kind: 'absent' });
 assert.deepEqual(parseReportTermQuery('29'), { kind: 'explicit', termId: 29 });
@@ -73,11 +71,6 @@ assert.equal(explicit29.term.id, 29);
 assert.equal(explicit29.explicit, true);
 assert.equal(termIdAfterFailure(explicit29), 29);
 assert.notEqual(termIdAfterFailure(explicit29), active.id);
-assert.equal(includeInactiveHalqas(explicit29.term), true);
-assert.equal(includeInactiveHalqas(active), false);
-assert.equal(halqaByTermParams(true).includeInactive, 'true');
-assert.deepEqual(halqaByTermParams(false), {});
-
 const missing = resolveReportTerm({ kind: 'explicit', termId: 99 }, catalog);
 assert.equal(missing.state, 'explicit-missing');
 assert.equal(termIdAfterFailure(missing), 99);
@@ -86,10 +79,17 @@ assert.doesNotMatch(reportTermBlockedReason(missing), /الدورة الحالي
 
 const unresolved = resolveReportTerm(
   { kind: 'explicit', termId: 29 },
-  { terms: null, explicitTerm: null, activeFromBootstrap: active, listErrorMessage: 'تعذر', bootstrapErrorMessage: null },
+  { terms: null, listErrorMessage: 'تعذر' },
 );
 assert.equal(unresolved.state, 'explicit-unresolved');
 assert.equal(termIdAfterFailure(unresolved), 29);
+const unresolvedMessage = reportTermBlockedReason(unresolved, 'تعذر');
+assert.match(unresolvedMessage, /29/);
+assert.match(unresolvedMessage, /أعد المحاولة/);
+assert.doesNotMatch(unresolvedMessage, /نشطة|مكتملة/);
+const listFailed = resolveReportTerm({ kind: 'absent' }, { terms: null, listErrorMessage: 'تعذر' });
+assert.equal(listFailed.state, 'list-failed');
+assert.doesNotMatch(reportTermBlockedReason(listFailed), /نشطة|مكتملة/);
 assert.match(explicitTermFailureMessage(unresolved, 'HALQA_NOT_FOUND'), /HALQA_NOT_FOUND/);
 assert.match(explicitTermFailureMessage(unresolved, 'HALQA_NOT_FOUND'), new RegExp(REPORT_TERM_NO_FALLBACK));
 
@@ -100,7 +100,7 @@ assert.match(reportTermBlockedReason(invalid), new RegExp(REPORT_TERM_NO_FALLBAC
 
 const noActive = resolveReportTerm(
   { kind: 'absent' },
-  { terms: [term29], explicitTerm: null, activeFromBootstrap: null, listErrorMessage: null, bootstrapErrorMessage: null },
+  { terms: [term29], listErrorMessage: null },
 );
 assert.equal(noActive.state, 'no-active');
 assert.match(reportTermBlockedReason(noActive), /دورة مكتملة/);
@@ -245,10 +245,13 @@ assert.match(progressPage, /loadProgress\(halqaId, this\.period\(\), this\.dateC
 assert.match(progressPage, /normalizePercent\(byType\.get\('HIFZ'\)\)/);
 assert.match(attendancePage, /loadCenterWeeklyTable\(weekStartDate, halqaValue, termId\)/);
 assert.match(attendancePage, /this\.table\.set\(data\)/);
-assert.match(progressPage, /includeInactiveHalqas\(term\)/);
-assert.match(attendancePage, /includeInactiveHalqas\(term\)/);
-assert.doesNotMatch(attendancePage, /scopeAttendanceTable/);
-assert.doesNotMatch(termService, /getActiveTerm\(|centerApi|\/center\//);
+assert.doesNotMatch(attendancePage, /scopeAttendanceTable|includeInactive|getTerm\(/);
+assert.doesNotMatch(progressPage, /includeInactive/);
+assert.doesNotMatch(termService, /getTerm\(|getActiveTerm\(|centerApi|\/center\//);
+const progressApi = readFileSync(join(src, 'app/core/api/progress-api.service.ts'), 'utf8');
+const attendanceApi = readFileSync(join(src, 'app/core/api/attendance-api.service.ts'), 'utf8');
+assert.doesNotMatch(progressApi, /includeInactive/);
+assert.doesNotMatch(attendanceApi, /includeInactive/);
 assert.doesNotMatch(progressPage, /603|604|605|606|607/);
 assert.doesNotMatch(attendancePage, /603|604|605|606|607/);
 

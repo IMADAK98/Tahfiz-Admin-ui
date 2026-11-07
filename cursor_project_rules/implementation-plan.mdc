@@ -172,7 +172,7 @@ Done
 
 Prepared — publication held for approval.
 
-Both report pages read `GET /term` as a bare array, default to its ACTIVE row, and send that `termId`. Completed terms stay on the picker when none is active. Report rows are not filtered on the client.
+Both report pages read `GET /term` as a bare array, default to its ACTIVE row, and send that `termId`. Halaqa and report requests do not send `includeInactive`. A failed list stays on the explicit URL term id and can be retried.
 
 ## Angular Admin — plans tab smoke nits
 

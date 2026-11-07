@@ -39,25 +39,21 @@ export function resolveReportTerm(query: ReportTermQuery, catalog: ReportTermCat
   if (query.kind === 'invalid') {
     return { state: 'explicit-invalid' };
   }
+  if (catalog.terms == null) {
+    return query.kind === 'explicit'
+      ? { state: 'explicit-unresolved', termId: query.termId }
+      : { state: 'list-failed' };
+  }
   if (query.kind === 'explicit') {
-    const fromList = catalog.terms?.find((term) => term.id === query.termId) ?? null;
+    const fromList = catalog.terms.find((term) => term.id === query.termId) ?? null;
     if (fromList) {
       return { state: 'selected', term: fromList, explicit: true };
     }
-    if (catalog.explicitTerm?.id === query.termId) {
-      return { state: 'selected', term: catalog.explicitTerm, explicit: true };
-    }
-    if (catalog.terms == null) {
-      return { state: 'explicit-unresolved', termId: query.termId };
-    }
     return { state: 'explicit-missing', termId: query.termId };
   }
-  const fromList = catalog.terms?.find((term) => term.status === 'ACTIVE') ?? null;
+  const fromList = catalog.terms.find((term) => term.status === 'ACTIVE') ?? null;
   if (fromList) {
     return { state: 'selected', term: fromList, explicit: false };
-  }
-  if (catalog.activeFromBootstrap?.status === 'ACTIVE') {
-    return { state: 'selected', term: catalog.activeFromBootstrap, explicit: false };
   }
   return { state: 'no-active' };
 }
@@ -77,14 +73,20 @@ export function termIdAfterFailure(selection: ReportTermSelection): number | nul
   return null;
 }
 
-export function reportTermBlockedReason(selection: ReportTermSelection): string | null {
+export function reportTermBlockedReason(
+  selection: ReportTermSelection,
+  listError?: string | null,
+): string | null {
+  const detail = listError ? `${listError} ` : '';
   switch (selection.state) {
     case 'explicit-invalid':
       return `معرّف الدورة في الرابط غير صالح. ${REPORT_TERM_NO_FALLBACK}`;
     case 'explicit-missing':
       return `الدورة المحددة غير موجودة في هذا المركز. ${REPORT_TERM_NO_FALLBACK}`;
     case 'explicit-unresolved':
-      return `تعذر التحقق من الدورة المحددة. ${REPORT_TERM_NO_FALLBACK}`;
+      return `${detail}تعذر تحميل قائمة الدورات. الرابط يبقى على الدورة ${selection.termId} دون حالة معروفة. أعد المحاولة. ${REPORT_TERM_NO_FALLBACK}`;
+    case 'list-failed':
+      return `${detail}تعذر تحميل قائمة الدورات. أعد المحاولة. ${REPORT_TERM_NO_FALLBACK}`;
     case 'no-active':
       return 'لا توجد دورة نشطة. يمكن اختيار دورة مكتملة من القائمة.';
     case 'selected':
@@ -99,24 +101,12 @@ export function explicitTermFailureMessage(selection: ReportTermSelection, detai
   return `${detail} ${REPORT_TERM_NO_FALLBACK}`;
 }
 
-/** Ḥalaqa list query only. Report grids are not filtered on the client. */
-export function includeInactiveHalqas(term: ReportTermRef | null): boolean {
-  return isCompletedTerm(term?.status);
-}
-
 export function attendanceAllLabel(term: ReportTermRef | null): string {
   return isCompletedTerm(term?.status) ? COMPLETED_TERM_HALAQAT_LABEL : ALL_ACTIVE_HALAQAT_LABEL;
 }
 
 export function pickerTerms(catalog: ReportTermCatalog): ReportTermRef[] {
-  const terms = [...(catalog.terms ?? [])];
-  const extra = [catalog.explicitTerm, catalog.activeFromBootstrap];
-  for (const term of extra) {
-    if (term && !terms.some((item) => item.id === term.id)) {
-      terms.push(term);
-    }
-  }
-  return terms;
+  return [...(catalog.terms ?? [])];
 }
 
 export function progressDateForTerm(

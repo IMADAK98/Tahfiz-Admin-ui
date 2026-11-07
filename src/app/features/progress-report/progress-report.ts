@@ -6,7 +6,7 @@ import { DateFieldComponent } from '../../core/ui/date-field/date-field';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { ApiError } from '../../core/api/api-error';
 import { ProgressPeriod, ProgressReportResponse } from '../../core/api/models/progress.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,7 +16,6 @@ import { REPORT_TERM_QUERY_PARAM, ReportTermSelection } from '../report-term/dto
 import { isCompletedTerm } from '../report-term/enums/report-term-status-label';
 import {
   explicitTermFailureMessage,
-  includeInactiveHalqas,
   parseReportTermQuery,
   pickerTerms,
   progressDateForTerm,
@@ -114,15 +113,16 @@ export class ProgressReportComponent {
       this.dateContext.set(value);
       this.reloadTable();
     });
-    this.route.queryParamMap
-      .pipe(
-        switchMap((params) => {
-          const raw = params.get(REPORT_TERM_QUERY_PARAM);
-          return this.terms.loadForQuery(parseReportTermQuery(raw)).pipe(map((catalog) => ({ raw, catalog })));
-        }),
-        takeUntilDestroyed(),
+    this.terms
+      .changes(
+        this.route.queryParamMap.pipe(
+          map((params) => parseReportTermQuery(params.get(REPORT_TERM_QUERY_PARAM))),
+        ),
       )
-      .subscribe(({ raw, catalog }) => this.applyTerm(raw, catalog));
+      .pipe(takeUntilDestroyed())
+      .subscribe((catalog) =>
+        this.applyTerm(this.route.snapshot.queryParamMap.get(REPORT_TERM_QUERY_PARAM), catalog),
+      );
   }
 
   protected readonly weekLabel = computed(() => {
@@ -195,6 +195,11 @@ export class ProgressReportComponent {
    * Empty = no roster rows for this period (0% students still show in table).
    * Product lock: 0% ≠ no students.
    */
+  protected readonly listFailed = computed(() => {
+    const state = this.selection().state;
+    return state === 'list-failed' || state === 'explicit-unresolved';
+  });
+
   protected readonly showEmpty = computed(() => {
     if (this.loading() || this.bootstrapping() || this.blockedReason()) {
       return false;
@@ -209,6 +214,10 @@ export class ProgressReportComponent {
     const n = this.rows().length;
     return this.translate.instant('progressReport.studentsCount', { count: n });
   });
+
+  retryTermList(): void {
+    this.terms.retryList();
+  }
 
   onTermSelected(termId: number): void {
     void this.router.navigate([], {
@@ -280,7 +289,7 @@ export class ProgressReportComponent {
     this.selectedTermId.set(term?.id ?? null);
     this.termHeading.set(termHeading(term));
     this.termReadOnly.set(isCompletedTerm(term?.status));
-    this.blockedReason.set(reportTermBlockedReason(selection));
+    this.blockedReason.set(reportTermBlockedReason(selection, catalog.listErrorMessage));
     if (this.syncTermUrl(raw, selection)) {
       return;
     }
@@ -303,7 +312,7 @@ export class ProgressReportComponent {
     this.appliedTermId = term.id;
     this.bootstrapping.set(true);
     this.errorMessage.set(null);
-    this.report.loadHalqaOptions(term.id, includeInactiveHalqas(term)).subscribe({
+    this.report.loadHalqaOptions(term.id).subscribe({
       next: (halqas) => {
         if (generation !== this.termApplyGeneration) {
           return;

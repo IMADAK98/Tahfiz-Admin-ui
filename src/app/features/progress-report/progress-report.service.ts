@@ -29,8 +29,8 @@ export class ProgressReportService {
     return this.centerApi.getActiveTerm(centerId);
   }
 
-  loadHalqaOptions(termId: number, includeInactive = false): Observable<HalqaSelectOption[]> {
-    return this.progressApi.getHalqasByTerm(termId, includeInactive).pipe(
+  loadHalqaOptions(termId: number): Observable<HalqaSelectOption[]> {
+    return this.progressApi.getHalqasByTerm(termId).pipe(
       map((list) =>
         (list ?? []).flatMap((h: HalqaByTermItem) => {
           const id = Number(h.id);

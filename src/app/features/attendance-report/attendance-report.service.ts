@@ -17,9 +17,8 @@ import {
 /**
  * Thin UI orchestration — HttpClient stays in core/api.
  * «كل الحلقات النشطة» omits `halqaId` and sends the selected termId.
- * The grid is the server payload. Report DTOs have no membership flags to filter on.
- * ACTIVE active-user and active-enrollment filtering is a pending Nest change.
- * COMPLETED asks the ḥalaqa list for inactive rows with `includeInactive=true`.
+ * The grid is the server payload. Membership follows term status on the server.
+ * This client does not add a membership query and does not drop rows.
  */
 @Injectable({ providedIn: 'root' })
 export class AttendanceReportService {
@@ -27,10 +26,9 @@ export class AttendanceReportService {
 
   loadHalqaFilterOptions(
     termId: number,
-    includeInactive = false,
     allLabel: string = ALL_ACTIVE_HALAQAT_LABEL,
   ): Observable<HalqaFilterOption[]> {
-    return this.attendanceApi.getHalqasByTerm(termId, includeInactive).pipe(
+    return this.attendanceApi.getHalqasByTerm(termId).pipe(
       map((list) => withAllActiveHalqaOption(readTermHalqas(list), allLabel)),
     );
   }

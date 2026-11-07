@@ -9,7 +9,6 @@ import {
   centerWeeklyQueryParams,
   halqaWeeklyQueryParams,
 } from './attendance-weekly-query';
-import { halqaByTermParams } from './halqa-by-term-query';
 import { unwrapEnvelope } from './envelope.helpers';
 import { isNoHalqasForTermError } from './error-message.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
@@ -78,15 +77,14 @@ export class AttendanceApiService {
   }
 
   /**
-   * Ḥalaqas of one term. `includeInactive` true sends `includeInactive=true`.
-   * Otherwise the param is omitted and Nest keeps the active-only list.
+   * Ḥalaqas of one term. Nest includes inactive rows only when that term is COMPLETED.
+   * This request adds no membership query.
    */
-  getHalqasByTerm(termId: number, includeInactive = false): Observable<HalqaByTermItem[]> {
-    const params = new HttpParams({ fromObject: halqaByTermParams(includeInactive) });
+  getHalqasByTerm(termId: number): Observable<HalqaByTermItem[]> {
     return this.http
       .get<ApiEnvelope<HalqaByTermItem[]>>(
         `${this.apiBaseUrl}/halqa/by-term/${encodeURIComponent(String(termId))}`,
-        withSkipGlobalErrorToast({ observe: 'response', params }),
+        withSkipGlobalErrorToast({ observe: 'response' }),
       )
       .pipe(
         map((res) => {

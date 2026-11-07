@@ -130,8 +130,11 @@
 
   @if (blockedReason()) {
     <div class="pr-report__empty">
-      <h2>الدورة المحددة</h2>
+      <h2>{{ listFailed() ? 'تعذر تحميل الدورات' : 'الدورة المحددة' }}</h2>
       <p>{{ blockedReason() }}</p>
+      @if (listFailed()) {
+        <p-button type="button" label="إعادة المحاولة" (onClick)="retryTermList()" />
+      }
     </div>
   }
 
