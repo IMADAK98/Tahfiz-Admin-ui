@@ -1,9 +1,10 @@
 /**
  * Nest Reports — GET /reports/progress
- * Shape from design/API-SCREEN-MAP.md §2.11 (live OpenAPI returns BaseResponseDto envelope only).
+ * Shape from design/API-SCREEN-MAP.md §2.11, plus optional `termId` (Tahfiz PR 43).
  *
- * Query: halqaId (required) + period=day|week|month + startingDate + endingDate (YYYY-MM-DD).
- * Period MUST be lowercase.
+ * Query: halqaId (required) + period=day|week|month + startingDate + endingDate (YYYY-MM-DD)
+ * + termId (optional positive integer). Period MUST be lowercase.
+ * When both dates are sent they are the window. Response DTO is unchanged.
  */
 
 export type ProgressPeriod = 'day' | 'week' | 'month';
@@ -59,4 +60,6 @@ export interface ProgressReportQuery {
   period: ProgressPeriod;
   startingDate: string;
   endingDate: string;
+  /** Selected term. Omit for the legacy unscoped read. */
+  termId?: number | null;
 }

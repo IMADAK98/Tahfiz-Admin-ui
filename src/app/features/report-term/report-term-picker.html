@@ -1,0 +1,26 @@
+<div class="report-term">
+  <div class="report-term__field">
+    <label for="report-term">الدورة</label>
+    <p-select
+      inputId="report-term"
+      [options]="options()"
+      optionLabel="optionLabel"
+      optionValue="id"
+      placeholder="اختر الدورة"
+      [formControl]="control"
+      styleClass="w-full"
+      appendTo="body"
+    />
+  </div>
+  @if (heading()) {
+    <p class="report-term__heading">{{ heading() }}</p>
+  }
+  @if (readOnly()) {
+    <p class="report-term__readonly" role="status">
+      دورة مكتملة — للعرض فقط
+      @if (bounds()) {
+        <span> · {{ bounds() }}</span>
+      }
+    </p>
+  }
+</div>

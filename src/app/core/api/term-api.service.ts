@@ -60,6 +60,25 @@ export class TermApiService {
       );
   }
 
+  /**
+   * GET /term — every term in the JWT center, including COMPLETED.
+   * Same envelope as the other term reads. No query param is added.
+   */
+  listTerms(): Observable<ActiveTerm[]> {
+    return this.http
+      .get<ApiEnvelope<ActiveTerm[]>>(`${this.apiBaseUrl}/term`, { observe: 'response' })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
+  /** GET /term/:id — one term in the caller center, any status. */
+  getTerm(termId: number): Observable<ActiveTerm> {
+    return this.http
+      .get<ApiEnvelope<ActiveTerm>>(`${this.apiBaseUrl}/term/${encodeURIComponent(String(termId))}`, {
+        observe: 'response',
+      })
+      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+  }
+
   getTermsByCenterId(centerId: number): Observable<ActiveTerm[]> {
     return this.http
       .get<ApiEnvelope<ActiveTerm[]>>(`${this.apiBaseUrl}/term/by-center-id/${centerId}`, {
