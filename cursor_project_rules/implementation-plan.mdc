@@ -174,3 +174,10 @@ Done
 
 Specific success toasts replace «تم الحفظ» for item delete, plan delete, assign, and unassign, and both delete confirms say past progress is kept.
 Edit dialog writes من سورة only after the surah list is ready. Plan delete and unassign patch the plans signal before the details refetch, and that refetch cannot put the removed row back.
+
+## Angular Admin — re-enrollment accept then optional ḥalaqa
+
+Done
+
+Approve on `/admin/re-enrollment` still POSTs an empty body. Success opens the shared assign dialog. Choices load `GET /halqa/by-term/{requestTermId}`; save posts `{ studentsIds: [numeric existingUserId] }`. Skip leaves the acceptance with no enroll. New-student assign still uses active-ḥalaqas.
+Assign failures keep that acceptance: the dialog shows Nest `message` (these bodies have no `code`) and a retry posts enroll only.

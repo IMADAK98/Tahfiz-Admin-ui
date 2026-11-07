@@ -21,5 +21,6 @@ export const STUDENTS_I18N = {
     missingId: 'students.assignHalqa.missingId',
     centerUnknown: 'students.assignHalqa.centerUnknown',
     enrollFailed: 'students.assignHalqa.enrollFailed',
+    termUnavailable: 'students.assignHalqa.termUnavailable',
   },
 } as const;

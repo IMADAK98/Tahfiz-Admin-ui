@@ -1,4 +1,14 @@
 export {
+  acceptAssignSettled,
+  acceptFailed,
+  acceptSucceeded,
+  beginAccept,
+  enrollUserId,
+  idleAcceptAssign,
+  type AcceptAssignPhase,
+  type AcceptAssignSession,
+} from './re-enrollment-assign';
+export {
   coerceId,
   isAlreadyProcessedError,
   mapReEnrollmentRequest,

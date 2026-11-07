@@ -9,11 +9,18 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { FieldErrorComponent } from '../../core/ui/field-error';
 import { TOAST_I18N, resolveServerErrorToastDisplay } from '../../core/ui/toast-messages';
+import { AssignHalqaModalComponent } from '../students/assign-halqa-modal/assign-halqa-modal';
 import {
+  acceptAssignSettled,
+  acceptFailed,
+  acceptSucceeded,
+  beginAccept,
+  idleAcceptAssign,
   isAlreadyProcessedError,
   ReEnrollmentRequestView,
   RejectReEnrollmentFormModel,
   validateRejectForm,
+  type AcceptAssignSession,
 } from './dto';
 import { ReEnrollmentLoadState } from './enums';
 import { ReEnrollmentService } from './re-enrollment.service';
@@ -22,7 +29,14 @@ type ConfirmKind = 'approve' | 'reject';
 
 @Component({
   selector: 'app-re-enrollment',
-  imports: [RouterLink, ReactiveFormsModule, TranslatePipe, Textarea, FieldErrorComponent],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    TranslatePipe,
+    Textarea,
+    FieldErrorComponent,
+    AssignHalqaModalComponent,
+  ],
   templateUrl: './re-enrollment.html',
   styleUrl: './re-enrollment.scss',
 })
@@ -41,6 +55,7 @@ export class ReEnrollmentComponent {
   protected readonly activeConfirm = signal<{ requestId: number; kind: ConfirmKind } | null>(null);
   protected readonly rejectErrors = signal<Record<number, string | null>>({});
   protected readonly actingRequestId = signal<number | null>(null);
+  protected readonly session = signal<AcceptAssignSession>(idleAcceptAssign());
   private readonly fields = createFieldErrorBag();
   private readonly rejectControls = new Map<number, FormControl<string>>();
 
@@ -110,9 +125,13 @@ export class ReEnrollmentComponent {
     }));
   }
 
+  protected interactionLocked(): boolean {
+    return this.session().phase !== 'idle' || this.actingRequestId() != null;
+  }
+
   protected showApproveConfirm(request: ReEnrollmentRequestView, event: Event): void {
     event.stopPropagation();
-    if (this.actingRequestId() != null) {
+    if (this.interactionLocked()) {
       return;
     }
     this.activeConfirm.set({ requestId: request.id, kind: 'approve' });
@@ -121,7 +140,7 @@ export class ReEnrollmentComponent {
 
   protected showRejectConfirm(request: ReEnrollmentRequestView, event: Event): void {
     event.stopPropagation();
-    if (this.actingRequestId() != null) {
+    if (this.interactionLocked()) {
       return;
     }
     this.activeConfirm.set({ requestId: request.id, kind: 'reject' });
@@ -161,7 +180,11 @@ export class ReEnrollmentComponent {
   }
 
   protected canSubmitReject(requestId: number): boolean {
-    return this.rejectReason(requestId).trim().length > 0 && this.actingRequestId() !== requestId;
+    return (
+      this.session().phase === 'idle' &&
+      this.rejectReason(requestId).trim().length > 0 &&
+      this.actingRequestId() !== requestId
+    );
   }
 
   protected rejectError(requestId: number): string | null {
@@ -173,23 +196,45 @@ export class ReEnrollmentComponent {
     if (this.actingRequestId() != null) {
       return;
     }
+    const approving = beginAccept(this.session(), request.id);
+    if (!approving) {
+      return;
+    }
 
+    this.session.set(approving);
     this.actingRequestId.set(request.id);
     this.reEnrollmentService.approveRequest(request.id).subscribe({
       next: () => {
         this.actingRequestId.set(null);
         this.activeConfirm.set(null);
         this.toastMessage.notifySuccess(TOAST_I18N.success.reEnrollmentApproved);
-        this.toastMessage.notifyInfo(TOAST_I18N.info.reEnrollmentAddToHalaqa);
-        this.reload();
+        this.requests.update((rows) => rows.filter((row) => row.id !== request.id));
+        this.session.set(acceptSucceeded(request));
       },
-      error: (error: unknown) => this.handleMutationError(error, request.id, 'approve'),
+      error: (error: unknown) => {
+        this.actingRequestId.set(null);
+        this.session.set(acceptFailed());
+        this.handleMutationError(error, request.id, 'approve');
+      },
     });
+  }
+
+  protected onAssignDone(): void {
+    this.finishAssign();
+  }
+
+  protected onAssignSkipped(): void {
+    this.finishAssign();
+  }
+
+  private finishAssign(): void {
+    this.session.set(acceptAssignSettled());
+    this.reload();
   }
 
   protected confirmReject(request: ReEnrollmentRequestView, event: Event): void {
     event.stopPropagation();
-    if (this.actingRequestId() != null) {
+    if (this.interactionLocked()) {
       return;
     }
 
