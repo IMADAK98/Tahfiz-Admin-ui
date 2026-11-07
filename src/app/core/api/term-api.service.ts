@@ -7,7 +7,8 @@ import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token'
 import { apiErrorFromBody } from './api-error';
 import { envelopeOk, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { ActiveTerm, CreateTermPayload, UpdateTermPayload } from './models/term.model';
+import { ActiveTerm, CreateTermPayload, TermListItem, UpdateTermPayload } from './models/term.model';
+import { readTermList } from './term-list';
 import { readTermEditConflict, TermEditConflictError } from './term-edit-conflict';
 
 @Injectable({ providedIn: 'root' })
@@ -62,12 +63,12 @@ export class TermApiService {
 
   /**
    * GET /term — every term in the JWT center, including COMPLETED.
-   * Same envelope as the other term reads. No query param is added.
+   * HTTP 200 body is a bare array. No query param is added.
    */
-  listTerms(): Observable<ActiveTerm[]> {
+  listTerms(): Observable<TermListItem[]> {
     return this.http
-      .get<ApiEnvelope<ActiveTerm[]>>(`${this.apiBaseUrl}/term`, { observe: 'response' })
-      .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
+      .get<TermListItem[]>(`${this.apiBaseUrl}/term`, { observe: 'response' })
+      .pipe(map((res) => readTermList(res.body)));
   }
 
   /** GET /term/:id — one term in the caller center, any status. */

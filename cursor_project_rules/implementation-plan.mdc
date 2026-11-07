@@ -172,7 +172,7 @@ Done
 
 Prepared — publication held for approval.
 
-Both report pages list `GET /term`, select the active term by default, and send that `termId`. An explicit completed term stays selected on errors and empty results. «كل الحلقات النشطة» remains every active ḥalaqa of the selected term.
+Both report pages read `GET /term` as a bare array, default to its ACTIVE row, and send that `termId`. Completed terms stay on the picker when none is active. Report rows are not filtered on the client.
 
 ## Angular Admin — plans tab smoke nits
 

@@ -16,9 +16,10 @@ import {
 
 /**
  * Thin UI orchestration — HttpClient stays in core/api.
- * «كل الحلقات النشطة» omits `halqaId` and, when a term is selected, sends that termId.
- * The option is every relevant ḥalaqa of the selected term, not one forced ḥalaqa
- * and not a cross-term mode. Omitting termId stays available for legacy callers.
+ * «كل الحلقات النشطة» omits `halqaId` and sends the selected termId.
+ * The grid is the server payload. Report DTOs have no membership flags to filter on.
+ * ACTIVE active-user and active-enrollment filtering is a pending Nest change.
+ * COMPLETED asks the ḥalaqa list for inactive rows with `includeInactive=true`.
  */
 @Injectable({ providedIn: 'root' })
 export class AttendanceReportService {

@@ -99,6 +99,7 @@ export function explicitTermFailureMessage(selection: ReportTermSelection, detai
   return `${detail} ${REPORT_TERM_NO_FALLBACK}`;
 }
 
+/** Ḥalaqa list query only. Report grids are not filtered on the client. */
 export function includeInactiveHalqas(term: ReportTermRef | null): boolean {
   return isCompletedTerm(term?.status);
 }

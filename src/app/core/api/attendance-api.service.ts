@@ -47,9 +47,9 @@ export class AttendanceApiService {
 
   /**
    * Center-wide Sun–Thu grid.
-   * Omit `halqaId` → every ḥalaqa in the requested scope, not one forced ḥalaqa.
-   * Omit `termId` → legacy active roster (any active ḥalaqa, including non-active terms).
-   * Report pages pass the selected term and still omit `halqaId` for «كل الحلقات النشطة».
+   * Omit `halqaId` for every ḥalaqa in the requested scope, not one forced ḥalaqa.
+   * Report pages send the selected termId with that omission.
+   * Omitting termId remains the legacy caller path. This client does not drop rows.
    */
   getCenterWeeklyTable(
     weekStartDate: string,

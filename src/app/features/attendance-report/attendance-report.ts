@@ -29,7 +29,6 @@ import {
 import { ReportTermService } from '../report-term/report-term.service';
 import { buildAttendanceWeeklyCsv, downloadCsv } from './attendance-report-csv';
 import { AttendanceReportService } from './attendance-report.service';
-import { scopeAttendanceTable } from './dto/attendance-term-scope';
 import {
   ALL_ACTIVE_HALAQAT,
   AttendanceDayHeaderVm,
@@ -343,7 +342,6 @@ export class AttendanceReportComponent {
     const termId = term.id;
     const weekStartDate = this.weekStartDate();
     const halqaValue = this.selectedHalqaValue();
-    const activeIds = this.termHalqaIds();
     this.loading.set(true);
     this.errorMessage.set(null);
     this.report.loadCenterWeeklyTable(weekStartDate, halqaValue, termId).subscribe({
@@ -351,7 +349,7 @@ export class AttendanceReportComponent {
         if (generation !== this.loadGeneration || selectedTerm(this.selection())?.id !== termId) {
           return;
         }
-        this.table.set(scopeAttendanceTable(data, term.status, activeIds, halqaValue));
+        this.table.set(data);
         this.tableTermId.set(termId);
         this.loading.set(false);
       },

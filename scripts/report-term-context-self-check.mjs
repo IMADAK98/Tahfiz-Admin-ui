@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { centerWeeklyQueryParams, halqaWeeklyQueryParams } from '../src/app/core/api/attendance-weekly-query.ts';
 import { halqaByTermParams } from '../src/app/core/api/halqa-by-term-query.ts';
 import { progressReportQueryParams } from '../src/app/core/api/progress-report-query.ts';
-import { scopeAttendanceTable } from '../src/app/features/attendance-report/dto/attendance-term-scope.ts';
+import { readTermList } from '../src/app/core/api/term-list.ts';
 import { buildAttendanceWeeklyCsv } from '../src/app/features/attendance-report/attendance-report-csv.ts';
 import { ALL_ACTIVE_HALAQAT } from '../src/app/features/attendance-report/dto/attendance-report-filters.dto.ts';
 import { buildProgressReportCsv } from '../src/app/features/progress-report/progress-report-csv.ts';
@@ -225,29 +225,30 @@ assert.match(attendanceCsv, /مكتملة/);
 assert.match(attendanceCsv, /كل حلقات الدورة/);
 assert.doesNotMatch(attendanceCsv, /603/);
 
-const table = {
-  halqa: null,
-  weekStartDate: '2026-11-08',
-  weekEndDate: '2026-11-12',
-  columns: [],
-  students: [
-    { student: { id: 73, name: 'S1' }, days: [], halqa: { id: 27, name: 'H1' } },
-    { student: { id: 81, name: 'S81' }, days: [], halqa: { id: 99, name: 'أخرى' } },
-  ],
-};
-const scoped = scopeAttendanceTable(table, 'ACTIVE', [27], ALL_ACTIVE_HALAQAT);
-assert.deepEqual(scoped.students.map((row) => row.student.id), [73]);
-const historical = scopeAttendanceTable(table, 'COMPLETED', [27], ALL_ACTIVE_HALAQAT);
-assert.deepEqual(historical.students.map((row) => row.student.id), [73, 81]);
+const bareList = readTermList([
+  {
+    id: 29,
+    name: 'SMOKE E2E دورة نوفمبر',
+    status: 'COMPLETED',
+    startDate: '2026-11-03T00:00:00.000Z',
+    endDate: '2026-11-07T00:00:00.000Z',
+  },
+]);
+assert.equal(bareList[0].id, 29);
+assert.equal(bareList[0].status, 'COMPLETED');
+assert.throws(() => readTermList({ status: 200, data: bareList }), /term array/);
 
 const progressPage = readFileSync(join(src, 'app/features/progress-report/progress-report.ts'), 'utf8');
 const attendancePage = readFileSync(join(src, 'app/features/attendance-report/attendance-report.ts'), 'utf8');
+const termService = readFileSync(join(src, 'app/features/report-term/report-term.service.ts'), 'utf8');
 assert.match(progressPage, /loadProgress\(halqaId, this\.period\(\), this\.dateContext\(\), termId\)/);
 assert.match(progressPage, /normalizePercent\(byType\.get\('HIFZ'\)\)/);
 assert.match(attendancePage, /loadCenterWeeklyTable\(weekStartDate, halqaValue, termId\)/);
+assert.match(attendancePage, /this\.table\.set\(data\)/);
 assert.match(progressPage, /includeInactiveHalqas\(term\)/);
 assert.match(attendancePage, /includeInactiveHalqas\(term\)/);
-assert.match(attendancePage, /scopeAttendanceTable\(/);
+assert.doesNotMatch(attendancePage, /scopeAttendanceTable/);
+assert.doesNotMatch(termService, /getActiveTerm\(|centerApi|\/center\//);
 assert.doesNotMatch(progressPage, /603|604|605|606|607/);
 assert.doesNotMatch(attendancePage, /603|604|605|606|607/);
 
