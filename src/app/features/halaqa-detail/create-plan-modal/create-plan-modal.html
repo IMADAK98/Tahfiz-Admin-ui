@@ -56,7 +56,9 @@
 
         <div class="plan-edit-items-head">
           <h3 class="plan-edit-section-title">عناصر الخطة</h3>
-          <button type="button" class="btn btn-secondary btn-sm" (click)="addItem()">+ إضافة عنصر</button>
+          <button type="button" class="btn btn-secondary btn-sm" [disabled]="!canAddItem()" (click)="addItem()">
+            + إضافة عنصر
+          </button>
         </div>
 
         <ul class="plan-edit-items" formArrayName="items">
@@ -67,9 +69,10 @@
                   <label [attr.for]="'type-' + index">النوع</label>
                   <p-select
                     [inputId]="'type-' + index"
-                    [options]="itemTypeOptions"
+                    [options]="typeOptions(index)"
                     optionLabel="label"
                     optionValue="value"
+                    optionDisabled="disabled"
                     formControlName="type"
                     [fluid]="true"
                     appendTo="body"

@@ -23,19 +23,19 @@ import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N, arabicDialogMessage } from '../../../core/ui/toast-messages';
 import {
   PlanItemFormModel,
+  PlanItemTypeSelectOption,
   StudyPlanItemViewModel,
   ayahNumbersOf,
   createPlanItemFormFromView,
+  editPlanItemTypeOptions,
+  editPlanItemTypeSubmitError,
+  isLegacyDuplicatePlanItemType,
   mapSurahSelectOptions,
   surahSelectLabel,
   validatePlanItemForm,
 } from '../dto';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
-import {
-  STUDY_PLAN_AMOUNT_TYPE_OPTIONS,
-  STUDY_PLAN_DIRECTION_OPTIONS,
-  STUDY_PLAN_ITEM_TYPE_OPTIONS,
-} from '../enums';
+import { STUDY_PLAN_AMOUNT_TYPE_OPTIONS, STUDY_PLAN_DIRECTION_OPTIONS } from '../enums';
 import { HalaqaDetailService } from '../halaqa-detail.service';
 
 const emptyPlanItemView: StudyPlanItemViewModel = {
@@ -70,10 +70,11 @@ export class EditPlanItemModalComponent {
   readonly visible = input.required<boolean>();
   readonly planName = input.required<string>();
   readonly item = input.required<StudyPlanItemViewModel | null>();
+  /** Live types on the same plan, excluding the item being edited. */
+  readonly siblingTypes = input<readonly unknown[]>([]);
   readonly saved = output<StudyPlanItemViewModel | null>();
   readonly closed = output<void>();
 
-  protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
   protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
   protected readonly form = formGroupOf(this.fb, createPlanItemFormFromView(emptyPlanItemView));
@@ -101,6 +102,23 @@ export class EditPlanItemModalComponent {
 
   protected model(): PlanItemFormModel {
     return this.form.getRawValue() as PlanItemFormModel;
+  }
+
+  protected typeOptions(): PlanItemTypeSelectOption[] {
+    return editPlanItemTypeOptions(this.siblingTypes(), this.form.controls['type'].value);
+  }
+
+  /** Loaded type shared with another live item. The control value is left in place. */
+  protected legacyDuplicateType(): boolean {
+    const item = this.item();
+    if (!item) {
+      return false;
+    }
+    return isLegacyDuplicatePlanItemType(
+      this.form.controls['type'].value,
+      item.type,
+      this.siblingTypes(),
+    );
   }
 
   protected readonly surahOptions = computed(() => mapSurahSelectOptions(this.surahs()));
@@ -178,6 +196,10 @@ export class EditPlanItemModalComponent {
     const mapped: Record<string, string> = {};
     for (const [field, key] of Object.entries(raw)) {
       mapped[field] = this.translate.instant(key);
+    }
+    const typeKey = editPlanItemTypeSubmitError(value.type, item.type, this.siblingTypes());
+    if (typeKey) {
+      mapped['type'] = this.translate.instant(typeKey);
     }
     if (this.fields.applyMap(mapped)) {
       return;

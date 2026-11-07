@@ -236,6 +236,16 @@ export class HalaqaDetailComponent {
     return missingPlanItemTypes(plan.items);
   }
 
+  /** Other live items on the plan being edited. Soft-deleted rows are not in this list. */
+  protected editSiblingTypes(): StudyPlanItemType[] {
+    const plan = this.selectedPlan();
+    const item = this.selectedPlanItem();
+    if (!plan || !item) {
+      return [];
+    }
+    return plan.items.filter((row) => row.id !== item.id).map((row) => row.type);
+  }
+
   protected openAddPlanItem(plan: StudyPlanViewModel): void {
     const availableTypes = missingPlanItemTypes(plan.items);
     if (!availableTypes.length) {
