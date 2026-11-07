@@ -5,7 +5,11 @@ import { CenterApiService } from '../../core/api/center-api.service';
 import { HalqaApiService } from '../../core/api/halqa-api.service';
 import { StudentRequestApiService } from '../../core/api/student-request-api.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { ActiveHalqaOption, selectableActiveHalqas } from '../../core/api/models/halqa.model';
+import {
+  ActiveHalqaOption,
+  mapActiveHalqaOption,
+  selectableActiveHalqas,
+} from '../../core/api/models/halqa.model';
 import {
   ActiveStudent,
   CreatedManualStudent,
@@ -18,6 +22,12 @@ import { StudentFormModel, buildCreateManualStudentPayload, validateStudentForm 
 export interface AssignableHalqasResult {
   all: ActiveHalqaOption[];
   selectable: ActiveHalqaOption[];
+}
+
+/** Map a by-term ḥalaqa list. Empty rows stay empty. Unknown capacity stays selectable. */
+export function toAssignableHalqas(rows: unknown[]): AssignableHalqasResult {
+  const all = rows.map((row) => mapActiveHalqaOption(row)).filter((halqa) => halqa.id > 0);
+  return { all, selectable: selectableActiveHalqas(all) };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,6 +96,11 @@ export class StudentsService {
     return this.centerApi
       .getActiveHalqas(centerId)
       .pipe(map((all) => ({ all, selectable: selectableActiveHalqas(all) })));
+  }
+
+  /** GET /halqa/by-term/:termId — the re-enrollment request term, not active-ḥalaqas. */
+  loadAssignableHalqasForTerm(termId: number): Observable<AssignableHalqasResult> {
+    return this.halqaApi.getByTerm(termId).pipe(map((rows) => toAssignableHalqas(rows)));
   }
 
   enrollStudent(halqaId: number, studentId: number): Observable<unknown> {

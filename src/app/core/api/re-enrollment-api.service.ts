@@ -35,9 +35,13 @@ export class ReEnrollmentApiService {
       .pipe(map((res) => this.unwrapItem(res.body, res.status)));
   }
 
+  /**
+   * Empty body. Success `data` is a GetUserDto whose `id` is a string.
+   * Assignment does not read that id — it posts numeric `existingUserId`.
+   */
   approveRequest(id: number): Observable<void> {
     return this.http
-      .post<ApiEnvelope<null>>(
+      .post<ApiEnvelope<unknown>>(
         `${this.apiBaseUrl}/admin/re-enrollment-requests/${id}/approve`,
         {},
         withSkipGlobalErrorToast({ observe: 'response' }),
@@ -73,7 +77,7 @@ export class ReEnrollmentApiService {
   }
 
   /** Approve/reject may return `data: null` on success — trust envelope status only. */
-  private unwrapMutation(body: ApiEnvelope<null> | null, httpStatus: number): void {
+  private unwrapMutation(body: ApiEnvelope<unknown> | null, httpStatus: number): void {
     if (!body || !envelopeOk(body, httpStatus)) {
       throw apiErrorFromBody(body, httpStatus);
     }
