@@ -1,8 +1,9 @@
 /**
- * Weekly grid DTO. Nest #40 (`5fa08515`).
- * `GET /attendance/weekly-table?weekStartDate=&halqaId?` and the per-ḥalaqa path.
+ * Weekly grid DTO. Nest #40, plus optional `termId` (Tahfiz PR 43).
+ * `GET /attendance/weekly-table?weekStartDate=&halqaId?&termId?` and the per-ḥalaqa path.
  * Omit `halqaId`: `halqa` is null and each student row includes `halqa`.
  * Set `halqaId`: `halqa` is set and student rows omit `halqa`.
+ * Response DTO is unchanged. Missing marks stay `NOT_MARKED`.
  */
 
 /** OpenAPI enum — EXCUSED not in swagger; kept for UI/mobile معذور. */

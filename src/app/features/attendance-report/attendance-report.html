@@ -1,4 +1,12 @@
 <section class="att-report" dir="rtl" lang="ar">
+  <app-report-term-picker
+    [terms]="termOptions()"
+    [selectedTermId]="selectedTermId()"
+    [heading]="termHeading()"
+    [readOnly]="termReadOnly()"
+    (termSelected)="onTermSelected($event)"
+  />
+
   <div class="att-report__header">
     <p-button
       type="button"
@@ -62,6 +70,16 @@
     </div>
   </div>
 
+  @if (blockedReason()) {
+    <div class="att-report__empty">
+      <h2>{{ listFailed() ? 'تعذر تحميل الدورات' : 'الدورة المحددة' }}</h2>
+      <p>{{ blockedReason() }}</p>
+      @if (listFailed()) {
+        <p-button type="button" label="إعادة المحاولة" (onClick)="retryTermList()" />
+      }
+    </div>
+  }
+
   @if (filterError()) {
     <p class="att-report__error" role="alert">{{ filterError() }}</p>
   }
@@ -73,10 +91,14 @@
     <p class="att-report__status" role="status">جاري التحميل…</p>
   }
 
-  @if (!loading() && table() && !errorMessage()) {
+  @if (!loading() && !blockedReason() && table() && !errorMessage()) {
     <div class="att-report__meta">
+      @if (termHeading(); as heading) {
+        <span class="badge badge-neutral">{{ heading }}</span>
+      }
       <span class="badge badge-primary">{{ scopeLabel() }}</span>
       <span class="badge badge-neutral">أسبوع أحد–خميس</span>
+      <span class="badge badge-neutral">{{ weekLabel() }}</span>
       <span class="badge badge-neutral">{{ studentCountLabel() }}</span>
     </div>
 
@@ -146,8 +168,13 @@
       </div>
     } @else if (showNoActiveHalqas()) {
       <div class="att-report__empty">
-        <h2>لا حلقات نشطة</h2>
-        <p>لا توجد حلقات نشطة في هذا المركز.</p>
+        @if (termReadOnly()) {
+          <h2>لا حلقات في هذه الدورة</h2>
+          <p>لا توجد حلقات مسجّلة في الدورة المحددة.</p>
+        } @else {
+          <h2>لا حلقات نشطة</h2>
+          <p>لا توجد حلقات نشطة في الدورة المحددة.</p>
+        }
       </div>
     } @else if (showNoStudents()) {
       <div class="att-report__empty">
@@ -157,8 +184,16 @@
     }
   }
 
-  <p class="att-report__note">
-    إدارة المركز: تصفية وقراءة فقط. لا يمكن تعديل الحضور من الويب — يُعدَّل من تطبيق المعلّم إن لزم.
-    الحلقات المعروضة هنا هي الحلقات <strong>النشطة</strong> فقط.
-  </p>
+  @if (termReadOnly()) {
+    <p class="att-report__note">
+      دورة مكتملة — للعرض فقط. لا يمكن تعديل الحضور من الويب. صفوف هذه الدورة تشمل المسجّلين غير
+      النشطين، ولا تُستبدل بدورة أخرى.
+    </p>
+  } @else {
+    <p class="att-report__note">
+      إدارة المركز: تصفية وقراءة فقط. لا يمكن تعديل الحضور من الويب — يُعدَّل من تطبيق المعلّم إن لزم.
+      كل الحلقات النشطة تعني كل الحلقات النشطة ضمن الدورة المحددة، لا حلقة واحدة ولا حلقات دورة أخرى.
+      الحلقات المعروضة في القائمة هي الحلقات <strong>النشطة</strong> ضمن هذه الدورة.
+    </p>
+  }
 </section>

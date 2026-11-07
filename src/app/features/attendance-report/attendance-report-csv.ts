@@ -1,18 +1,29 @@
-import { AttendanceDayHeaderVm, AttendanceRowVm } from './dto/attendance-report-filters.dto';
+import type { AttendanceDayHeaderVm, AttendanceRowVm } from './dto/attendance-report-filters.dto';
 
 /** Client-side CSV from loaded weekly grid (no Nest export). */
 export function buildAttendanceWeeklyCsv(
   headers: AttendanceDayHeaderVm[],
   rows: AttendanceRowVm[],
-  meta?: { halqaName?: string; weekLabel?: string },
+  meta?: {
+    halqaName?: string;
+    weekLabel?: string;
+    termName?: string;
+    termStatusLabel?: string;
+    termStart?: string;
+    termEnd?: string;
+  },
 ): string {
   const dayTitles = headers.map((h) => {
     const title = `${h.dowAr} ${h.dayOfMonth}`;
     return h.isHoliday ? `${title} عطلة` : title;
   });
   const lines: string[] = [];
-  if (meta?.halqaName || meta?.weekLabel) {
-    lines.push(csvRow([meta.halqaName ?? '', meta.weekLabel ?? '']));
+  if (meta?.halqaName || meta?.weekLabel || meta?.termName || meta?.termStatusLabel) {
+    const cells = [meta.halqaName ?? '', meta.weekLabel ?? ''];
+    if (meta.termName || meta.termStatusLabel || meta.termStart || meta.termEnd) {
+      cells.push(meta.termName ?? '', meta.termStatusLabel ?? '', meta.termStart ?? '', meta.termEnd ?? '');
+    }
+    lines.push(csvRow(cells));
   }
   lines.push(csvRow(['الطالب', 'الحلقة', ...dayTitles]));
   for (const row of rows) {

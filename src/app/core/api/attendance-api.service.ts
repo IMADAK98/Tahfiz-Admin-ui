@@ -1,11 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
-import { CENTER_WEEKLY_TABLE_PATH, centerWeeklyHalqaIdParam } from './attendance-weekly-query';
+import {
+  CENTER_WEEKLY_TABLE_PATH,
+  centerWeeklyQueryParams,
+  halqaWeeklyQueryParams,
+} from './attendance-weekly-query';
 import { unwrapEnvelope } from './envelope.helpers';
+import { isNoHalqasForTermError } from './error-message.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
 import { HalqaByTermItem, WeeklyAttendanceTable } from './models/attendance.model';
 
@@ -26,11 +31,11 @@ export class AttendanceApiService {
     halqaId: number | string,
     weekStartDate: string,
     studentId?: number,
+    termId?: number | null,
   ): Observable<WeeklyAttendanceTable> {
-    let params = new HttpParams().set('weekStartDate', weekStartDate);
-    if (studentId !== undefined) {
-      params = params.set('studentId', String(studentId));
-    }
+    const params = new HttpParams({
+      fromObject: halqaWeeklyQueryParams(weekStartDate, studentId, termId),
+    });
     return this.http
       .get<ApiEnvelope<WeeklyAttendanceTable>>(
         `${this.apiBaseUrl}/attendance/halqa/${encodeURIComponent(String(halqaId))}/weekly-table`,
@@ -40,16 +45,19 @@ export class AttendanceApiService {
   }
 
   /**
-   * Center-wide Sun–Thu grid (Nest build B).
-   * Omit `halqaId` → all active ḥalaqāt in the caller center.
-   * The path lives in `CENTER_WEEKLY_TABLE_PATH`.
+   * Center-wide Sun–Thu grid.
+   * Omit `halqaId` for every ḥalaqa in the requested scope, not one forced ḥalaqa.
+   * Report pages send the selected termId with that omission.
+   * Omitting termId remains the legacy caller path. This client does not drop rows.
    */
-  getCenterWeeklyTable(weekStartDate: string, halqaId?: number | null): Observable<unknown> {
-    let params = new HttpParams().set('weekStartDate', weekStartDate);
-    const halqaParam = centerWeeklyHalqaIdParam(halqaId);
-    if (halqaParam) {
-      params = params.set('halqaId', halqaParam);
-    }
+  getCenterWeeklyTable(
+    weekStartDate: string,
+    halqaId?: number | null,
+    termId?: number | null,
+  ): Observable<unknown> {
+    const params = new HttpParams({
+      fromObject: centerWeeklyQueryParams(weekStartDate, halqaId, termId),
+    });
     return this.http
       .get<ApiEnvelope<unknown>>(
         `${this.apiBaseUrl}${CENTER_WEEKLY_TABLE_PATH}`,
@@ -68,7 +76,10 @@ export class AttendanceApiService {
       .pipe(map((res) => unwrapEnvelope(res.body, res.status)));
   }
 
-  /** Ḥalaqa dropdown; live empty array when term has none. */
+  /**
+   * Ḥalaqas of one term. Nest includes inactive rows only when that term is COMPLETED.
+   * This request adds no membership query.
+   */
   getHalqasByTerm(termId: number): Observable<HalqaByTermItem[]> {
     return this.http
       .get<ApiEnvelope<HalqaByTermItem[]>>(
@@ -80,6 +91,9 @@ export class AttendanceApiService {
           const data = unwrapEnvelope(res.body, res.status);
           return Array.isArray(data) ? data : [];
         }),
+        catchError((error: unknown) =>
+          isNoHalqasForTermError(error) ? of([]) : throwError(() => error),
+        ),
       );
   }
 }

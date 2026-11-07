@@ -7,7 +7,8 @@ import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token'
 import { apiErrorFromBody } from './api-error';
 import { envelopeOk, unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { ActiveTerm, CreateTermPayload, UpdateTermPayload } from './models/term.model';
+import { ActiveTerm, CreateTermPayload, TermListItem, UpdateTermPayload } from './models/term.model';
+import { readTermList } from './term-list';
 import { readTermEditConflict, TermEditConflictError } from './term-edit-conflict';
 
 @Injectable({ providedIn: 'root' })
@@ -58,6 +59,16 @@ export class TermApiService {
           return throwError(() => err);
         }),
       );
+  }
+
+  /**
+   * GET /term — every term in the JWT center, including COMPLETED.
+   * HTTP 200 body is a bare array. No query param is added.
+   */
+  listTerms(): Observable<TermListItem[]> {
+    return this.http
+      .get<TermListItem[]>(`${this.apiBaseUrl}/term`, { observe: 'response' })
+      .pipe(map((res) => readTermList(res.body)));
   }
 
   getTermsByCenterId(centerId: number): Observable<ActiveTerm[]> {

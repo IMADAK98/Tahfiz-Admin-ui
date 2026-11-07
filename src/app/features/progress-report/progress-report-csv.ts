@@ -1,13 +1,31 @@
-import { ProgressRowVm } from './dto/progress-report-filters.dto';
+import type { ProgressRowVm } from './dto/progress-report-filters.dto';
 
 /** Client-side CSV from loaded progress rows (no Nest export). */
 export function buildProgressReportCsv(
   rows: ProgressRowVm[],
-  meta?: { halqaName?: string; periodLabel?: string; rangeLabel?: string },
+  meta?: {
+    halqaName?: string;
+    periodLabel?: string;
+    rangeLabel?: string;
+    termName?: string;
+    termStatusLabel?: string;
+    termStart?: string;
+    termEnd?: string;
+  },
 ): string {
   const lines: string[] = [];
-  if (meta?.halqaName || meta?.periodLabel || meta?.rangeLabel) {
-    lines.push(csvRow([meta.halqaName ?? '', meta.periodLabel ?? '', meta.rangeLabel ?? '']));
+  if (
+    meta?.halqaName ||
+    meta?.periodLabel ||
+    meta?.rangeLabel ||
+    meta?.termName ||
+    meta?.termStatusLabel
+  ) {
+    const cells = [meta.halqaName ?? '', meta.periodLabel ?? '', meta.rangeLabel ?? ''];
+    if (meta.termName || meta.termStatusLabel || meta.termStart || meta.termEnd) {
+      cells.push(meta.termName ?? '', meta.termStatusLabel ?? '', meta.termStart ?? '', meta.termEnd ?? '');
+    }
+    lines.push(csvRow(cells));
   }
   lines.push(csvRow(['الطالب', 'نسبة الحفظ', 'نسبة التثبيت', 'نسبة المراجعة', 'آخر تحديث']));
   for (const row of rows) {

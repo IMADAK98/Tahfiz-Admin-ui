@@ -100,14 +100,19 @@ assert.equal(pathHits.length, 0, 'path string stays in CENTER_WEEKLY_TABLE_PATH'
 assert.match(api, /CENTER_WEEKLY_TABLE_PATH/);
 assert.match(api, /getHalqaDropdown/);
 assert.match(feature, /getCenterWeeklyTable/);
-assert.match(feature, /getHalqaDropdown/);
+assert.match(feature, /getHalqasByTerm/);
+assert.doesNotMatch(feature, /getHalqaDropdown/);
 assert.doesNotMatch(feature, /getWeeklyTable\(/);
 assert.doesNotMatch(feature, /forkJoin/);
-assert.doesNotMatch(feature, /getActiveTerm|by-term|getHalqasByTerm/);
+assert.doesNotMatch(feature, /getActiveTerm/);
 assert.doesNotMatch(feature, /\/attendance\/halqa\//);
+assert.match(
+  feature,
+  /getCenterWeeklyTable\(weekStartDate, Number\.isFinite\(halqaId\) \? halqaId : null, termId\)/,
+);
 assert.match(html, /halaqa-under/);
 assert.match(html, /تصدير CSV/);
-assert.match(html, /الحلقات <strong>النشطة<\/strong> فقط/);
+assert.match(html, /الحلقات <strong>النشطة<\/strong> ضمن هذه الدورة/);
 
 const queryFile = readFileSync(join(src, 'app/core/api/attendance-weekly-query.ts'), 'utf8');
 assert.equal(
