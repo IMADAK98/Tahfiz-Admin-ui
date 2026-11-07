@@ -42,11 +42,12 @@ export function formatStudentCountAr(count: number): string {
   return `${count} طالباً`;
 }
 
-export function withAllActiveHalqaOption(items: HalqaDropdownItem[]): HalqaFilterOption[] {
+export function withAllActiveHalqaOption(
+  items: HalqaDropdownItem[],
+  allLabel: string = ALL_ACTIVE_HALAQAT_LABEL,
+): HalqaFilterOption[] {
   const seen = new Set<number>();
-  const options: HalqaFilterOption[] = [
-    { value: ALL_ACTIVE_HALAQAT, name: ALL_ACTIVE_HALAQAT_LABEL },
-  ];
+  const options: HalqaFilterOption[] = [{ value: ALL_ACTIVE_HALAQAT, name: allLabel }];
   for (const item of items) {
     if (!item.id || seen.has(item.id) || !item.name) {
       continue;

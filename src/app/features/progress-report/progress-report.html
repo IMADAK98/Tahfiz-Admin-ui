@@ -16,6 +16,14 @@
     </div>
   </header>
 
+  <app-report-term-picker
+    [terms]="termOptions()"
+    [selectedTermId]="selectedTermId()"
+    [heading]="termHeading()"
+    [readOnly]="termReadOnly()"
+    (termSelected)="onTermSelected($event)"
+  />
+
   <!-- Filter TWO ROWS (spacing lock): row1 = حلقة | period pills | search; row2 = date context -->
   <div class="pr-report__filters" role="search" aria-label="فلاتر التقرير — حلقة وفترة وبحث">
     <div class="pr-report__filter-row">
@@ -120,6 +128,16 @@
     </div>
   </div>
 
+  @if (blockedReason()) {
+    <div class="pr-report__empty">
+      <h2>{{ listFailed() ? 'تعذر تحميل الدورات' : 'الدورة المحددة' }}</h2>
+      <p>{{ blockedReason() }}</p>
+      @if (listFailed()) {
+        <p-button type="button" label="إعادة المحاولة" (onClick)="retryTermList()" />
+      }
+    </div>
+  }
+
   @if (errorMessage()) {
     <p class="pr-report__error" role="alert">{{ errorMessage() }}</p>
   }
@@ -128,7 +146,7 @@
     <p class="pr-report__status" role="status">جاري التحميل…</p>
   }
 
-  @if (!bootstrapping() && !loading() && selectedHalqaId() && showEmpty()) {
+  @if (!bootstrapping() && !loading() && !blockedReason() && selectedHalqaId() && showEmpty()) {
     <div class="pr-report__empty">
       <h2>لا توجد بيانات تقدّم بعد</h2>
       <p>
@@ -138,19 +156,19 @@
     </div>
   }
 
-  @if (!bootstrapping() && !loading() && selectedHalqaId() && table() && !showEmpty()) {
+  @if (!bootstrapping() && !loading() && !blockedReason() && selectedHalqaId() && table() && !showEmpty()) {
     <div class="pr-report__meta">
+      @if (termHeading(); as heading) {
+        <span class="badge badge-neutral">{{ heading }}</span>
+      }
       @if (selectedHalqaName(); as hn) {
-        <span class="badge badge-neutral"
-          >{{ hn }}@if (termName()) {
-            · {{ termName() }}
-          }</span
-        >
+        <span class="badge badge-neutral">{{ hn }}</span>
       }
       <span class="type-badge hifz">حفظ</span>
       <span class="type-badge tath">تثبيت</span>
       <span class="type-badge mur">مراجعة</span>
       <span class="badge badge-neutral">فترة: {{ periodLabelAr() }}</span>
+      <span class="badge badge-neutral">{{ rangeLabel() }}</span>
       <span class="badge badge-neutral">{{ studentCountLabel() }}</span>
     </div>
 
@@ -195,10 +213,22 @@
     </div>
   }
 
-  @if (!bootstrapping() && !loading() && !selectedHalqaId() && halqaOptions().length === 0) {
+  @if (!bootstrapping() && !loading() && !blockedReason() && !selectedHalqaId() && halqaOptions().length > 0) {
     <div class="pr-report__empty">
-      <h2>لا حلقات في الدورة النشطة</h2>
-      <p>أضف حلقة للدورة الحالية ثم عد إلى تقرير التقدّم.</p>
+      <h2>اختر حلقة</h2>
+      <p>الحلقة السابقة ليست ضمن هذه الدورة. اختر حلقة لعرض تقرير الدورة المحددة.</p>
+    </div>
+  }
+
+  @if (!bootstrapping() && !loading() && !blockedReason() && !selectedHalqaId() && halqaOptions().length === 0) {
+    <div class="pr-report__empty">
+      @if (termReadOnly()) {
+        <h2>لا حلقات في هذه الدورة</h2>
+        <p>لا توجد حلقات مسجّلة في الدورة المحددة.</p>
+      } @else {
+        <h2>لا حلقات في الدورة النشطة</h2>
+        <p>أضف حلقة للدورة الحالية ثم عد إلى تقرير التقدّم.</p>
+      }
     </div>
   }
 </section>

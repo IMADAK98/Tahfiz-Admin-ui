@@ -168,6 +168,12 @@ Done
 
 `/admin/reports/attendance` defaults to «كل الحلقات النشطة» and optionally filters one ḥalaqa on the same grid. It calls live `GET /attendance/weekly-table` (omit `halqaId` = all active, including non-active terms — same set as `GET /halqa/dropdown`, Nest #40 `5fa08515`). CSV stays client-side.
 
+## Angular Admin — report term picker (progress + attendance)
+
+Prepared — publication held for approval.
+
+Both report pages read `GET /term` as a bare array, default to its ACTIVE row, and send that `termId`. Halaqa and report requests do not send `includeInactive`. A failed list stays on the explicit URL term id and can be retried.
+
 ## Angular Admin — plans tab smoke nits
 
 Done
