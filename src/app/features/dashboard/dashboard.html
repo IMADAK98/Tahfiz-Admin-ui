@@ -1,3 +1,4 @@
+<!-- primeicons glyphs render mirrored under dir=rtl, so pi-angle-right shows as ‹ (toward the inline end). -->
 <section class="dash">
   @if (loadState() === DashboardLoadState.Loading) {
     <p class="dash-muted">جاري تحميل لوحة التحكم…</p>
@@ -8,7 +9,7 @@
     @if (data.term; as term) {
       <div class="term-banner">
         <div>
-          <div class="eyebrow">{{ copy['term.label'] }}</div>
+          <div class="term-eyebrow">{{ copy['term.label'] }}</div>
           <div class="term-name">
             <strong>{{ term.name }}</strong>
             @if (term.status === 'ACTIVE') {
@@ -92,7 +93,7 @@
           @if (requests.total > 0) {
             <div class="kpi-cta">
               {{ copy['kpi.requests_cta'] }}
-              <i class="pi pi-angle-left" aria-hidden="true"></i>
+              <i class="pi pi-angle-right" aria-hidden="true"></i>
             </div>
           }
         </p-card>
@@ -112,7 +113,7 @@
           </div>
           <a class="link-all" routerLink="/admin/reports/progress">
             {{ copy['ov.link'] }}
-            <i class="pi pi-angle-left" aria-hidden="true"></i>
+            <i class="pi pi-angle-right" aria-hidden="true"></i>
           </a>
         </div>
 
@@ -176,7 +177,7 @@
                 <td class="ov-num num" [class.is-low]="isLow(row.coverage, lowCoverageBelow)">
                   {{ percent(row.coverage) }}
                 </td>
-                <td class="col-chev"><i class="pi pi-angle-left chev" aria-hidden="true"></i></td>
+                <td class="col-chev"><i class="pi pi-angle-right chev" aria-hidden="true"></i></td>
               </tr>
             </ng-template>
           </p-table>
@@ -242,7 +243,7 @@
                         }
                       </span>
                     </span>
-                    <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                    <i class="pi pi-angle-right chev" aria-hidden="true"></i>
                   </a>
                 }
               </div>
@@ -293,7 +294,7 @@
                           <p-tag severity="danger" [value]="coverageIssue(student)" />
                         }
                       </span>
-                      <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                      <i class="pi pi-angle-right chev" aria-hidden="true"></i>
                     </a>
                   }
                 </div>
@@ -312,7 +313,7 @@
             <div class="foot-link">
               <a class="link-all sm" routerLink="/admin/students">
                 {{ t('ws.all', { n: data.attentionStudents.length }) }}
-                <i class="pi pi-angle-left" aria-hidden="true"></i>
+                <i class="pi pi-angle-right" aria-hidden="true"></i>
               </a>
             </div>
           }
@@ -386,7 +387,7 @@
                         })
                       "
                     />
-                    <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                    <i class="pi pi-angle-right chev" aria-hidden="true"></i>
                   </a>
                 }
               </div>
