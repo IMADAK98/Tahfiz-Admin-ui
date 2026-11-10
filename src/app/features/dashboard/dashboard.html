@@ -1,185 +1,425 @@
-<section class="dashboard-page">
-  <header class="dashboard-header">
-    <div>
-      <h2>مرحباً بك</h2>
-      <p>ملخص تشغيل المركز اليوم</p>
-    </div>
-
-    <div
-      class="term-actions"
-      [attr.aria-label]="hasActiveTerm() ? 'إجراءات الدورة النشطة' : 'إنشاء أول دورة'"
-    >
-      @if (hasActiveTerm()) {
-        <button
-          type="button"
-          class="btn btn-primary is-disabled"
-          disabled
-          title="أنهِ الدورة الحالية أولاً"
-        >
-          + إنشاء دورة
-        </button>
-        <p class="create-hint">أنهِ الدورة الحالية أولاً</p>
-        <button type="button" class="btn btn-secondary" (click)="confirmEndTerm()">
-          إنهاء الدورة
-        </button>
-      } @else {
-        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-          + إنشاء دورة
-        </button>
-      }
-    </div>
-  </header>
-
+<section class="dash">
   @if (loadState() === DashboardLoadState.Loading) {
-    <p style="color: var(--color-muted)">جاري تحميل الدورة النشطة…</p>
+    <p class="dash-muted">جاري تحميل لوحة التحكم…</p>
   } @else if (loadState() === DashboardLoadState.Error) {
     <p class="load-error" role="alert">{{ loadError() }}</p>
     <button type="button" class="btn btn-secondary" (click)="reload()">إعادة المحاولة</button>
-  } @else if (!hasActiveTerm()) {
-    <div class="empty-block">
-      <h2>ابدأ بإنشاء أول دورة</h2>
-      <p>
-        لا توجد دورة نشطة بعد. أنشئ دورة دراسية لتحديد فترة التسجيل والإجازات، ثم أضف الحلقات
-        والمعلمين.
-      </p>
-      <button type="button" class="btn btn-primary btn-lg" (click)="openCreateModal()">
-        إنشاء دورة
-      </button>
-    </div>
-  } @else {
-    @if (activeTerm(); as term) {
+  } @else if (dashboard(); as data) {
+    @if (data.term; as term) {
       <div class="term-banner">
         <div>
-          <div class="term-banner-label">الدورة النشطة</div>
-          <strong>{{ term.name }}</strong>
-          @if (isRegistrationOpen(term)) {
-            <span class="badge badge-success" style="margin-inline-start: 8px">التسجيل مفتوح</span>
+          <div class="eyebrow">{{ copy['term.label'] }}</div>
+          <div class="term-name">
+            <strong>{{ term.name }}</strong>
+            @if (term.status === 'ACTIVE') {
+              <p-tag severity="success" [value]="copy['term.status_active']" />
+            }
+            <p-tag class="tag-sample" [value]="copy['common.sample']" />
+          </div>
+          <div class="term-meta">{{ termMeta(term) }}</div>
+        </div>
+        <div class="term-actions">
+          @if (activeTerm()?.status !== 'COMPLETED') {
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              [disabled]="!activeTerm() || endingTerm()"
+              (click)="openEditModal()"
+            >
+              تعديل
+            </button>
           }
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            [disabled]="!activeTerm() || endingTerm()"
+            (click)="confirmEndTerm()"
+          >
+            {{ copy['term.end_btn'] }}
+          </button>
         </div>
       </div>
+    } @else {
+      <div class="empty-block">
+        <h2>{{ copy['noterm.title'] }}</h2>
+        <p>{{ copy['noterm.body'] }}</p>
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <i class="pi pi-plus" aria-hidden="true"></i>
+          {{ copy['noterm.cta'] }}
+        </button>
+      </div>
+    }
 
-      @if (cards(); as kpi) {
-        <div class="kpi-grid">
-          <a class="card kpi" routerLink="/admin/halaqat">
-            <div class="kpi-label">الحلقات النشطة</div>
-            <div class="kpi-value">{{ kpi.activeHalqasCount }}</div>
-          </a>
-          <a class="card kpi" routerLink="/admin/teachers">
-            <div class="kpi-label">المعلمون</div>
-            <div class="kpi-value">{{ kpi.teachersCount }}</div>
-          </a>
-          <a class="card kpi" routerLink="/admin/students">
-            <div class="kpi-label">الطلاب المسجّلون</div>
-            <div class="kpi-value">{{ kpi.activeStudentsCount }}</div>
-          </a>
-          <a class="card kpi" routerLink="/admin/teacher-requests">
-            <div class="kpi-label">طلبات المعلمين</div>
-            <div class="kpi-value">{{ kpi.pendingTeacherRequestsCount }}</div>
-          </a>
-          <a class="card kpi" routerLink="/admin/student-requests">
-            <div class="kpi-label">طلبات الطلاب</div>
-            <div class="kpi-value">{{ kpi.pendingStudentRequestsCount }}</div>
+    <div class="kpi-grid">
+      <p-card class="kpi-card">
+        <div class="kpi-label">{{ copy['kpi.halaqat'] }}</div>
+        <div class="kpi-value num">{{ data.kpis.activeHalaqatCount }}</div>
+        <div class="kpi-meta">{{ copy['kpi.halaqat_meta'] }}</div>
+      </p-card>
+      <p-card class="kpi-card">
+        <div class="kpi-label">{{ copy['kpi.teachers'] }}</div>
+        <div class="kpi-value num">{{ data.kpis.activeTeachersCount }}</div>
+        <div class="kpi-meta">{{ copy['kpi.teachers_meta'] }}</div>
+      </p-card>
+      <p-card class="kpi-card">
+        <div class="kpi-label">{{ copy['kpi.students'] }}</div>
+        <div class="kpi-value num">{{ data.kpis.activeStudentsCount }}</div>
+        <div class="kpi-meta">{{ copy['kpi.students_meta'] }}</div>
+      </p-card>
+      @let requests = data.kpis.pendingRequests;
+      <a
+        class="kpi-link row-link"
+        routerLink="/admin/student-requests"
+        [attr.aria-label]="t('kpi.requests_aria', { n: requests.total })"
+      >
+        <p-card class="kpi-card" [class.kpi-alert]="requests.total > 0">
+          <div class="kpi-label">
+            {{ copy['kpi.requests'] }}
+            @if (requests.total > 0) {
+              <p-badge severity="warn" [value]="requests.total" />
+            }
+          </div>
+          <div class="kpi-value num">{{ requests.total }}</div>
+          <div class="kpi-meta">
+            {{
+              t('kpi.requests_meta', {
+                s: requests.students,
+                t: requests.teachers,
+                r: requests.reEnrollment,
+              })
+            }}
+          </div>
+          @if (requests.total > 0) {
+            <div class="kpi-cta">
+              {{ copy['kpi.requests_cta'] }}
+              <i class="pi pi-angle-left" aria-hidden="true"></i>
+            </div>
+          }
+        </p-card>
+      </a>
+    </div>
+
+    @if (data.term) {
+      <section class="card dash-card" aria-labelledby="ov-h">
+        <div class="card-head">
+          <div>
+            <h2 id="ov-h" class="card-title">
+              {{ copy['ov.title'] }}
+              <p-tag class="tag-sample" [value]="copy['common.sample']" />
+            </h2>
+            <p class="card-sub">{{ copy['ov.order_note'] }}</p>
+            <p class="formula">{{ copy['ov.formula'] }}</p>
+          </div>
+          <a class="link-all" routerLink="/admin/reports/progress">
+            {{ copy['ov.link'] }}
+            <i class="pi pi-angle-left" aria-hidden="true"></i>
           </a>
         </div>
-      }
 
-      <div class="layout-2">
-        <section class="card panel" aria-labelledby="term-detail-title">
-          <div class="panel-head">
-            <div class="panel-head-title">
-              <h3 id="term-detail-title">تفاصيل الدورة</h3>
-              <span
-                class="badge"
-                [class.badge-success]="termHasStarted(term)"
-                [class.badge-primary]="!termHasStarted(term)"
+        <div role="group" [attr.aria-label]="copy['ov.table_aria']">
+          <p-table
+            class="ov-table"
+            [value]="data.halaqat"
+            dataKey="halaqaId"
+            selectionMode="single"
+            [rowHover]="true"
+            [tableStyle]="{ 'table-layout': 'fixed', width: '100%' }"
+            (onRowSelect)="openHalaqa($event)"
+          >
+            <ng-template #header>
+              <tr>
+                <th class="col-rank">{{ copy['ov.col.rank'] }}</th>
+                <th class="col-name">{{ copy['ov.col.name'] }}</th>
+                <th>{{ copy['ov.col.score'] }}</th>
+                <th class="col-num">{{ copy['ov.col.att'] }}</th>
+                <th class="col-num">{{ copy['ov.col.cov'] }}</th>
+                <th class="col-chev"></th>
+              </tr>
+            </ng-template>
+            <ng-template #body let-row>
+              @let band = scoreBand(row.score);
+              <tr
+                class="ov-row row-link"
+                [pSelectableRow]="row"
+                [class.b-low]="band === ScoreBand.Low"
+                [class.b-mid]="band === ScoreBand.Mid"
+                [class.is-inc]="!row.fullyMarkedThisWeek"
+                [attr.aria-label]="halaqaAria(row)"
               >
-                {{ termHasStarted(term) ? 'جارية' : 'قادمة' }}
-              </span>
+                <td class="ov-rank num">{{ row.rank }}</td>
+                <td class="ov-name">
+                  <strong>{{ row.name }}</strong>
+                  <small>{{
+                    t('ov.row_meta', { teacher: row.teacherName, n: row.studentCount })
+                  }}</small>
+                </td>
+                <td>
+                  <div class="ov-score" [class.has-tag]="!row.fullyMarkedThisWeek">
+                    <b class="num">{{ round(row.score) }}</b>
+                    <p-progressbar [value]="row.score ?? 0" [showValue]="false" />
+                    @if (!row.fullyMarkedThisWeek) {
+                      <p-tag
+                        severity="warn"
+                        icon="pi pi-exclamation-triangle"
+                        [value]="copy['ov.inc_chip']"
+                        [attr.title]="copy['ov.inc_tip']"
+                      />
+                    }
+                  </div>
+                </td>
+                <td
+                  class="ov-num num"
+                  [class.is-low]="isLow(row.attendanceRate, lowAttendanceBelow)"
+                >
+                  {{ percent(row.attendanceRate) }}
+                </td>
+                <td class="ov-num num" [class.is-low]="isLow(row.coverage, lowCoverageBelow)">
+                  {{ percent(row.coverage) }}
+                </td>
+                <td class="col-chev"><i class="pi pi-angle-left chev" aria-hidden="true"></i></td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <div class="bands">
+          <span><i class="band b-low"></i>{{ copy['ov.band.low'] }}</span>
+          <span><i class="band b-mid"></i>{{ copy['ov.band.mid'] }}</span>
+          <span><i class="band b-ok"></i>{{ copy['ov.band.ok'] }}</span>
+          <span>
+            <i class="pi pi-exclamation-triangle warn-ico" aria-hidden="true"></i>
+            {{ copy['ov.band.inc'] }}
+          </span>
+        </div>
+      </section>
+
+      <div class="grid-2">
+        <section class="card dash-card" aria-labelledby="wh-h">
+          <div class="card-head">
+            <div>
+              <h3 id="wh-h" class="card-title sm">{{ copy['wh.title'] }}</h3>
+              <p class="card-sub">{{ copy['wh.sub'] }}</p>
             </div>
-            @if (canEditTerm(term)) {
-              <div class="panel-actions">
-                <button type="button" class="btn btn-secondary btn-sm" (click)="openEditModal()">
-                  <span class="edit-ico" aria-hidden="true">✎</span>
-                  تعديل
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" (click)="confirmEndTerm()">
-                  إنهاء الدورة
-                </button>
+          </div>
+          <p-dataview [value]="focus()" layout="list">
+            <ng-template #list let-items>
+              <div role="list">
+                @for (item of items; track item.row.halaqaId) {
+                  @let band = scoreBand(item.row.score);
+                  <a
+                    role="listitem"
+                    class="wl-row row-link"
+                    [class.b-low]="band === ScoreBand.Low"
+                    [class.b-mid]="band === ScoreBand.Mid"
+                    [routerLink]="['/admin/halaqat', item.row.halaqaId]"
+                    [attr.aria-label]="
+                      t('wh.row_aria', { name: item.row.name, score: round(item.row.score) })
+                    "
+                  >
+                    <span
+                      class="score-pill num"
+                      [class.b-low]="band === ScoreBand.Low"
+                      [class.b-mid]="band === ScoreBand.Mid"
+                    >
+                      {{ round(item.row.score) }}
+                    </span>
+                    <span class="wl-main">
+                      <strong>{{ item.row.name }}</strong>
+                      <span class="tags">
+                        @for (reason of item.reasons; track reason) {
+                          @if (reason === FocusReason.IncompleteMarking) {
+                            <p-tag
+                              severity="warn"
+                              icon="pi pi-exclamation-triangle"
+                              [value]="t(reason)"
+                            />
+                          } @else {
+                            <p-tag
+                              [severity]="reason === FocusReason.LowScore ? 'warn' : 'danger'"
+                              [value]="t(reason)"
+                            />
+                          }
+                        }
+                      </span>
+                    </span>
+                    <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                  </a>
+                }
+              </div>
+            </ng-template>
+            <ng-template #emptymessage>
+              <div class="empty-chart">
+                <strong>{{ copy['wh.empty_title'] }}</strong>
+                <span>{{ copy['wh.empty_body'] }}</span>
+              </div>
+            </ng-template>
+          </p-dataview>
+        </section>
+
+        <section class="card dash-card" aria-labelledby="ws-h">
+          <div class="card-head">
+            <div>
+              <h3 id="ws-h" class="card-title sm">{{ copy['ws.title'] }}</h3>
+              <p class="card-sub">{{ copy['ws.sub'] }}</p>
+            </div>
+          </div>
+          @for (group of studentGroups(); track group.absence) {
+            <div class="grp-h">
+              {{ group.absence ? copy['ws.grp_abs'] : copy['ws.grp_cov'] }}
+              <span class="num">({{ group.total }})</span>
+            </div>
+            <p-dataview [value]="group.students" layout="list">
+              <ng-template #list let-students>
+                <div role="list">
+                  @for (student of students; track student.studentId) {
+                    <a
+                      role="listitem"
+                      class="wl-row row-link wl-student"
+                      routerLink="/admin/students"
+                      [queryParams]="{ studentId: student.studentId }"
+                      [attr.aria-label]="studentAria(student, group.absence)"
+                    >
+                      <span class="wl-main">
+                        <strong>{{ student.name }}</strong>
+                        <p-chip [label]="student.halaqaName" />
+                      </span>
+                      <span class="tags end">
+                        @if (group.absence) {
+                          <p-tag severity="danger" [value]="absenceIssue(student)" />
+                          @if (isLow(student.coverage, lowCoverageBelow)) {
+                            <p-tag severity="secondary" [value]="coverageIssue(student)" />
+                          }
+                        } @else {
+                          <p-tag severity="danger" [value]="coverageIssue(student)" />
+                        }
+                      </span>
+                      <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                    </a>
+                  }
+                </div>
+              </ng-template>
+            </p-dataview>
+            @if (group.hidden) {
+              <div class="more">{{ t('ws.more', { n: group.hidden }) }}</div>
+            }
+          } @empty {
+            <div class="empty-chart">
+              <strong>{{ copy['ws.empty_title'] }}</strong>
+              <span>{{ copy['ws.empty_body'] }}</span>
+            </div>
+          }
+          @if (data.attentionStudents.length) {
+            <div class="foot-link">
+              <a class="link-all sm" routerLink="/admin/students">
+                {{ t('ws.all', { n: data.attentionStudents.length }) }}
+                <i class="pi pi-angle-left" aria-hidden="true"></i>
+              </a>
+            </div>
+          }
+        </section>
+      </div>
+
+      <div class="grid-2-1">
+        <section class="card dash-card" aria-labelledby="mc-h">
+          <div class="card-head">
+            <div>
+              <h3 id="mc-h" class="card-title sm">{{ copy['mc.title'] }}</h3>
+              @if (data.week; as week) {
+                <p class="card-sub">{{ weekSubtitle(week) }}</p>
+              }
+            </div>
+          </div>
+          @if (data.markingCompleteness; as marking) {
+            <div class="mc-top">
+              <div class="mc-big">
+                <b class="num">{{ marking.fullyMarkedHalaqat }}</b>
+                <span>{{ t('mc.big', { done: '', all: marking.totalHalaqat }).trim() }}</span>
+                <small>{{ copy['mc.big_sub'] }}</small>
+              </div>
+              <p-metergroup [value]="meterItems()" [max]="marking.expectedCells || 1">
+                <ng-template #label>
+                  <div class="mc-legend">
+                    <span>
+                      <i class="dot m-marked"></i>
+                      {{ t('mc.legend_marked', { n: marking.markedCells }) }}
+                      <b class="num">
+                        ({{
+                          round(
+                            marking.expectedCells
+                              ? (marking.markedCells * 100) / marking.expectedCells
+                              : null
+                          )
+                        }}%)
+                      </b>
+                    </span>
+                    <span>
+                      <i class="dot m-unmarked"></i>
+                      {{ t('mc.legend_unmarked', { n: marking.notMarkedCells }) }}
+                    </span>
+                  </div>
+                </ng-template>
+              </p-metergroup>
+            </div>
+            @if (incompleteHalaqat().length) {
+              <div class="grp-h">{{ copy['mc.inc_head'] }}</div>
+              <div role="list">
+                @for (row of incompleteHalaqat(); track row.halaqaId) {
+                  <a
+                    role="listitem"
+                    class="wl-row row-link b-mid wl-student"
+                    [routerLink]="['/admin/halaqat', row.halaqaId]"
+                    [attr.aria-label]="
+                      t('wh.row_aria', { name: row.name, score: round(row.score) })
+                    "
+                  >
+                    <span class="wl-main"
+                      ><strong>{{ row.name }}</strong></span
+                    >
+                    <p-tag
+                      severity="warn"
+                      icon="pi pi-exclamation-triangle"
+                      [value]="
+                        t('mc.inc_row', {
+                          m: row.markedThisWeek,
+                          e: row.expectedThisWeek,
+                          u: row.notMarkedThisWeek,
+                        })
+                      "
+                    />
+                    <i class="pi pi-angle-left chev" aria-hidden="true"></i>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="mc-ok">{{ copy['mc.ok'] }}</div>
+            }
+          }
+        </section>
+
+        <section class="card dash-card" aria-labelledby="pc-h">
+          <div class="card-head">
+            <div>
+              <h3 id="pc-h" class="card-title sm">{{ copy['pc.title'] }}</h3>
+              <p class="card-sub">{{ copy['pc.sub'] }}</p>
+            </div>
+          </div>
+          <div class="pc-list">
+            @for (row of coverageRows(); track row.type) {
+              <div class="pc-row" [class.is-na]="row.average === null">
+                <span class="pc-l">{{ copy[row.label] }}</span>
+                <p-progressbar [value]="row.average ?? 0" [showValue]="false" />
+                <b class="pc-v num">{{ percent(row.average) }}</b>
+                <span class="pc-m">
+                  {{ row.average === null ? copy['pc.na'] : t('pc.n', { n: row.students }) }}
+                </span>
               </div>
             }
           </div>
-          <ul class="term-detail-list">
-            <li [class.is-updated]="isRowUpdated('name')">
-              <span class="label">
-                اسم الدورة
-                @if (isRowUpdated('name')) {
-                  <span class="updated-tag">· مُحدَّث</span>
-                }
-              </span>
-              <span class="value">{{ term.name }}</span>
-            </li>
-            <li [class.is-updated]="isRowUpdated('start')">
-              <span class="label">
-                بداية الدورة
-                @if (isRowUpdated('start')) {
-                  <span class="updated-tag">· مُحدَّث</span>
-                }
-              </span>
-              <span class="value">{{ formatDate(term.startDate) }}</span>
-            </li>
-            <li [class.is-updated]="isRowUpdated('end')">
-              <span class="label">
-                نهاية الدورة
-                @if (isRowUpdated('end')) {
-                  <span class="updated-tag">· مُحدَّث</span>
-                }
-              </span>
-              <span class="value">{{ formatDate(term.endDate) }}</span>
-            </li>
-            <li [class.is-updated]="isRowUpdated('reg')">
-              <span class="label">
-                فترة التسجيل
-                @if (isRowUpdated('reg')) {
-                  <span class="updated-tag">· مُحدَّث</span>
-                }
-              </span>
-              <span class="value">
-                {{ formatDate(term.registerationStartDate) }} —
-                {{ formatDate(term.registerationEndDate) }}
-              </span>
-            </li>
-            <li [class.is-updated]="isRowUpdated('holidays')">
-              <span class="label">
-                الإجازات
-                @if (isRowUpdated('holidays')) {
-                  <span class="updated-tag">· مُحدَّث</span>
-                }
-              </span>
-              <span class="value" [class.muted]="!holidayLabels(term).length">
-                @if (holidayLabels(term).length) {
-                  {{ holidayLabels(term).join(' · ') }}
-                } @else {
-                  لا إجازات
-                }
-              </span>
-            </li>
-          </ul>
-        </section>
-
-        <section class="card panel" aria-labelledby="quick-title">
-          <div class="panel-head">
-            <h3 id="quick-title">اختصارات</h3>
-          </div>
-          <div class="quick-links">
-            <a routerLink="/admin/halaqat">عرض الحلقات <span>←</span></a>
-            <a routerLink="/admin/halaqat">إنشاء حلقة جديدة <span>←</span></a>
-            <span class="quick-link-disabled" title="أنهِ الدورة الحالية أولاً">
-              إنشاء دورة أخرى <span>←</span>
-            </span>
-            <a routerLink="/admin/reports/attendance">تقرير الحضور (قراءة فقط) <span>←</span></a>
-          </div>
+          <p class="pc-note">{{ copy['pc.note'] }}</p>
         </section>
       </div>
+
+      <p class="note-admin">{{ copy['foot.note'] }}</p>
     }
   }
 </section>
@@ -193,7 +433,7 @@
 <app-edit-term-modal
   [visible]="showEditModal()"
   [term]="activeTerm()"
-  (saved)="onTermUpdated($event)"
+  (saved)="onTermUpdated()"
   (closed)="closeEditModal()"
 />
 
