@@ -194,3 +194,17 @@ Done
 
 إضافة خطة disables a type already chosen on another row, keeps the row's own type, and disables إضافة عنصر when حفظ/تثبيت/مراجعة are all used. Edit uses the same rule against the plan's other live items and flags a legacy duplicate without clearing it.
 Duplicate or empty types fail the existing field-error submit. Nest `localization-refactor` `8164c6ec` is the contract: one live HIFZ/TATHBEET/MURAJAA per plan.
+
+## Angular Admin — landing dashboard rev 4.1 (mock data)
+
+Done
+
+`/admin` renders design rev 4.1 (25-dashboard-landing-charts) from `DASHBOARD_DATA_SOURCE`, which is `MockDashboardDataSource` until Nest ships `GET /dashboard/term/:termId?weekStart=`. `?mock=` picks populated / incomplete-marking / missing-type / empty-worklists / noterm.
+Attendance, coverage, score, rank and attention students are computed from raw counts by `buildTermDashboard` (locked rules, specs in `dashboard-metrics.spec.ts`). Term create / edit / end still act on the live active term.
+
+## Angular Admin — landing rev 4.2 + live «أداء الحلقات»
+
+Done
+
+Rev 4.2 drops the ḥalaqa worklist; «أداء الحلقات» now reads `GET /dashboard/term/:termId/halqa-performance` (Nest PR #47) for the live active term, with loading, error + retry and empty states, and null rates shown as «—».
+`?mock=<state>` keeps every block on fixtures with no performance call; without it, only «أداء الحلقات» is live and a missing active term shows the no-term state.
