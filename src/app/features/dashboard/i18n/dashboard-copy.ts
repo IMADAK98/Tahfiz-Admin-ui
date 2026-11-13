@@ -1,5 +1,6 @@
 /**
- * Admin landing dashboard copy, rev 4.2, verbatim from DASHBOARD-COPY.arabic.md (Thafiz Arabic).
+ * Admin landing dashboard copy, rev 4.2, verbatim from DASHBOARD-COPY.arabic.md (Thafiz Arabic,
+ * including the 2026-11-13 «أداء الحلقات» live-state additions).
  * `{x, plural, …}` blocks are ICU MessageFormat; render with `formatDashboardCopy`.
  */
 export const DASHBOARD_COPY = {
@@ -39,7 +40,13 @@ export const DASHBOARD_COPY = {
   'ov.col.cov': 'التغطية',
   'ov.row_meta':
     '{teacher} · {n, plural, zero {لا طلاب} one {طالب واحد} two {طالبان} few {# طلاب} many {# طالبًا} other {# طالب}}',
-  'ov.row_aria': '{name}: الدرجة {score}، الحضور {att}%، التغطية {cov}%. فتح تفاصيل الحلقة',
+  'ov.row_aria': '{name}: الدرجة {score}، الحضور {att}، التغطية {cov}. فتح تفاصيل الحلقة',
+  'ov.aria_pct': '{v}%',
+  'ov.aria_none': 'بلا بيانات بعد',
+  'ov.loading': 'جارٍ تحميل الحلقات…',
+  'ov.error_title': 'تعذّر تحميل الحلقات',
+  'ov.retry': 'إعادة المحاولة',
+  'ov.empty': 'لا توجد حلقات نشطة في هذه الدورة.',
   'ov.inc_chip': 'تسجيل غير مكتمل',
   'ov.inc_tip': 'لم يكتمل تسجيل حضور هذه الحلقة هذا الأسبوع، لذا قد تتغيّر الدرجة بعد اكتماله.',
   'ov.band.low': 'أقل من 75 — تحتاج اهتمامًا',

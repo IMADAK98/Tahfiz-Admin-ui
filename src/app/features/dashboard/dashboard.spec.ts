@@ -85,7 +85,7 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     const fixture = await render('/');
     http.expectOne(PERFORMANCE_URL);
     expect(card(fixture)?.querySelector('[role="status"]')?.textContent).toContain(
-      'جاري تحميل الحلقات…',
+      'جارٍ تحميل الحلقات…',
     );
     expect(rows(fixture)).toHaveLength(0);
   });
@@ -100,7 +100,9 @@ describe('DashboardComponent «أداء الحلقات»', () => {
       );
     fixture.detectChanges();
     const alert = card(fixture)?.querySelector<HTMLElement>('[role="alert"]');
+    expect(alert?.querySelector('strong')?.textContent).toBe('تعذّر تحميل الحلقات');
     expect(alert?.textContent).toContain('الدورة غير موجودة');
+    expect(alert?.querySelector('button')?.textContent?.trim()).toBe('إعادة المحاولة');
 
     alert?.querySelector('button')?.click();
     fixture.detectChanges();
@@ -109,12 +111,38 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     expect(rows(fixture)).toHaveLength(1);
   });
 
-  it('falls back to the app error string when the failure has no Nest body', async () => {
+  it('shows only the error title when the failure has no Nest body', async () => {
     const fixture = await render('/');
     http.expectOne(PERFORMANCE_URL).error(new ProgressEvent('error'));
     fixture.detectChanges();
-    expect(card(fixture)?.querySelector('[role="alert"]')?.textContent).toContain(
-      'تعذّر تحميل الحلقات',
+    const alert = card(fixture)?.querySelector<HTMLElement>('[role="alert"]');
+    expect(alert?.querySelector('strong')?.textContent).toBe('تعذّر تحميل الحلقات');
+    expect(alert?.querySelector('span')).toBeNull();
+  });
+
+  it('reads null values as «بلا بيانات بعد» in the row aria-label', async () => {
+    const fixture = await render('/');
+    http.expectOne(PERFORMANCE_URL).flush({
+      status: 200,
+      message: 'ok',
+      data: [{ ...nullRow, name: 'حلقة أبي بكر', attendanceRate: 92 }],
+    });
+    fixture.detectChanges();
+    expect(rows(fixture)[0].getAttribute('aria-label')).toBe(
+      'حلقة أبي بكر: الدرجة بلا بيانات بعد، الحضور 92%، التغطية بلا بيانات بعد. فتح تفاصيل الحلقة',
+    );
+  });
+
+  it('reads a scored row with a bare score and percent attendance and coverage', async () => {
+    const fixture = await render('/');
+    http.expectOne(PERFORMANCE_URL).flush({
+      status: 200,
+      message: 'ok',
+      data: [{ ...nullRow, attendanceRate: 87.5, coverage: 74.26, score: 80.88 }],
+    });
+    fixture.detectChanges();
+    expect(rows(fixture)[0].getAttribute('aria-label')).toBe(
+      'حلقة الإنتاج: الدرجة 81، الحضور 88%، التغطية 74%. فتح تفاصيل الحلقة',
     );
   });
 
@@ -123,7 +151,7 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     http.expectOne(PERFORMANCE_URL).flush({ status: 200, message: 'ok', data: [] });
     fixture.detectChanges();
     expect(card(fixture)?.querySelector('.empty-chart')?.textContent).toContain(
-      'لا توجد حلقات نشطة في الدورة المحددة.',
+      'لا توجد حلقات نشطة في هذه الدورة.',
     );
     expect(rows(fixture)).toHaveLength(0);
   });
@@ -142,6 +170,55 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     expect(row.querySelector('p-tag')).toBeNull();
     expect(card(fixture)?.querySelector('.tag-sample')).toBeNull();
     expect(row.getAttribute('aria-label')).toContain('حلقة الإنتاج');
+  });
+
+  const sampleTagged = (fixture: ComponentFixture<DashboardComponent>) => {
+    const element = fixture.nativeElement as HTMLElement;
+    const has = (selector: string) =>
+      Array.from(element.querySelectorAll(selector)).map(
+        (block) => !!block.querySelector('.tag-sample'),
+      );
+    return {
+      term: has('.term-banner'),
+      kpis: has('.kpi-card'),
+      overview: has('[aria-labelledby="ov-h"]'),
+      students: has('[aria-labelledby="ws-h"]'),
+      completeness: has('[aria-labelledby="mc-h"]'),
+      coverage: has('[aria-labelledby="pc-h"]'),
+    };
+  };
+
+  it('labels every mock-backed block «عيّنة» in live mode, but not «أداء الحلقات»', async () => {
+    const fixture = await render('/');
+    http.expectOne(PERFORMANCE_URL).flush({ status: 200, message: 'ok', data: [nullRow] });
+    fixture.detectChanges();
+    expect(sampleTagged(fixture)).toEqual({
+      term: [true],
+      kpis: [true, true, true, true],
+      overview: [false],
+      students: [true],
+      completeness: [true],
+      coverage: [true],
+    });
+    const tag = (fixture.nativeElement as HTMLElement).querySelector('.kpi-card .tag-sample');
+    expect(tag?.textContent?.trim()).toBe('عيّنة');
+  });
+
+  it('keeps the spec badges under ?mock=: term banner and «أداء الحلقات» only', async () => {
+    const fixture = await render('/?mock=populated');
+    expect(sampleTagged(fixture)).toEqual({
+      term: [true],
+      kpis: [false, false, false, false],
+      overview: [true],
+      students: [false],
+      completeness: [false],
+      coverage: [false],
+    });
+  });
+
+  it('labels the mock KPI tiles in the live no-term state', async () => {
+    const fixture = await render('/', null);
+    expect(sampleTagged(fixture).kpis).toEqual([true, true, true, true]);
   });
 
   it('uses mock rows under ?mock= and makes no performance call', async () => {

@@ -53,17 +53,32 @@
 
     <div class="kpi-grid">
       <p-card class="kpi-card">
-        <div class="kpi-label">{{ copy['kpi.halaqat'] }}</div>
+        <div class="kpi-label">
+          {{ copy['kpi.halaqat'] }}
+          @if (!mockMode()) {
+            <p-tag class="tag-sample" [value]="copy['common.sample']" />
+          }
+        </div>
         <div class="kpi-value num">{{ data.kpis.activeHalaqatCount }}</div>
         <div class="kpi-meta">{{ copy['kpi.halaqat_meta'] }}</div>
       </p-card>
       <p-card class="kpi-card">
-        <div class="kpi-label">{{ copy['kpi.teachers'] }}</div>
+        <div class="kpi-label">
+          {{ copy['kpi.teachers'] }}
+          @if (!mockMode()) {
+            <p-tag class="tag-sample" [value]="copy['common.sample']" />
+          }
+        </div>
         <div class="kpi-value num">{{ data.kpis.activeTeachersCount }}</div>
         <div class="kpi-meta">{{ copy['kpi.teachers_meta'] }}</div>
       </p-card>
       <p-card class="kpi-card">
-        <div class="kpi-label">{{ copy['kpi.students'] }}</div>
+        <div class="kpi-label">
+          {{ copy['kpi.students'] }}
+          @if (!mockMode()) {
+            <p-tag class="tag-sample" [value]="copy['common.sample']" />
+          }
+        </div>
         <div class="kpi-value num">{{ data.kpis.activeStudentsCount }}</div>
         <div class="kpi-meta">{{ copy['kpi.students_meta'] }}</div>
       </p-card>
@@ -78,6 +93,9 @@
             {{ copy['kpi.requests'] }}
             @if (requests.total > 0) {
               <p-badge severity="warn" [value]="requests.total" />
+            }
+            @if (!mockMode()) {
+              <p-tag class="tag-sample" [value]="copy['common.sample']" />
             }
           </div>
           <div class="kpi-value num">{{ requests.total }}</div>
@@ -121,18 +139,21 @@
 
         @if (performanceState() === DashboardLoadState.Loading) {
           <div class="empty-chart" role="status">
-            <span>جاري تحميل الحلقات…</span>
+            <span>{{ copy['ov.loading'] }}</span>
           </div>
         } @else if (performanceState() === DashboardLoadState.Error) {
           <div class="empty-chart" role="alert">
-            <strong>{{ performanceError() }}</strong>
+            <strong>{{ copy['ov.error_title'] }}</strong>
+            @if (performanceError(); as detail) {
+              <span>{{ detail }}</span>
+            }
             <button type="button" class="btn btn-secondary btn-sm" (click)="retryPerformance()">
-              إعادة المحاولة
+              {{ copy['ov.retry'] }}
             </button>
           </div>
         } @else if (!performanceRows().length) {
           <div class="empty-chart">
-            <strong>لا توجد حلقات نشطة في الدورة المحددة.</strong>
+            <strong>{{ copy['ov.empty'] }}</strong>
           </div>
         } @else {
           <div role="group" [attr.aria-label]="copy['ov.table_aria']">
@@ -218,7 +239,12 @@
       <section class="card dash-card" aria-labelledby="ws-h">
         <div class="card-head">
           <div>
-            <h2 id="ws-h" class="card-title">{{ copy['ws.title'] }}</h2>
+            <h2 id="ws-h" class="card-title">
+              {{ copy['ws.title'] }}
+              @if (!mockMode()) {
+                <p-tag class="tag-sample" [value]="copy['common.sample']" />
+              }
+            </h2>
             <p class="card-sub">{{ copy['ws.sub'] }}</p>
           </div>
         </div>
@@ -281,7 +307,12 @@
         <section class="card dash-card" aria-labelledby="mc-h">
           <div class="card-head">
             <div>
-              <h3 id="mc-h" class="card-title sm">{{ copy['mc.title'] }}</h3>
+              <h3 id="mc-h" class="card-title sm">
+                {{ copy['mc.title'] }}
+                @if (!mockMode()) {
+                  <p-tag class="tag-sample" [value]="copy['common.sample']" />
+                }
+              </h3>
               @if (data.week; as week) {
                 <p class="card-sub">{{ weekSubtitle(week) }}</p>
               }
@@ -357,7 +388,12 @@
         <section class="card dash-card" aria-labelledby="pc-h">
           <div class="card-head">
             <div>
-              <h3 id="pc-h" class="card-title sm">{{ copy['pc.title'] }}</h3>
+              <h3 id="pc-h" class="card-title sm">
+                {{ copy['pc.title'] }}
+                @if (!mockMode()) {
+                  <p-tag class="tag-sample" [value]="copy['common.sample']" />
+                }
+              </h3>
               <p class="card-sub">{{ copy['pc.sub'] }}</p>
             </div>
           </div>

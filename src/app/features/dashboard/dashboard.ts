@@ -181,7 +181,7 @@ export class DashboardComponent {
       },
       error: (error: unknown) => {
         this.performanceState.set(DashboardLoadState.Error);
-        this.performanceError.set(error instanceof ApiError ? error.message : 'تعذّر تحميل الحلقات');
+        this.performanceError.set(error instanceof ApiError ? error.message : null);
       },
     });
   }
@@ -220,10 +220,16 @@ export class DashboardComponent {
   protected halaqaAria(row: OverviewRow): string {
     return this.t('ov.row_aria', {
       name: row.name,
-      score: this.round(row.score),
-      att: this.round(row.attendanceRate),
-      cov: this.round(row.coverage),
+      score: row.score === null ? this.copy['ov.aria_none'] : this.round(row.score),
+      att: this.ariaPercent(row.attendanceRate),
+      cov: this.ariaPercent(row.coverage),
     });
+  }
+
+  private ariaPercent(value: number | null): string {
+    return value === null
+      ? this.copy['ov.aria_none']
+      : this.t('ov.aria_pct', { v: this.round(value) });
   }
 
   protected absenceIssue(student: DashboardAttentionStudent): string {
