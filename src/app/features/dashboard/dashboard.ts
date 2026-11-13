@@ -30,14 +30,13 @@ import { DashboardService } from './dashboard.service';
 import {
   LOW_ATTENDANCE_BELOW,
   LOW_COVERAGE_BELOW,
-  focusHalaqat,
   isLow,
   scoreBand,
   studentGroups,
   termDateLabels,
   weekRangeLabel,
 } from './dto/dashboard-view';
-import { DashboardLoadState, FocusReason, ScoreBand } from './enums';
+import { DashboardLoadState, ScoreBand } from './enums';
 import {
   DASHBOARD_COPY,
   DashboardCopyKey,
@@ -79,7 +78,6 @@ export class DashboardComponent {
   private readonly toastMessage = inject(ToastMessageService);
 
   protected readonly DashboardLoadState = DashboardLoadState;
-  protected readonly FocusReason = FocusReason;
   protected readonly ScoreBand = ScoreBand;
   protected readonly copy = DASHBOARD_COPY;
   protected readonly lowAttendanceBelow = LOW_ATTENDANCE_BELOW;
@@ -95,7 +93,6 @@ export class DashboardComponent {
   protected readonly showEditModal = signal(false);
   protected readonly endingTerm = signal(false);
 
-  protected readonly focus = computed(() => focusHalaqat(this.dashboard()?.halaqat ?? []));
   protected readonly studentGroups = computed(() =>
     studentGroups(this.dashboard()?.attentionStudents ?? []),
   );

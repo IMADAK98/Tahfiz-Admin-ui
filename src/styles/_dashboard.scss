@@ -315,11 +315,6 @@
   .foot-link {
     padding-top: 8px;
   }
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
   .grid-2-1 {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
@@ -492,19 +487,13 @@
   }
   .wl-row {
     display: grid;
-    grid-template-columns: auto 1fr 24px;
+    grid-template-columns: 1fr auto 24px;
     align-items: center;
     gap: 8px 16px;
     min-height: 56px;
     padding: 8px;
     border-bottom: 1px solid var(--color-border);
     border-inline-start: 4px solid transparent;
-  }
-  .wl-row.wl-student {
-    grid-template-columns: 1fr auto 24px;
-  }
-  .wl-row.b-low {
-    border-inline-start-color: var(--sev-danger);
   }
   .wl-row.b-mid {
     border-inline-start-color: var(--sev-warn-edge);
@@ -527,28 +516,6 @@
   }
   .tags.end {
     justify-content: flex-end;
-  }
-  .score-pill {
-    min-width: 48px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.125rem;
-    font-weight: 800;
-    border-radius: 8px;
-    background: var(--neutral-bg);
-    color: var(--ok-text);
-  }
-  .score-pill.b-low {
-    background: var(--sev-danger-bg);
-    color: var(--sev-danger);
-    box-shadow: inset 0 0 0 1.5px var(--sev-danger);
-  }
-  .score-pill.b-mid {
-    background: var(--sev-warn-bg);
-    color: var(--sev-warn);
-    box-shadow: inset 0 0 0 1.5px var(--sev-warn-edge);
   }
   .grp-h {
     margin: 16px 0 0;
@@ -717,7 +684,6 @@
     .kpi-grid {
       grid-template-columns: 1fr 1fr;
     }
-    .grid-2,
     .grid-2-1 {
       grid-template-columns: 1fr;
     }

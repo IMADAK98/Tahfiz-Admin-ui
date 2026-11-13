@@ -1,5 +1,5 @@
 /**
- * Admin landing dashboard copy, rev 4.1, verbatim from DASHBOARD-COPY.arabic.md (Thafiz Arabic).
+ * Admin landing dashboard copy, rev 4.2, verbatim from DASHBOARD-COPY.arabic.md (Thafiz Arabic).
  * `{x, plural, …}` blocks are ICU MessageFormat; render with `formatDashboardCopy`.
  */
 export const DASHBOARD_COPY = {
@@ -47,16 +47,7 @@ export const DASHBOARD_COPY = {
   'ov.band.ok': '85 فأكثر',
   'ov.band.inc': 'لم يكتمل تسجيل الحضور هذا الأسبوع',
   'ov.table_aria': 'أداء الحلقات، مرتّبة من الأقل درجةً إلى الأعلى',
-  'wh.title': 'حلقات بحاجة إلى متابعة',
-  'wh.sub': 'الأقل درجةً أولًا، بحدّ أقصى 5 حلقات، مع سبب كل منها',
-  'reason.att': 'حضور منخفض',
-  'reason.cov': 'تغطية منخفضة',
-  'reason.inc': 'تسجيل غير مكتمل',
-  'reason.score': 'درجة منخفضة',
   'wh.row_aria': '{name}، الدرجة {score}. فتح تفاصيل الحلقة',
-  'wh.empty_title': 'لا توجد حلقات بحاجة إلى متابعة الآن.',
-  'wh.empty_body':
-    'في جميع الحلقات: الدرجة 80 فأكثر، والحضور 85% فأكثر، والتغطية 75% فأكثر، والتسجيل مكتمل.',
   'ws.title': 'طلاب بحاجة إلى متابعة',
   'ws.sub': 'الغياب 3 مرات فأكثر، أو التغطية أقل من 75% · للمتابعة لا للمفاضلة',
   'ws.grp_abs': 'الغياب 3 مرات فأكثر',

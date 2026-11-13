@@ -194,131 +194,67 @@
         </div>
       </section>
 
-      <div class="grid-2">
-        <section class="card dash-card" aria-labelledby="wh-h">
-          <div class="card-head">
-            <div>
-              <h3 id="wh-h" class="card-title sm">{{ copy['wh.title'] }}</h3>
-              <p class="card-sub">{{ copy['wh.sub'] }}</p>
-            </div>
+      <section class="card dash-card" aria-labelledby="ws-h">
+        <div class="card-head">
+          <div>
+            <h2 id="ws-h" class="card-title">{{ copy['ws.title'] }}</h2>
+            <p class="card-sub">{{ copy['ws.sub'] }}</p>
           </div>
-          <p-dataview [value]="focus()" layout="list">
-            <ng-template #list let-items>
+        </div>
+        @for (group of studentGroups(); track group.absence) {
+          <div class="grp-h">
+            {{ group.absence ? copy['ws.grp_abs'] : copy['ws.grp_cov'] }}
+            <span class="num">({{ group.total }})</span>
+          </div>
+          <p-dataview [value]="group.students" layout="list">
+            <ng-template #list let-students>
               <div role="list">
-                @for (item of items; track item.row.halaqaId) {
-                  @let band = scoreBand(item.row.score);
+                @for (student of students; track student.studentId) {
                   <a
                     role="listitem"
                     class="wl-row row-link"
-                    [class.b-low]="band === ScoreBand.Low"
-                    [class.b-mid]="band === ScoreBand.Mid"
-                    [routerLink]="['/admin/halaqat', item.row.halaqaId]"
-                    [attr.aria-label]="
-                      t('wh.row_aria', { name: item.row.name, score: round(item.row.score) })
-                    "
+                    routerLink="/admin/students"
+                    [queryParams]="{ studentId: student.studentId }"
+                    [attr.aria-label]="studentAria(student, group.absence)"
                   >
-                    <span
-                      class="score-pill num"
-                      [class.b-low]="band === ScoreBand.Low"
-                      [class.b-mid]="band === ScoreBand.Mid"
-                    >
-                      {{ round(item.row.score) }}
-                    </span>
                     <span class="wl-main">
-                      <strong>{{ item.row.name }}</strong>
-                      <span class="tags">
-                        @for (reason of item.reasons; track reason) {
-                          @if (reason === FocusReason.IncompleteMarking) {
-                            <p-tag
-                              severity="warn"
-                              icon="pi pi-exclamation-triangle"
-                              [value]="t(reason)"
-                            />
-                          } @else {
-                            <p-tag
-                              [severity]="reason === FocusReason.LowScore ? 'warn' : 'danger'"
-                              [value]="t(reason)"
-                            />
-                          }
+                      <strong>{{ student.name }}</strong>
+                      <p-chip [label]="student.halaqaName" />
+                    </span>
+                    <span class="tags end">
+                      @if (group.absence) {
+                        <p-tag severity="danger" [value]="absenceIssue(student)" />
+                        @if (isLow(student.coverage, lowCoverageBelow)) {
+                          <p-tag severity="secondary" [value]="coverageIssue(student)" />
                         }
-                      </span>
+                      } @else {
+                        <p-tag severity="danger" [value]="coverageIssue(student)" />
+                      }
                     </span>
                     <i class="pi pi-angle-right chev" aria-hidden="true"></i>
                   </a>
                 }
               </div>
             </ng-template>
-            <ng-template #emptymessage>
-              <div class="empty-chart">
-                <strong>{{ copy['wh.empty_title'] }}</strong>
-                <span>{{ copy['wh.empty_body'] }}</span>
-              </div>
-            </ng-template>
           </p-dataview>
-        </section>
-
-        <section class="card dash-card" aria-labelledby="ws-h">
-          <div class="card-head">
-            <div>
-              <h3 id="ws-h" class="card-title sm">{{ copy['ws.title'] }}</h3>
-              <p class="card-sub">{{ copy['ws.sub'] }}</p>
-            </div>
+          @if (group.hidden) {
+            <div class="more">{{ t('ws.more', { n: group.hidden }) }}</div>
+          }
+        } @empty {
+          <div class="empty-chart">
+            <strong>{{ copy['ws.empty_title'] }}</strong>
+            <span>{{ copy['ws.empty_body'] }}</span>
           </div>
-          @for (group of studentGroups(); track group.absence) {
-            <div class="grp-h">
-              {{ group.absence ? copy['ws.grp_abs'] : copy['ws.grp_cov'] }}
-              <span class="num">({{ group.total }})</span>
-            </div>
-            <p-dataview [value]="group.students" layout="list">
-              <ng-template #list let-students>
-                <div role="list">
-                  @for (student of students; track student.studentId) {
-                    <a
-                      role="listitem"
-                      class="wl-row row-link wl-student"
-                      routerLink="/admin/students"
-                      [queryParams]="{ studentId: student.studentId }"
-                      [attr.aria-label]="studentAria(student, group.absence)"
-                    >
-                      <span class="wl-main">
-                        <strong>{{ student.name }}</strong>
-                        <p-chip [label]="student.halaqaName" />
-                      </span>
-                      <span class="tags end">
-                        @if (group.absence) {
-                          <p-tag severity="danger" [value]="absenceIssue(student)" />
-                          @if (isLow(student.coverage, lowCoverageBelow)) {
-                            <p-tag severity="secondary" [value]="coverageIssue(student)" />
-                          }
-                        } @else {
-                          <p-tag severity="danger" [value]="coverageIssue(student)" />
-                        }
-                      </span>
-                      <i class="pi pi-angle-right chev" aria-hidden="true"></i>
-                    </a>
-                  }
-                </div>
-              </ng-template>
-            </p-dataview>
-            @if (group.hidden) {
-              <div class="more">{{ t('ws.more', { n: group.hidden }) }}</div>
-            }
-          } @empty {
-            <div class="empty-chart">
-              <strong>{{ copy['ws.empty_title'] }}</strong>
-              <span>{{ copy['ws.empty_body'] }}</span>
-            </div>
-          }
-          @if (data.attentionStudents.length) {
-            <div class="foot-link">
-              <a class="link-all sm" routerLink="/admin/students">
-                {{ t('ws.all', { n: data.attentionStudents.length }) }}
-                <i class="pi pi-angle-right" aria-hidden="true"></i>
-              </a>
-            </div>
-          }
-        </section>
-      </div>
+        }
+        @if (data.attentionStudents.length) {
+          <div class="foot-link">
+            <a class="link-all sm" routerLink="/admin/students">
+              {{ t('ws.all', { n: data.attentionStudents.length }) }}
+              <i class="pi pi-angle-right" aria-hidden="true"></i>
+            </a>
+          </div>
+        }
+      </section>
 
       <div class="grid-2-1">
         <section class="card dash-card" aria-labelledby="mc-h">
@@ -367,7 +303,7 @@
                 @for (row of incompleteHalaqat(); track row.halaqaId) {
                   <a
                     role="listitem"
-                    class="wl-row row-link b-mid wl-student"
+                    class="wl-row row-link b-mid"
                     [routerLink]="['/admin/halaqat', row.halaqaId]"
                     [attr.aria-label]="
                       t('wh.row_aria', { name: row.name, score: round(row.score) })

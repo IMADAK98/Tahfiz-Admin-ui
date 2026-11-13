@@ -1,14 +1,8 @@
-import { DashboardMockState, FocusReason, ScoreBand, parseDashboardMockState } from '../enums';
+import { DashboardMockState, ScoreBand, parseDashboardMockState } from '../enums';
 import { dashboardCopy } from '../i18n/dashboard-copy';
 import { dashboardMockInput } from '../mock/dashboard-mock-fixtures';
 import { buildTermDashboard } from '../mock/dashboard-metrics';
-import {
-  focusHalaqat,
-  scoreBand,
-  studentGroups,
-  termDateLabels,
-  weekRangeLabel,
-} from './dashboard-view';
+import { scoreBand, studentGroups, termDateLabels, weekRangeLabel } from './dashboard-view';
 
 const dashboard = (state: DashboardMockState) => buildTermDashboard(dashboardMockInput(state));
 
@@ -20,18 +14,6 @@ describe('dashboard view helpers', () => {
       ScoreBand.Mid,
       ScoreBand.Ok,
     ]);
-  });
-
-  it('focus list: reasons per ḥalaqa, lowest first', () => {
-    const populated = focusHalaqat(dashboard(DashboardMockState.Populated).halaqat);
-    expect(populated.map((item) => [item.row.name, item.reasons])).toEqual([
-      ['حلقة الناشئين', [FocusReason.LowAttendance, FocusReason.LowCoverage]],
-      ['حلقة الأترجة', [FocusReason.LowCoverage]],
-      ['حلقة العصر', [FocusReason.LowAttendance]],
-    ]);
-    const incomplete = focusHalaqat(dashboard(DashboardMockState.IncompleteMarking).halaqat);
-    expect(incomplete.map((item) => item.row.name)).toContain('حلقة النور');
-    expect(focusHalaqat(dashboard(DashboardMockState.EmptyWorklists).halaqat)).toEqual([]);
   });
 
   it('student groups: absence first, alphabetical, 3 shown', () => {

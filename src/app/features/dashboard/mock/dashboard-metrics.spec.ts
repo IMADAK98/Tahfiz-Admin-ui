@@ -230,7 +230,11 @@ describe('dashboard mock states match design rev 4.1', () => {
   it('empty-worklists', () => {
     const result = buildTermDashboard(dashboardMockInput(DashboardMockState.EmptyWorklists));
     expect(result.attentionStudents).toEqual([]);
-    expect(result.halaqat.every((row) => row.score! >= 80)).toBe(true);
+    expect(scores(DashboardMockState.EmptyWorklists).slice(0, 3)).toEqual([
+      ['حلقة العصر', 84],
+      ['حلقة المغرب', 84],
+      ['حلقة الناشئين', 85],
+    ]);
   });
 
   it('noterm', () => {

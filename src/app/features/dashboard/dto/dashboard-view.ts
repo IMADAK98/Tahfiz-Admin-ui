@@ -1,21 +1,10 @@
-import {
-  DashboardAttentionStudent,
-  DashboardHalaqaRow,
-} from '../../../core/api/models/term-dashboard.model';
+import { DashboardAttentionStudent } from '../../../core/api/models/term-dashboard.model';
 import { parseLocalIsoDate } from '../../../core/utils/local-date';
-import { FocusReason } from '../enums/focus-reason.enum';
 import { ScoreBand } from '../enums/score-band.enum';
 
-export const FOCUS_LIST_LIMIT = 5;
 export const STUDENT_GROUP_LIMIT = 3;
-const FOCUS_SCORE_BELOW = 80;
 export const LOW_ATTENDANCE_BELOW = 85;
 export const LOW_COVERAGE_BELOW = 75;
-
-export interface FocusHalaqa {
-  row: DashboardHalaqaRow;
-  reasons: FocusReason[];
-}
 
 export interface StudentGroup {
   absence: boolean;
@@ -31,23 +20,6 @@ export function scoreBand(score: number | null): ScoreBand {
 
 export function isLow(value: number | null, below: number): boolean {
   return value !== null && value < below;
-}
-
-/** Rows are already ranked lowest first. */
-export function focusHalaqat(rows: readonly DashboardHalaqaRow[]): FocusHalaqa[] {
-  return rows
-    .map((row) => {
-      const reasons = [
-        isLow(row.attendanceRate, LOW_ATTENDANCE_BELOW) && FocusReason.LowAttendance,
-        isLow(row.coverage, LOW_COVERAGE_BELOW) && FocusReason.LowCoverage,
-        !row.fullyMarkedThisWeek && FocusReason.IncompleteMarking,
-      ].filter((reason): reason is FocusReason => !!reason);
-      if (!reasons.length && isLow(row.score, FOCUS_SCORE_BELOW))
-        reasons.push(FocusReason.LowScore);
-      return { row, reasons };
-    })
-    .filter((item) => item.reasons.length)
-    .slice(0, FOCUS_LIST_LIMIT);
 }
 
 /** Absence group first, then coverage; alphabetical inside each group, never by severity. */
