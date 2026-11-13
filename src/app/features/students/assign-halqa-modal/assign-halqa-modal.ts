@@ -41,6 +41,12 @@ export class AssignHalqaModalComponent {
   private readonly translate = inject(TranslateService);
 
   readonly student = input.required<CreatedManualStudent>();
+  /**
+   * Null: new-student / manual-create path, GET /center/:id/active-halqas.
+   * A number, including 0: re-enrollment request term, GET /halqa/by-term/:termId.
+   * 0 does not fall back to the active list.
+   */
+  readonly requestTermId = input<number | null>(null);
   readonly assigned = output<void>();
   readonly skipped = output<void>();
 
@@ -123,6 +129,9 @@ export class AssignHalqaModalComponent {
       },
       error: (error: unknown) => {
         this.submitting.set(false);
+        // Acceptance already happened. Stay on this dialog and show Nest `message`.
+        // Assign-route failures (HALQA_NOT_ACTIVE, TERM_NOT_ACTIVE, HALQA_NOT_FOUND, 403)
+        // do not put `code` on the body; the filter resolves the key into `message`.
         this.errorMessage.set(
           nestSubmitBanner(
             error,
@@ -176,6 +185,12 @@ export class AssignHalqaModalComponent {
   }
 
   private loadHalqas(): void {
+    const requestTermId = this.requestTermId();
+    if (requestTermId !== null) {
+      this.loadRequestTermHalqas(requestTermId);
+      return;
+    }
+
     const centerId = this.auth.getClaims()?.centerId;
     if (!centerId) {
       this.errorMessage.set(this.translate.instant(this.i18n.centerUnknown));
@@ -184,6 +199,32 @@ export class AssignHalqaModalComponent {
 
     this.pickersLoading.set(true);
     this.studentsService.loadAssignableHalqas(centerId).subscribe({
+      next: ({ all, selectable }) => {
+        this.listedHalqaCount.set(all.length);
+        this.selectableHalqas.set(selectable);
+        this.pickersLoading.set(false);
+      },
+      error: (error: unknown) => {
+        this.pickersLoading.set(false);
+        this.errorMessage.set(
+          error instanceof ApiError ? error.message : this.translate.instant(this.i18n.empty),
+        );
+      },
+    });
+  }
+
+  /** Request-term choices only. A missing term does not load another term's ḥalaqas. */
+  private loadRequestTermHalqas(termId: number): void {
+    if (!(termId > 0)) {
+      this.pickersLoading.set(false);
+      this.selectableHalqas.set([]);
+      this.listedHalqaCount.set(0);
+      this.errorMessage.set(this.translate.instant(this.i18n.termUnavailable));
+      return;
+    }
+
+    this.pickersLoading.set(true);
+    this.studentsService.loadAssignableHalqasForTerm(termId).subscribe({
       next: ({ all, selectable }) => {
         this.listedHalqaCount.set(all.length);
         this.selectableHalqas.set(selectable);

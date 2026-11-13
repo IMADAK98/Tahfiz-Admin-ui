@@ -15,15 +15,19 @@ import { TOAST_I18N } from '../../../core/ui/toast-messages';
 import {
   HalaqaStudentViewModel,
   PlanItemFormModel,
+  PlanItemTypeSelectOption,
   ayahNumbersOf,
+  canAddUniquePlanItem,
   createEmptyPlanItemForm,
+  duplicatePlanItemTypeFieldErrors,
   mapSurahSelectOptions,
+  nextUnusedPlanItemType,
+  planItemTypeOptionsForRow,
   validatePlanItemForm,
 } from '../dto';
 import {
   STUDY_PLAN_AMOUNT_TYPE_OPTIONS,
   STUDY_PLAN_DIRECTION_OPTIONS,
-  STUDY_PLAN_ITEM_TYPE_OPTIONS,
 } from '../enums';
 import { HALAQA_DETAIL_I18N } from '../i18n/halaqa-detail-i18n';
 import { HalaqaDetailService } from '../halaqa-detail.service';
@@ -47,7 +51,6 @@ export class CreatePlanModalComponent {
   readonly created = output<void>();
   readonly closed = output<void>();
 
-  protected readonly itemTypeOptions = [...STUDY_PLAN_ITEM_TYPE_OPTIONS];
   protected readonly directionOptions = STUDY_PLAN_DIRECTION_OPTIONS;
   protected readonly amountTypeOptions = [...STUDY_PLAN_AMOUNT_TYPE_OPTIONS];
   protected readonly form = this.fb.group({
@@ -59,6 +62,8 @@ export class CreatePlanModalComponent {
   protected readonly ayahsBySurah = signal<Record<number, number[]>>({});
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  /** Bumps when a row type changes so each dropdown re-reads the live values. */
+  private readonly typeRevision = signal(0);
   private readonly fields = createFieldErrorBag();
 
   protected get itemRows(): FormArray {
@@ -102,6 +107,9 @@ export class CreatePlanModalComponent {
     this.form.controls['studentIds'].valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.clearFieldError('studentIds');
     });
+    this.itemRows.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.typeRevision.update((revision) => revision + 1);
+    });
     effect(() => {
       if (!this.visible()) {
         return;
@@ -137,8 +145,22 @@ export class CreatePlanModalComponent {
     return (this.form.controls['studentIds'].value ?? []).includes(studentId);
   }
 
+  protected typeOptions(index: number): PlanItemTypeSelectOption[] {
+    this.typeRevision();
+    return planItemTypeOptionsForRow(this.itemRows.getRawValue() as PlanItemFormModel[], index);
+  }
+
+  protected canAddItem(): boolean {
+    this.typeRevision();
+    return canAddUniquePlanItem(this.itemRows.getRawValue() as PlanItemFormModel[]);
+  }
+
   protected addItem(): void {
-    const item = createEmptyPlanItemForm();
+    const type = nextUnusedPlanItemType(this.itemRows.getRawValue() as PlanItemFormModel[]);
+    if (!type) {
+      return;
+    }
+    const item = createEmptyPlanItemForm(type);
     this.itemRows.push(this.itemGroup(item));
     this.loadAyahs(item.fromSurah);
   }
@@ -171,6 +193,9 @@ export class CreatePlanModalComponent {
         errors[`studyPlanItems.${index}.${field}`] = this.translate.instant(key);
       }
     });
+    for (const [field, key] of Object.entries(duplicatePlanItemTypeFieldErrors(items))) {
+      errors[field] = this.translate.instant(key);
+    }
     if (this.fields.applyMap(errors)) {
       return;
     }

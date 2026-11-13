@@ -26,14 +26,20 @@
             <label for="edit-item-type">النوع</label>
             <p-select
               inputId="edit-item-type"
-              [options]="itemTypeOptions"
+              [options]="typeOptions()"
               optionLabel="label"
               optionValue="value"
+              optionDisabled="disabled"
               formControlName="type"
               [fluid]="true"
               appendTo="body"
             />
             <app-field-error [message]="fieldError('type')" errorId="edit-item-type-error" />
+            @if (legacyDuplicateType()) {
+              <p class="hint" id="edit-item-type-legacy" role="status">
+                {{ 'halaqaDetail.validation.planItemTypeLegacy' | translate }}
+              </p>
+            }
           </div>
 
           <fieldset class="dir-fieldset brand-dir">

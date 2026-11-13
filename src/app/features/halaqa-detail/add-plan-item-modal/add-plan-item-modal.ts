@@ -14,6 +14,7 @@ import { FieldErrorComponent } from '../../../core/ui/field-error';
 import { TOAST_I18N, arabicDialogMessage } from '../../../core/ui/toast-messages';
 import {
   PlanItemFormModel,
+  addPlanItemTypeSubmitError,
   ayahNumbersOf,
   createEmptyPlanItemForm,
   mapSurahSelectOptions,
@@ -132,6 +133,10 @@ export class AddPlanItemModalComponent {
     const mapped: Record<string, string> = {};
     for (const [field, key] of Object.entries(raw)) {
       mapped[field] = this.translate.instant(key);
+    }
+    const typeKey = addPlanItemTypeSubmitError(value.type, this.availableTypes());
+    if (typeKey) {
+      mapped['type'] = this.translate.instant(typeKey);
     }
     if (this.fields.applyMap(mapped)) {
       return;

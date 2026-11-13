@@ -61,3 +61,136 @@ Done
 
 Create success on `/admin/students` opens «تعيين إلى حلقة؟» (نعم/لا). لا reloads the list; نعم + حفظ enrolls via `POST /halqa/enroll-students/{id}`.
 `createManual` now returns coerced `data.id`; `CenterApiService.getActiveHalqas` lists capacity-aware ḥalaqas; full ḥalaqas are skipped when countable.
+
+## Angular Admin — create-assign hardenings (null `data.id` / enroll `data:null`)
+
+Done
+
+`createStudent` merges form email/name when create `data` is null/missing id, then email-match resolve. Lookup failure does not hide create.
+`enrollStudents` keeps `unwrapEnvelopeOrNull` (Nest 2xx + `data: null`). No dialog remount change — production E2E passed; localhost toast-only is stale `ng serve`.
+
+## Angular Admin — post approve → assign ḥalaqa
+
+Done
+
+Approve on `/admin/student-requests` reuses `app-assign-halqa-modal` (same chrome as post-create). لا reloads pending; نعم + حفظ enrolls.
+Student id from approve `data` (incl. nested userId/user.id), else `existingUserId`, else email-match in the shared modal.
+
+## Angular Admin — teachers list assigned ḥalaqas
+
+Done
+
+`/admin/teachers` table shows each Nest `halqas[]` name as a chip linking to `/admin/halaqat/:id`. Empty/`[]`/missing → muted «غير معيّن», no link.
+Mapped from `GET /center/{id}/active-teachers` only (id string→number). No roster or by-teacher-id calls. Stub until Nest/Render ships the field.
+
+## Angular Admin — students list assigned ḥalaqa
+
+Done
+
+`/admin/students` cards show Nest `halqa: { id, name } | null` from `GET /center/{id}/active-students` (PR #4 merged). Link → `/admin/halaqat/:id`; null → muted «غير معيّن».
+No active-term + `/halqa/by-term` invert. Coerce string id.
+
+## Angular Admin — invite share dialog copies /identify
+
+Done
+
+The students share dialog and copy button run `mapInviteRegistrationLink` so a Nest `/signup/student` URL is shown and copied as `/identify` with the same query.
+`check:invite-link` fails if the dialog interpolates `result.registrationUrl` or the clipboard writes that field raw.
+
+## Angular Admin — view-only center + admin profiles
+
+Done
+
+`/admin/center-profile` reads `GET /center/{id}` (name, address, isActive only). `/admin/profile` reads `GET /users/{id}` for the locked personal fields. Sidebar الحساب and the topbar menu link both pages. No edit, save, or password UI.
+
+## Angular Admin — profile credential dialogs
+
+Done
+
+`/admin/profile` stays view-only from `GET /users/{id}`. تغيير البريد and تغيير كلمة المرور open dialogs that POST `/auth/change-email` and `/auth/change-password` (Nest PR #8). Password success keeps the current tokens. Email success stores the new access/refresh pair, then reloads the profile. Center page unchanged. Public reset routes are not used.
+
+## Angular Admin — edit active term (تعديل الدورة)
+
+Done
+
+Dashboard «تفاصيل الدورة» opens an edit dialog (create submit rules unchanged) that PUTs `/term/{id}` and refetches the active term. 409 with top-level `code` shows the in-dialog conflict banner; other errors show the localized message. Create and edit both block Friday/Saturday holidays on add.
+
+## Angular Admin — create ḥalaqa with zero students
+
+Done
+
+Create dialog no longer requires a student. `POST /halqa` still sends `studentsIds: []`. Teacher and the other field rules stay required. Empty picker copy is unchanged.
+
+## Angular Admin — delete teacher (حذف المعلّم)
+
+Done
+
+List and detail «حذف» confirm with the ḥalaqa danger modal, then `DELETE /teacher-profile/:profileId`.
+409 `TEACHER_HAS_ASSIGNED_HALAQAS` stays in the modal; success reloads the list or returns to it. Merge after Nest is live.
+
+## Angular Admin — edit study-plan item (تعديل العنصر)
+
+Done
+
+PUT `/study-plan-item/:id` accepts a raw item or an envelope `data` item, maps `to*`, and patches the plan list. Neither shape refetches `GET /study-plan/:id/details`. The dialog banner stays Arabic.
+
+## Angular Admin — omit blank identity on student signup
+
+Done
+
+Public signup and admin manual-create omit a blank `identificationNumber` / `passportNumber` instead of sending `""`.
+`check:student-signup-payload` asserts national-ID mode has no passport key and passport mode has no ID key.
+
+## Angular Admin — add and delete study-plan items
+
+Done
+
+تفاصيل الحلقة → الخطط: «إضافة عنصر» only for missing حفظ/تثبيت/مراجعة types, POST six fields, delete confirm maps the two 409 codes.
+`check:plan-item-crud` locks method order, payload keys, `[formGroup]`, and the Arabic conflict copy. Merge after Nest deploys.
+
+## Angular Admin — assign ḥalaqa save actually enrolls
+
+Done
+
+Assign popup and the three reject dialogs use native `(submit)` plus a `type="button"` click so حفظ / تأكيد الرفض call the handler instead of reloading the page.
+`check:reactive-forms` fails any `<form` that binds `(ngSubmit)` without `[formGroup]`.
+
+## Angular Admin — plans tab delete and assign refresh
+
+Done
+
+Plan-item delete removes the row from the plans signal on success, then refetches without putting that id back. Assign-students accepts a raw plan or `data: null` and appends the checked roster students before the details refetch.
+`check:plan-tab-refresh` locks both patches to the success path.
+
+## Angular Admin — attendance Option 2 (كل الحلقات النشطة)
+
+Done
+
+`/admin/reports/attendance` defaults to «كل الحلقات النشطة» and optionally filters one ḥalaqa on the same grid. It calls live `GET /attendance/weekly-table` (omit `halqaId` = all active, including non-active terms — same set as `GET /halqa/dropdown`, Nest #40 `5fa08515`). CSV stays client-side.
+
+## Angular Admin — report term picker (progress + attendance)
+
+Prepared — publication held for approval.
+
+Both report pages read `GET /term` as a bare array, default to its ACTIVE row, and send that `termId`. Halaqa and report requests do not send `includeInactive`. A failed list stays on the explicit URL term id and can be retried.
+
+## Angular Admin — plans tab smoke nits
+
+Done
+
+Specific success toasts replace «تم الحفظ» for item delete, plan delete, assign, and unassign, and both delete confirms say past progress is kept.
+Edit dialog writes من سورة only after the surah list is ready. Plan delete and unassign patch the plans signal before the details refetch, and that refetch cannot put the removed row back.
+
+## Angular Admin — re-enrollment accept then optional ḥalaqa
+
+Done
+
+Approve on `/admin/re-enrollment` still POSTs an empty body. Success opens the shared assign dialog. Choices load `GET /halqa/by-term/{requestTermId}`; save posts `{ studentsIds: [numeric existingUserId] }`. Skip leaves the acceptance with no enroll. New-student assign still uses active-ḥalaqas.
+Assign failures keep that acceptance: the dialog shows Nest `message` (these bodies have no `code`) and a retry posts enroll only.
+
+## Angular Admin — unique plan-item type
+
+Done
+
+إضافة خطة disables a type already chosen on another row, keeps the row's own type, and disables إضافة عنصر when حفظ/تثبيت/مراجعة are all used. Edit uses the same rule against the plan's other live items and flags a legacy duplicate without clearing it.
+Duplicate or empty types fail the existing field-error submit. Nest `localization-refactor` `8164c6ec` is the contract: one live HIFZ/TATHBEET/MURAJAA per plan.

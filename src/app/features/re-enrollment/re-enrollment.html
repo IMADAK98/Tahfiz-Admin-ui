@@ -77,7 +77,7 @@
                 type="button"
                 class="btn btn-primary"
                 (click)="showApproveConfirm(request, $event)"
-                [disabled]="isActingOn(request)"
+                [disabled]="interactionLocked()"
               >
                 {{
                   isActingOn(request) && isConfirmOpen(request.id, 'approve') ?
@@ -89,7 +89,7 @@
                 type="button"
                 class="btn btn-danger"
                 (click)="showRejectConfirm(request, $event)"
-                [disabled]="isActingOn(request)"
+                [disabled]="interactionLocked()"
               >
                 {{ 'reEnrollment.actions.reject' | translate }}
               </button>
@@ -104,7 +104,7 @@
                     type="button"
                     class="btn btn-primary btn-sm"
                     (click)="confirmApprove(request, $event)"
-                    [disabled]="isActingOn(request)"
+                    [disabled]="interactionLocked()"
                   >
                     {{ 'reEnrollment.approve.confirm' | translate }}
                   </button>
@@ -112,7 +112,7 @@
                     type="button"
                     class="btn btn-ghost btn-sm"
                     (click)="cancelConfirm(request.id, $event)"
-                    [disabled]="isActingOn(request)"
+                    [disabled]="interactionLocked()"
                   >
                     {{ 'reEnrollment.approve.cancel' | translate }}
                   </button>
@@ -135,7 +135,7 @@
                     rows="3"
                     [formControl]="rejectControl(request.id)"
                     [placeholder]="'reEnrollment.reject.reasonPlaceholder' | translate"
-                    [disabled]="isActingOn(request)"
+                    [disabled]="interactionLocked()"
                   ></textarea>
                   <app-field-error
                     [message]="fieldError('rejectionReason')"
@@ -162,7 +162,7 @@
                     type="button"
                     class="btn btn-ghost btn-sm"
                     (click)="cancelConfirm(request.id, $event)"
-                    [disabled]="isActingOn(request)"
+                    [disabled]="interactionLocked()"
                   >
                     {{ 'reEnrollment.reject.cancel' | translate }}
                   </button>
@@ -175,3 +175,12 @@
     }
   }
 </section>
+
+@if (session().phase === 'assign' && session().student; as student) {
+  <app-assign-halqa-modal
+    [student]="student"
+    [requestTermId]="session().termId ?? 0"
+    (assigned)="onAssignDone()"
+    (skipped)="onAssignSkipped()"
+  />
+}

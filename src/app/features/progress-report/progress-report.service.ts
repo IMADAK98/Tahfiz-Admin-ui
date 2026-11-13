@@ -32,12 +32,14 @@ export class ProgressReportService {
   loadHalqaOptions(termId: number): Observable<HalqaSelectOption[]> {
     return this.progressApi.getHalqasByTerm(termId).pipe(
       map((list) =>
-        (list ?? []).map((h: HalqaByTermItem) => ({
-          id: Number(h.id),
-          name: h.name,
-        })),
+        (list ?? []).flatMap((h: HalqaByTermItem) => {
+          const id = Number(h.id);
+          if (!Number.isInteger(id) || id <= 0 || !h.name) {
+            return [];
+          }
+          return [{ id, name: h.name }];
+        }),
       ),
-      catchError(() => of([])),
     );
   }
 
@@ -69,6 +71,7 @@ export class ProgressReportService {
     halqaId: number,
     period: ProgressPeriod,
     dateContext: string,
+    termId?: number | null,
   ): Observable<ProgressReportResponse> {
     const range = this.resolveRange(period, dateContext);
     return this.progressApi.getProgressReport({
@@ -76,6 +79,7 @@ export class ProgressReportService {
       period,
       startingDate: range.startingDate,
       endingDate: range.endingDate,
+      termId,
     });
   }
 
@@ -85,7 +89,10 @@ export class ProgressReportService {
         if (!term) {
           return of({ term: null, halqas: [] as HalqaSelectOption[] });
         }
-        return this.loadHalqaOptions(term.id).pipe(map((halqas) => ({ term, halqas })));
+        return this.loadHalqaOptions(term.id).pipe(
+          map((halqas) => ({ term, halqas })),
+          catchError(() => of({ term, halqas: [] as HalqaSelectOption[] })),
+        );
       }),
     );
   }

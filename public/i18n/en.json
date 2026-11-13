@@ -72,7 +72,7 @@
     },
     "approve": {
       "message": "TODO: Approve re-enrollment for {{name}} in {{term}}?",
-      "h1Note": "TODO: Term enroll only — no halaqa assignment.",
+      "h1Note": "The student is accepted into the requested term. Halaqa assignment in the next step is optional and can be skipped.",
       "confirm": "TODO: Confirm approval",
       "cancel": "TODO: Cancel"
     },
@@ -121,7 +121,8 @@
       "pickHalqa": "TODO: Select a halaqa",
       "missingId": "TODO: Could not resolve the created student",
       "centerUnknown": "TODO: Could not resolve center from session",
-      "enrollFailed": "TODO: Could not assign the student to a halaqa. Try again."
+      "enrollFailed": "TODO: Could not assign the student to a halaqa. Try again.",
+      "termUnavailable": "The request term is missing. Halaqas from another term are not shown."
     }
   },
   "halaqaDetail": {
@@ -131,6 +132,9 @@
       "pickTeacher": "TODO: Select a teacher",
       "studentLimit": "TODO: Enter student limit (at least 1)",
       "planName": "TODO: Enter plan name",
+      "planItemType": "TODO: Select an item type",
+      "planItemTypeDuplicate": "TODO: This type is already used by another item on the same plan",
+      "planItemTypeLegacy": "TODO: This type is duplicated on another item of the same plan. The current data stays as it is.",
       "fromSurah": "TODO: Select start surah",
       "fromAyah": "TODO: Enter start ayah",
       "amount": "TODO: Enter amount value",
@@ -242,7 +246,8 @@
     "title": "Attendance report",
     "subtitle": "Read-only — daily marks come from the teacher app",
     "halqa": "Ḥalaqa",
-    "halqaPlaceholder": "Select ḥalaqa",
+    "halqaPlaceholder": "All active ḥalaqas",
+    "allActive": "All active ḥalaqas",
     "week": "Week",
     "prevWeek": "Previous week",
     "nextWeek": "Next week",
@@ -265,8 +270,12 @@
     },
     "emptyTitle": "No attendance marks yet",
     "emptyBody": "There are no attendance marks for this week. That does not mean there are no students. The grid stays for filtering/reading; daily entry is on the teacher app.",
-    "noHalqasTitle": "No ḥalaqas in the active term",
-    "noHalqasBody": "Add a ḥalaqa to the current term, then return here.",
+    "noHalqasTitle": "No active ḥalaqas",
+    "noHalqasBody": "This center has no active ḥalaqas.",
+    "noStudentsTitle": "No students this week",
+    "noStudentsBody": "No students in the selected scope for this week.",
+    "noSearchTitle": "No student with that name",
+    "note": "Center admin: filter and read only. Attendance cannot be edited on the web — the teacher app is where marks change. Only active ḥalaqas are listed.",
     "loading": "Loading…",
     "loadHalqasFailed": "Could not load ḥalaqas",
     "loadTableFailed": "Could not load attendance table",

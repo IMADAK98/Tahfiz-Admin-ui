@@ -14,6 +14,16 @@ export interface ActiveTerm {
   deletedAt?: string | null;
 }
 
+/**
+ * GET /term row. Live 2026-11-07: HTTP 200 bare array, not `{ data }` and not paginated.
+ * `center` and `termDays` are present on the wire; report reads do not use them.
+ */
+export interface TermListItem extends ActiveTerm {
+  holidayDates: string[];
+  center: unknown;
+  termDays: unknown;
+}
+
 /** POST /term body — API typo registeration preserved. */
 export interface CreateTermPayload {
   name: string;

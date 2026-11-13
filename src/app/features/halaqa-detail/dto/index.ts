@@ -24,14 +24,25 @@ export {
   type EditHalaqaFormModel,
 } from './edit-halaqa-form.model';
 export {
+  addPlanItemTypeSubmitError,
   buildAddPlanItemPayload,
   buildCreatePlanItemPayload,
   buildUpdatePlanItemPayload,
+  canAddUniquePlanItem,
   createEmptyPlanItemForm,
   createPlanItemFormFromView,
+  duplicatePlanItemTypeFieldErrors,
+  editPlanItemTypeOptions,
+  editPlanItemTypeSubmitError,
+  isLegacyDuplicatePlanItemType,
   missingPlanItemTypes,
+  nextUnusedPlanItemType,
+  normalizeStudyPlanItemType,
+  planItemTypeOptionsForRow,
+  STUDY_PLAN_UNIQUE_ITEM_TYPES,
   validatePlanItemForm,
   type PlanItemFormModel,
+  type PlanItemTypeSelectOption,
 } from './plan-item-form.model';
 export {
   PLAN_ITEM_DELETE_LAST_ITEM_MESSAGE,

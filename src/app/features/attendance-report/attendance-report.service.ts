@@ -1,52 +1,56 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AttendanceApiService } from '../../core/api/attendance-api.service';
-import { CenterApiService } from '../../core/api/center-api.service';
-import { HalqaByTermItem, WeeklyAttendanceTable } from '../../core/api/models/attendance.model';
-import { ActiveTerm } from '../../core/api/models/term.model';
-import { AuthService } from '../../core/auth/auth.service';
-import { HalqaSelectOption } from './dto/attendance-report-filters.dto';
+import {
+  ALL_ACTIVE_HALAQAT,
+  ALL_ACTIVE_HALAQAT_LABEL,
+  HalqaFilterOption,
+} from './dto/attendance-report-filters.dto';
+import {
+  CenterWeeklyTable,
+  HalqaDropdownItem,
+  normalizeCenterWeeklyTable,
+  withAllActiveHalqaOption,
+} from './dto/center-weekly-table.mapper';
 
-/** Thin UI orchestration — HttpClient stays in core/api. */
+/**
+ * Thin UI orchestration — HttpClient stays in core/api.
+ * «كل الحلقات النشطة» omits `halqaId` and sends the selected termId.
+ * The grid is the server payload. Membership follows term status on the server.
+ * This client does not add a membership query and does not drop rows.
+ */
 @Injectable({ providedIn: 'root' })
 export class AttendanceReportService {
   private readonly attendanceApi = inject(AttendanceApiService);
-  private readonly centerApi = inject(CenterApiService);
-  private readonly auth = inject(AuthService);
 
-  resolveActiveTerm(): Observable<ActiveTerm | null> {
-    const centerId = this.auth.getClaims()?.centerId;
-    if (centerId == null) {
-      return of(null);
-    }
-    return this.centerApi.getActiveTerm(centerId);
-  }
-
-  loadHalqaOptions(termId: number): Observable<HalqaSelectOption[]> {
+  loadHalqaFilterOptions(
+    termId: number,
+    allLabel: string = ALL_ACTIVE_HALAQAT_LABEL,
+  ): Observable<HalqaFilterOption[]> {
     return this.attendanceApi.getHalqasByTerm(termId).pipe(
-      map((list) =>
-        (list ?? []).map((h: HalqaByTermItem) => ({
-          id: Number(h.id),
-          name: h.name,
-        })),
-      ),
-      catchError(() => of([])),
+      map((list) => withAllActiveHalqaOption(readTermHalqas(list), allLabel)),
     );
   }
 
-  loadWeeklyTable(halqaId: number, weekStartDate: string): Observable<WeeklyAttendanceTable> {
-    return this.attendanceApi.getWeeklyTable(halqaId, weekStartDate);
+  loadCenterWeeklyTable(
+    weekStartDate: string,
+    halqaValue: string,
+    termId?: number | null,
+  ): Observable<CenterWeeklyTable> {
+    const halqaId = halqaValue === ALL_ACTIVE_HALAQAT ? null : Number(halqaValue);
+    return this.attendanceApi
+      .getCenterWeeklyTable(weekStartDate, Number.isFinite(halqaId) ? halqaId : null, termId)
+      .pipe(map((raw) => normalizeCenterWeeklyTable(raw)));
   }
+}
 
-  bootstrapHalqas(): Observable<{ term: ActiveTerm | null; halqas: HalqaSelectOption[] }> {
-    return this.resolveActiveTerm().pipe(
-      switchMap((term) => {
-        if (!term) {
-          return of({ term: null, halqas: [] as HalqaSelectOption[] });
-        }
-        return this.loadHalqaOptions(term.id).pipe(map((halqas) => ({ term, halqas })));
-      }),
-    );
-  }
+function readTermHalqas(list: { id: number | string; name: string }[] | null | undefined): HalqaDropdownItem[] {
+  return (list ?? []).flatMap((item) => {
+    const id = Number(item.id);
+    if (!Number.isInteger(id) || id <= 0 || !item.name) {
+      return [];
+    }
+    return [{ id, name: item.name }];
+  });
 }
