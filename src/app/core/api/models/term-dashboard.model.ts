@@ -2,7 +2,8 @@ import { StudyPlanItemType } from './study-plan.model';
 import { TermStatus } from './term.model';
 
 /**
- * Planned GET /dashboard/term/:termId?weekStart=yyyy-MM-dd (Sunday). Not on Nest yet.
+ * Planned GET /dashboard/term/:termId?weekStart=yyyy-MM-dd (Sunday). Not on Nest yet; only
+ * `halaqat` has a live source (`DashboardHalaqaPerformanceRow`).
  * Percentages are 0–100 and unrounded; the UI rounds for display. `term: null` = no ACTIVE term.
  */
 export interface TermDashboardResponse {
@@ -56,7 +57,11 @@ export interface DashboardAttendanceCounts {
 /** `null` = no plan in scope has that item type (never 0). */
 export type DashboardTypeAverages = Record<StudyPlanItemType, number | null>;
 
-export interface DashboardHalaqaRow {
+/**
+ * Live GET /dashboard/term/:termId/halqa-performance row (Nest PR #47). Rates are 0–100 rounded to
+ * 2 decimals; `null` = no data, never 0. `teacherName` joins names with «، ».
+ */
+export interface DashboardHalaqaPerformanceRow {
   halaqaId: number;
   name: string;
   teacherName: string;
@@ -66,8 +71,12 @@ export interface DashboardHalaqaRow {
   typeAverages: DashboardTypeAverages;
   coverage: number | null;
   score: number | null;
-  /** 1 = lowest score (needs the most follow-up). */
+  /** 1 = lowest score (needs the most follow-up); null scores rank last. */
   rank: number;
+}
+
+/** Weekly marking fields are mock-only; the live performance endpoint does not return them. */
+export interface DashboardHalaqaRow extends DashboardHalaqaPerformanceRow {
   markedThisWeek: number;
   expectedThisWeek: number;
   notMarkedThisWeek: number;

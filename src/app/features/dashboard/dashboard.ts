@@ -10,11 +10,13 @@ import { MeterGroup } from 'primeng/metergroup';
 import { ProgressBar } from 'primeng/progressbar';
 import { TableModule, TableRowSelectEvent } from 'primeng/table';
 import { Tag } from 'primeng/tag';
+import { Subscription } from 'rxjs';
 import { ApiError } from '../../core/api/api-error';
 import { StudyPlanItemType } from '../../core/api/models/study-plan.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import {
   DashboardAttentionStudent,
+  DashboardHalaqaPerformanceRow,
   DashboardHalaqaRow,
   DashboardTerm,
   DashboardWeek,
@@ -49,6 +51,8 @@ const COVERAGE_TYPES: readonly { type: StudyPlanItemType; label: DashboardCopyKe
   { type: 'TATHBEET', label: 'type.tathbeet' },
   { type: 'MURAJAA', label: 'type.murajaa' },
 ];
+
+type OverviewRow = DashboardHalaqaPerformanceRow | DashboardHalaqaRow;
 
 @Component({
   selector: 'app-dashboard',
@@ -92,6 +96,12 @@ export class DashboardComponent {
   protected readonly showCreateModal = signal(false);
   protected readonly showEditModal = signal(false);
   protected readonly endingTerm = signal(false);
+  /** «أداء الحلقات» only: mock rows under `?mock=`, else the live halqa-performance endpoint. */
+  protected readonly mockMode = signal(false);
+  protected readonly performanceState = signal(DashboardLoadState.Loading);
+  protected readonly performanceError = signal<string | null>(null);
+  protected readonly performanceRows = signal<OverviewRow[]>([]);
+  private performanceSubscription?: Subscription;
 
   protected readonly studentGroups = computed(() =>
     studentGroups(this.dashboard()?.attentionStudents ?? []),
@@ -128,20 +138,57 @@ export class DashboardComponent {
       return;
     }
 
+    this.performanceSubscription?.unsubscribe();
     this.loadState.set(DashboardLoadState.Loading);
     this.loadError.set(null);
 
     this.dashboardService.loadPage(centerId).subscribe({
-      next: ({ activeTerm, dashboard }) => {
+      next: ({ activeTerm, dashboard, mock }) => {
         this.activeTerm.set(activeTerm);
         this.dashboard.set(dashboard);
+        this.mockMode.set(mock);
         this.loadState.set(DashboardLoadState.Ready);
+        if (mock) {
+          this.performanceRows.set(dashboard.halaqat);
+          this.performanceState.set(DashboardLoadState.Ready);
+        } else if (activeTerm) {
+          this.loadPerformance(activeTerm.id);
+        }
       },
       error: (error: unknown) => {
         this.loadState.set(DashboardLoadState.Error);
         this.loadError.set(error instanceof ApiError ? error.message : 'تعذّر تحميل لوحة التحكم');
       },
     });
+  }
+
+  protected retryPerformance(): void {
+    const term = this.activeTerm();
+    if (term && !this.mockMode()) {
+      this.loadPerformance(term.id);
+    }
+  }
+
+  private loadPerformance(termId: number): void {
+    this.performanceSubscription?.unsubscribe();
+    this.performanceState.set(DashboardLoadState.Loading);
+    this.performanceError.set(null);
+    this.performanceRows.set([]);
+    this.performanceSubscription = this.dashboardService.loadHalqaPerformance(termId).subscribe({
+      next: (rows) => {
+        this.performanceRows.set(rows);
+        this.performanceState.set(DashboardLoadState.Ready);
+      },
+      error: (error: unknown) => {
+        this.performanceState.set(DashboardLoadState.Error);
+        this.performanceError.set(error instanceof ApiError ? error.message : 'تعذّر تحميل الحلقات');
+      },
+    });
+  }
+
+  /** Live rows carry no weekly marking, so they never show the incomplete-marking hint. */
+  protected isIncomplete(row: OverviewRow): boolean {
+    return 'fullyMarkedThisWeek' in row && !row.fullyMarkedThisWeek;
   }
 
   protected t(key: DashboardCopyKey, values?: DashboardCopyValues): string {
@@ -170,7 +217,7 @@ export class DashboardComponent {
     });
   }
 
-  protected halaqaAria(row: DashboardHalaqaRow): string {
+  protected halaqaAria(row: OverviewRow): string {
     return this.t('ov.row_aria', {
       name: row.name,
       score: this.round(row.score),
@@ -200,7 +247,7 @@ export class DashboardComponent {
     });
   }
 
-  protected openHalaqa(event: TableRowSelectEvent<DashboardHalaqaRow>): void {
+  protected openHalaqa(event: TableRowSelectEvent<OverviewRow>): void {
     const row = Array.isArray(event.data) ? event.data[0] : event.data;
     if (row) {
       void this.router.navigate(['/admin/halaqat', row.halaqaId]);

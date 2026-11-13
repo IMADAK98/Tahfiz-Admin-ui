@@ -106,7 +106,9 @@
           <div>
             <h2 id="ov-h" class="card-title">
               {{ copy['ov.title'] }}
-              <p-tag class="tag-sample" [value]="copy['common.sample']" />
+              @if (mockMode()) {
+                <p-tag class="tag-sample" [value]="copy['common.sample']" />
+              }
             </h2>
             <p class="card-sub">{{ copy['ov.order_note'] }}</p>
             <p class="formula">{{ copy['ov.formula'] }}</p>
@@ -117,81 +119,100 @@
           </a>
         </div>
 
-        <div role="group" [attr.aria-label]="copy['ov.table_aria']">
-          <p-table
-            class="ov-table"
-            [value]="data.halaqat"
-            dataKey="halaqaId"
-            selectionMode="single"
-            [rowHover]="true"
-            [tableStyle]="{ 'table-layout': 'fixed', width: '100%' }"
-            (onRowSelect)="openHalaqa($event)"
-          >
-            <ng-template #header>
-              <tr>
-                <th class="col-rank">{{ copy['ov.col.rank'] }}</th>
-                <th class="col-name">{{ copy['ov.col.name'] }}</th>
-                <th>{{ copy['ov.col.score'] }}</th>
-                <th class="col-num">{{ copy['ov.col.att'] }}</th>
-                <th class="col-num">{{ copy['ov.col.cov'] }}</th>
-                <th class="col-chev"></th>
-              </tr>
-            </ng-template>
-            <ng-template #body let-row>
-              @let band = scoreBand(row.score);
-              <tr
-                class="ov-row row-link"
-                [pSelectableRow]="row"
-                [class.b-low]="band === ScoreBand.Low"
-                [class.b-mid]="band === ScoreBand.Mid"
-                [class.is-inc]="!row.fullyMarkedThisWeek"
-                [attr.aria-label]="halaqaAria(row)"
-              >
-                <td class="ov-rank num">{{ row.rank }}</td>
-                <td class="ov-name">
-                  <strong>{{ row.name }}</strong>
-                  <small>{{
-                    t('ov.row_meta', { teacher: row.teacherName, n: row.studentCount })
-                  }}</small>
-                </td>
-                <td>
-                  <div class="ov-score" [class.has-tag]="!row.fullyMarkedThisWeek">
-                    <b class="num">{{ round(row.score) }}</b>
-                    <p-progressbar [value]="row.score ?? 0" [showValue]="false" />
-                    @if (!row.fullyMarkedThisWeek) {
-                      <p-tag
-                        severity="warn"
-                        icon="pi pi-exclamation-triangle"
-                        [value]="copy['ov.inc_chip']"
-                        [attr.title]="copy['ov.inc_tip']"
-                      />
-                    }
-                  </div>
-                </td>
-                <td
-                  class="ov-num num"
-                  [class.is-low]="isLow(row.attendanceRate, lowAttendanceBelow)"
+        @if (performanceState() === DashboardLoadState.Loading) {
+          <div class="empty-chart" role="status">
+            <span>جاري تحميل الحلقات…</span>
+          </div>
+        } @else if (performanceState() === DashboardLoadState.Error) {
+          <div class="empty-chart" role="alert">
+            <strong>{{ performanceError() }}</strong>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="retryPerformance()">
+              إعادة المحاولة
+            </button>
+          </div>
+        } @else if (!performanceRows().length) {
+          <div class="empty-chart">
+            <strong>لا توجد حلقات نشطة في الدورة المحددة.</strong>
+          </div>
+        } @else {
+          <div role="group" [attr.aria-label]="copy['ov.table_aria']">
+            <p-table
+              class="ov-table"
+              [value]="performanceRows()"
+              dataKey="halaqaId"
+              selectionMode="single"
+              [rowHover]="true"
+              [tableStyle]="{ 'table-layout': 'fixed', width: '100%' }"
+              (onRowSelect)="openHalaqa($event)"
+            >
+              <ng-template #header>
+                <tr>
+                  <th class="col-rank">{{ copy['ov.col.rank'] }}</th>
+                  <th class="col-name">{{ copy['ov.col.name'] }}</th>
+                  <th>{{ copy['ov.col.score'] }}</th>
+                  <th class="col-num">{{ copy['ov.col.att'] }}</th>
+                  <th class="col-num">{{ copy['ov.col.cov'] }}</th>
+                  <th class="col-chev"></th>
+                </tr>
+              </ng-template>
+              <ng-template #body let-row>
+                @let band = scoreBand(row.score);
+                <tr
+                  class="ov-row row-link"
+                  [pSelectableRow]="row"
+                  [class.b-low]="band === ScoreBand.Low"
+                  [class.b-mid]="band === ScoreBand.Mid"
+                  [class.is-inc]="isIncomplete(row)"
+                  [attr.aria-label]="halaqaAria(row)"
                 >
-                  {{ percent(row.attendanceRate) }}
-                </td>
-                <td class="ov-num num" [class.is-low]="isLow(row.coverage, lowCoverageBelow)">
-                  {{ percent(row.coverage) }}
-                </td>
-                <td class="col-chev"><i class="pi pi-angle-right chev" aria-hidden="true"></i></td>
-              </tr>
-            </ng-template>
-          </p-table>
-        </div>
+                  <td class="ov-rank num">{{ row.rank }}</td>
+                  <td class="ov-name">
+                    <strong>{{ row.name }}</strong>
+                    <small>{{
+                      t('ov.row_meta', { teacher: row.teacherName, n: row.studentCount })
+                    }}</small>
+                  </td>
+                  <td>
+                    <div class="ov-score" [class.has-tag]="isIncomplete(row)">
+                      <b class="num">{{ round(row.score) }}</b>
+                      <p-progressbar [value]="row.score ?? 0" [showValue]="false" />
+                      @if (isIncomplete(row)) {
+                        <p-tag
+                          severity="warn"
+                          icon="pi pi-exclamation-triangle"
+                          [value]="copy['ov.inc_chip']"
+                          [attr.title]="copy['ov.inc_tip']"
+                        />
+                      }
+                    </div>
+                  </td>
+                  <td
+                    class="ov-num num"
+                    [class.is-low]="isLow(row.attendanceRate, lowAttendanceBelow)"
+                  >
+                    {{ percent(row.attendanceRate) }}
+                  </td>
+                  <td class="ov-num num" [class.is-low]="isLow(row.coverage, lowCoverageBelow)">
+                    {{ percent(row.coverage) }}
+                  </td>
+                  <td class="col-chev">
+                    <i class="pi pi-angle-right chev" aria-hidden="true"></i>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
 
-        <div class="bands">
-          <span><i class="band b-low"></i>{{ copy['ov.band.low'] }}</span>
-          <span><i class="band b-mid"></i>{{ copy['ov.band.mid'] }}</span>
-          <span><i class="band b-ok"></i>{{ copy['ov.band.ok'] }}</span>
-          <span>
-            <i class="pi pi-exclamation-triangle warn-ico" aria-hidden="true"></i>
-            {{ copy['ov.band.inc'] }}
-          </span>
-        </div>
+          <div class="bands">
+            <span><i class="band b-low"></i>{{ copy['ov.band.low'] }}</span>
+            <span><i class="band b-mid"></i>{{ copy['ov.band.mid'] }}</span>
+            <span><i class="band b-ok"></i>{{ copy['ov.band.ok'] }}</span>
+            <span>
+              <i class="pi pi-exclamation-triangle warn-ico" aria-hidden="true"></i>
+              {{ copy['ov.band.inc'] }}
+            </span>
+          </div>
+        }
       </section>
 
       <section class="card dash-card" aria-labelledby="ws-h">
