@@ -158,14 +158,14 @@ const percentSource = readFileSync(
   join(src, 'app/features/progress-report/enums/progress-plan-item-type.enum.ts'),
   'utf8',
 );
-assert.match(percentSource, /if \(n > 100\) \{\s*return 100;/);
+assert.doesNotMatch(percentSource, /return 100;/);
 
 const progressCsv = buildProgressReportCsv(
   [{
     studentId: 73,
     studentName: 'S1',
     hifzPercent: 100,
-    tathPercent: 100,
+    tathPercent: 150,
     murPercent: 25,
     lastUpdatedLabel: '5 نوفمبر 2026',
     lastUpdatedRaw: '2026-11-05',
@@ -185,7 +185,7 @@ assert.match(progressCsv, /مكتملة/);
 assert.match(progressCsv, /5 نوفمبر 2026/);
 assert.match(progressCsv, /100/);
 assert.match(progressCsv, /25/);
-assert.doesNotMatch(progressCsv, /150/);
+assert.match(progressCsv, /150/);
 assert.doesNotMatch(progressCsv, /الدورة الحالية/);
 const oldProgressCsv = buildProgressReportCsv(
   [{
