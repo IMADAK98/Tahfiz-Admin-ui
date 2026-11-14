@@ -194,3 +194,10 @@ Done
 
 إضافة خطة disables a type already chosen on another row, keeps the row's own type, and disables إضافة عنصر when حفظ/تثبيت/مراجعة are all used. Edit uses the same rule against the plan's other live items and flags a legacy duplicate without clearing it.
 Duplicate or empty types fail the existing field-error submit. Nest `localization-refactor` `8164c6ec` is the contract: one live HIFZ/TATHBEET/MURAJAA per plan.
+
+## Angular Admin — progress report real percent + null plan types
+
+Done
+
+`normalizePercent` no longer caps at 100 (115/200 shown as-is); only the bar fill stops at full width. Negative/invalid still → 0.
+Null or missing plan type → `null`, shown as «—» with an empty bar (CSV writes «—»); a real 0 stays 0%. Merge with the Nest null-type PR.

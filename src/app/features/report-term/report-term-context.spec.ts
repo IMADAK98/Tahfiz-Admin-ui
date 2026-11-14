@@ -254,9 +254,9 @@ function termListRow(overrides: Record<string, unknown> = {}): Record<string, un
   };
 }
 
-describe('saved-row display clamp', () => {
-  it('clamps the existing UI contract and leaves 25 untouched', () => {
-    expect(normalizePercent(150)).toBe(100);
+describe('saved-row display percent', () => {
+  it('keeps values above 100 and leaves 25 and 0 untouched', () => {
+    expect(normalizePercent(150)).toBe(150);
     expect(normalizePercent(25)).toBe(25);
     expect(normalizePercent(0)).toBe(0);
   });
