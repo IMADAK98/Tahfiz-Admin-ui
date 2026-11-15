@@ -98,6 +98,11 @@ export class HalaqaDetailService {
       .pipe(map(mapHalaqaDetail));
   }
 
+  /** GET /halqa/:id — includes teachers, which PUT does not. */
+  reloadDetail(halqaId: number): Observable<HalaqaDetailViewModel> {
+    return this.halqaApi.getById(halqaId).pipe(map(mapHalaqaDetail));
+  }
+
   deleteHalqa(halqaId: number): Observable<unknown> {
     return this.halqaApi.deleteHalqa(halqaId);
   }
