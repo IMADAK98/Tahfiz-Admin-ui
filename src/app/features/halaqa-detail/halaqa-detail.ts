@@ -13,6 +13,7 @@ import { AddPlanItemModalComponent } from './add-plan-item-modal/add-plan-item-m
 import { AssignPlanStudentsModalComponent } from './assign-plan-students-modal/assign-plan-students-modal';
 import { CreatePlanModalComponent } from './create-plan-modal/create-plan-modal';
 import {
+  detailAfterHalqaSave,
   HalaqaDetailViewModel,
   HalaqaStudentViewModel,
   StudyPlanItemViewModel,
@@ -172,8 +173,15 @@ export class HalaqaDetailComponent {
   }
 
   protected onHalqaSaved(updated: HalaqaDetailViewModel): void {
-    this.detail.set(updated);
     this.showEditModal.set(false);
+    this.detail.set(updated);
+    const halqaId = this.halaqaId();
+    if (!halqaId) {
+      return;
+    }
+    this.detailService.reloadDetail(halqaId).subscribe({
+      next: (fetched) => this.detail.set(detailAfterHalqaSave(updated, fetched)),
+    });
   }
 
   protected openEnrollModal(): void {

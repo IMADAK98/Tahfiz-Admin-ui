@@ -129,7 +129,7 @@ export class EditHalaqaModalComponent {
       next: (updated) => {
         this.submitting.set(false);
         this.toastMessage.notifySuccess(TOAST_I18N.success.saved);
-        this.saved.emit(updated);
+        this.saved.emit(this.withSelectedTeacher(updated));
       },
       error: (error: unknown) => {
         this.submitting.set(false);
@@ -143,6 +143,23 @@ export class EditHalaqaModalComponent {
         );
       },
     });
+  }
+
+  /** PUT body has no teacher name. Keep the chosen picker row until GET replaces it. */
+  private withSelectedTeacher(updated: HalaqaDetailViewModel): HalaqaDetailViewModel {
+    if (updated.teacherName) {
+      return updated;
+    }
+    const teacherId = this.model().teacherId;
+    const teacher = this.teachers().find((row) => row.id === teacherId);
+    if (!teacher) {
+      return updated;
+    }
+    return {
+      ...updated,
+      teacherId: teacher.id,
+      teacherName: teacher.name,
+    };
   }
 
   private loadTeachers(): void {

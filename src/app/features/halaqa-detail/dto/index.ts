@@ -4,6 +4,7 @@ export {
   formatFromRange,
   mapHalqaRoster,
   mapHalqaStudent,
+  detailAfterHalqaSave,
   mapHalaqaDetail,
   mapStudyPlanDetails,
   mapStudyPlanItem,
