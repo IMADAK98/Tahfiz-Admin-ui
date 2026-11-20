@@ -4,7 +4,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { providePrimeNG } from 'primeng/config';
-import { of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { ApiError } from '../../core/api/api-error';
 import { ProgressReportResponse } from '../../core/api/models/progress.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { ReportTermService } from '../report-term/report-term.service';
@@ -18,7 +19,13 @@ class TranslateStub {
   onTranslationChange = new EventEmitter<unknown>();
   onDefaultLangChange = new EventEmitter<unknown>();
   currentLang = 'ar';
-  instant(key: string): string {
+  instant(key: string, params?: Record<string, string>): string {
+    if (key === 'toast.error.requestFailed') {
+      return `فشل الطلب: ${params?.['message'] ?? ''}`;
+    }
+    if (key === 'progressReport.exportExcelFail') {
+      return 'تعذّر تصدير تقرير التقدّم';
+    }
     return key;
   }
   get(key: string) {
@@ -62,7 +69,11 @@ const report: ProgressReportResponse = {
 };
 
 describe('ProgressReportComponent percent cells', () => {
-  async function render(): Promise<HTMLElement> {
+  async function render(
+    exportWorkbook: () => Observable<unknown> = () => of(undefined),
+  ): Promise<{ root: HTMLElement; component: ProgressReportComponent; notifyErrorBody: ReturnType<typeof vi.fn> }> {
+    TestBed.resetTestingModule();
+    const notifyErrorBody = vi.fn();
     await TestBed.configureTestingModule({
       imports: [ProgressReportComponent],
       providers: [
@@ -71,7 +82,7 @@ describe('ProgressReportComponent percent cells', () => {
         { provide: TranslateService, useClass: TranslateStub },
         {
           provide: ToastMessageService,
-          useValue: { show: vi.fn(), notifyWarnBody: vi.fn(), notifyErrorBody: vi.fn() },
+          useValue: { show: vi.fn(), notifyWarnBody: vi.fn(), notifyErrorBody },
         },
         { provide: Router, useValue: { navigate: vi.fn() } },
         {
@@ -97,7 +108,7 @@ describe('ProgressReportComponent percent cells', () => {
         },
         {
           provide: WeeklyReportExcelService,
-          useValue: { exportWorkbook: () => of(undefined) },
+          useValue: { exportWorkbook },
         },
       ],
     }).compileComponents();
@@ -105,7 +116,11 @@ describe('ProgressReportComponent percent cells', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
+    return {
+      root: fixture.nativeElement as HTMLElement,
+      component: fixture.componentInstance,
+      notifyErrorBody,
+    };
   }
 
   function cells(root: HTMLElement): string[][] {
@@ -121,7 +136,7 @@ describe('ProgressReportComponent percent cells', () => {
   }
 
   it("shows real values above 100, '—' for null/missing types, and 0% for a real 0", async () => {
-    const root = await render();
+    const { root } = await render();
     expect(cells(root)).toEqual([
       ['115%', '200%', '—'],
       ['0%', '40%', '—'],
@@ -132,6 +147,25 @@ describe('ProgressReportComponent percent cells', () => {
     ]);
     expect(root.textContent).toContain('progressReport.exportExcel');
     expect(root.textContent).toContain('تصدير CSV');
+  });
+
+  it('shows فشل الطلب with the envelope message when Excel export fails', async () => {
+    const { component, notifyErrorBody } = await render(() =>
+      throwError(
+        () =>
+          new ApiError('لا طلاب في هذه الحلقة', 400, 400, {}, undefined, {
+            message: 'لا طلاب في هذه الحلقة',
+          }),
+      ),
+    );
+    component.exportExcel();
+    expect(notifyErrorBody).toHaveBeenCalledWith('فشل الطلب: لا طلاب في هذه الحلقة');
+  });
+
+  it('shows تعذّر تصدير تقرير التقدّم when Excel export fails without a server message', async () => {
+    const { component, notifyErrorBody } = await render(() => throwError(() => new Error('workbook')));
+    component.exportExcel();
+    expect(notifyErrorBody).toHaveBeenCalledWith('تعذّر تصدير تقرير التقدّم');
   });
 });
 

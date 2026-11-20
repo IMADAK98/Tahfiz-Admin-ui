@@ -228,3 +228,4 @@ Removed the mock KPI tiles, student worklist, completeness and coverage cards, �
 Done
 
 Attendance and progress (week period) export an exceljs workbook: one RTL sheet per term week plus «للفصل الدراسي». CSV stays. Dropped form number, points, pages, and لم يحفظ / لم يسمع. Null percents are «—»; values above 100 are kept; LEAVE is معذور.
+An envelope `message` on export failure reuses `toast.error.requestFailed` («فشل الطلب: {{message}}»). The «تعذّر تصدير…» strings are only for failures with no server message.

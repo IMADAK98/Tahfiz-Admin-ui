@@ -26,6 +26,7 @@ import {
   termStatusLabel,
 } from '../report-term/report-term-context';
 import { ReportTermService } from '../report-term/report-term.service';
+import { excelExportFailureToast } from '../weekly-report-excel/excel-export-error';
 import {
   WeeklyReportExcelService,
   WeeklyReportExportEmpty,
@@ -261,7 +262,9 @@ export class AttendanceReportComponent {
             this.toast.notifyWarnBody(this.translate.instant('attendanceReport.exportEmpty'));
             return;
           }
-          this.toast.notifyErrorBody(this.translate.instant('attendanceReport.exportExcelFail'));
+          this.toast.notifyErrorBody(
+            excelExportFailureToast(err, this.translate, 'attendanceReport.exportExcelFail'),
+          );
         },
       });
   }

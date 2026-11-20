@@ -27,6 +27,7 @@ import {
   termStatusLabel,
 } from '../report-term/report-term-context';
 import { ReportTermService } from '../report-term/report-term.service';
+import { excelExportFailureToast } from '../weekly-report-excel/excel-export-error';
 import {
   WeeklyReportExcelService,
   WeeklyReportExportEmpty,
@@ -310,7 +311,9 @@ export class ProgressReportComponent {
             this.toast.notifyWarnBody(this.translate.instant('progressReport.exportEmpty'));
             return;
           }
-          this.toast.notifyErrorBody(this.translate.instant('progressReport.exportExcelFail'));
+          this.toast.notifyErrorBody(
+            excelExportFailureToast(err, this.translate, 'progressReport.exportExcelFail'),
+          );
         },
       });
   }
