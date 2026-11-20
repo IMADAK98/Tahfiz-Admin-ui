@@ -222,3 +222,9 @@ Done
 
 `/admin` keeps only real blocks: the term bar (live active-term name, status and dates with create / edit / end), «أداء الحلقات» from `GET /dashboard/term/:termId/halqa-performance`, and the no-term state.
 Removed the mock KPI tiles, student worklist, completeness and coverage cards, «عيّنة» tags, `?mock=` with its fixtures, metrics and data-source token, and their copy ids and tests.
+
+## Angular Admin — weekly Excel report
+
+Done
+
+Attendance and progress (week period) export an exceljs workbook: one RTL sheet per term week plus «للفصل الدراسي». CSV stays. Dropped form number, points, pages, and لم يحفظ / لم يسمع. Null percents are «—»; values above 100 are kept; LEAVE is معذور.

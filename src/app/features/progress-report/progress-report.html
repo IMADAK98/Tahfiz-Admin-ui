@@ -5,6 +5,17 @@
       <h1 class="pr-report__title">تقرير التقدّم</h1>
     </div>
     <div class="pr-report__header-actions">
+      @if (period() === 'week') {
+        <p-button
+          type="button"
+          [label]="excelButtonLabel"
+          severity="secondary"
+          [outlined]="true"
+          [loading]="exportingExcel()"
+          [disabled]="loading() || exportingExcel() || !(table()?.students?.length ?? 0)"
+          (onClick)="exportExcel()"
+        />
+      }
       <p-button
         type="button"
         label="تصدير CSV"

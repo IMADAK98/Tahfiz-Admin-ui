@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { ProgressReportResponse } from '../../core/api/models/progress.model';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { ReportTermService } from '../report-term/report-term.service';
+import { WeeklyReportExcelService } from '../weekly-report-excel/weekly-report-excel.service';
 import { buildProgressReportCsv } from './progress-report-csv';
 import { ProgressReportComponent } from './progress-report';
 import { ProgressReportService } from './progress-report.service';
@@ -94,6 +95,10 @@ describe('ProgressReportComponent percent cells', () => {
             loadProgress: () => of(report),
           },
         },
+        {
+          provide: WeeklyReportExcelService,
+          useValue: { exportWorkbook: () => of(undefined) },
+        },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(ProgressReportComponent);
@@ -125,6 +130,8 @@ describe('ProgressReportComponent percent cells', () => {
       ['100%', '100%', '0%'],
       ['0%', '40%', '0%'],
     ]);
+    expect(root.textContent).toContain('progressReport.exportExcel');
+    expect(root.textContent).toContain('تصدير CSV');
   });
 });
 
