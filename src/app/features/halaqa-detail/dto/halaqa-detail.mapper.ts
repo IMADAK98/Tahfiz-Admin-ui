@@ -63,6 +63,26 @@ export function mapHalaqaDetail(record: HalqaApiRecord): HalaqaDetailViewModel {
   };
 }
 
+/**
+ * PUT /halqa/:id returns the row without the teacher relation.
+ * Prefer a follow-up GET, and keep PUT fields the GET omits (category).
+ */
+export function detailAfterHalqaSave(
+  submitted: HalaqaDetailViewModel,
+  fetched: HalaqaDetailViewModel,
+): HalaqaDetailViewModel {
+  return {
+    ...submitted,
+    ...fetched,
+    name: fetched.name || submitted.name,
+    category: fetched.category ?? submitted.category,
+    periods: fetched.periods.length ? fetched.periods : submitted.periods,
+    studentLimit: fetched.studentLimit || submitted.studentLimit,
+    teacherId: fetched.teacherId ?? submitted.teacherId,
+    teacherName: fetched.teacherName ?? submitted.teacherName,
+  };
+}
+
 export function mapHalqaStudent(record: HalqaStudentApiRecord): HalaqaStudentViewModel {
   const id = coerceId(record.id ?? record.userId ?? record.user?.id);
   return {

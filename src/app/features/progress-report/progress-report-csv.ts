@@ -32,9 +32,9 @@ export function buildProgressReportCsv(
     lines.push(
       csvRow([
         row.studentName,
-        String(row.hifzPercent),
-        String(row.tathPercent),
-        String(row.murPercent),
+        String(row.hifzPercent ?? '—'),
+        String(row.tathPercent ?? '—'),
+        String(row.murPercent ?? '—'),
         row.lastUpdatedLabel === '—' ? '' : row.lastUpdatedLabel,
       ]),
     );

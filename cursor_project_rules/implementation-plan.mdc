@@ -208,3 +208,10 @@ Done
 
 Rev 4.2 drops the ḥalaqa worklist; «أداء الحلقات» now reads `GET /dashboard/term/:termId/halqa-performance` (Nest PR #47) for the live active term, with loading, error + retry and empty states, and null rates shown as «—».
 `?mock=<state>` keeps every block on fixtures with no performance call; without it, only «أداء الحلقات» is live and a missing active term shows the no-term state.
+
+## Angular Admin — progress report real percent + null plan types
+
+Done
+
+`normalizePercent` no longer caps at 100 (115/200 shown as-is); only the bar fill stops at full width. Negative/invalid still → 0.
+Null or missing plan type → `null`, shown as «—» with an empty bar (CSV writes «—»); a real 0 stays 0%. Merge with the Nest null-type PR.

@@ -50,14 +50,26 @@ export function mapPlanItemType(type: string | null | undefined): ProgressTypeVi
   };
 }
 
-/** Clamp 0–100; treat null/NaN as 0 (still a visible row). */
-export function normalizePercent(value: unknown): number {
+/**
+ * Real percent, no upper cap (115 stays 115). null/undefined = the student has no
+ * such plan type → null, never 0. NaN/negative → 0.
+ */
+export function normalizePercent(value: unknown): number | null {
+  if (value == null) {
+    return null;
+  }
   const n = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(n) || n < 0) {
     return 0;
   }
-  if (n > 100) {
-    return 100;
-  }
   return Math.round(n);
+}
+
+export function formatPercent(value: number | null): string {
+  return value == null ? '—' : `${value}%`;
+}
+
+/** Bar fill only stops at full width; the label keeps the real value. */
+export function percentBarWidth(value: number | null): number {
+  return Math.min(value ?? 0, 100);
 }

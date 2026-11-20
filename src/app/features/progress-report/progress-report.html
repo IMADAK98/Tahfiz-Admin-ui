@@ -188,21 +188,21 @@
             <tr>
               <td class="name-cell"><strong>{{ row.studentName }}</strong></td>
               <td>
-                <div class="pct" [class.is-zero]="row.hifzPercent === 0">{{ row.hifzPercent }}%</div>
+                <div class="pct" [class.is-zero]="!row.hifzPercent">{{ formatPercent(row.hifzPercent) }}</div>
                 <div class="pct-bar" aria-hidden="true">
-                  <span [style.width.%]="row.hifzPercent"></span>
+                  <span [style.width.%]="percentBarWidth(row.hifzPercent)"></span>
                 </div>
               </td>
               <td>
-                <div class="pct" [class.is-zero]="row.tathPercent === 0">{{ row.tathPercent }}%</div>
+                <div class="pct" [class.is-zero]="!row.tathPercent">{{ formatPercent(row.tathPercent) }}</div>
                 <div class="pct-bar is-tath" aria-hidden="true">
-                  <span [style.width.%]="row.tathPercent"></span>
+                  <span [style.width.%]="percentBarWidth(row.tathPercent)"></span>
                 </div>
               </td>
               <td>
-                <div class="pct" [class.is-zero]="row.murPercent === 0">{{ row.murPercent }}%</div>
+                <div class="pct" [class.is-zero]="!row.murPercent">{{ formatPercent(row.murPercent) }}</div>
                 <div class="pct-bar is-mur" aria-hidden="true">
-                  <span [style.width.%]="row.murPercent"></span>
+                  <span [style.width.%]="percentBarWidth(row.murPercent)"></span>
                 </div>
               </td>
               <td class="pr-report__updated">{{ row.lastUpdatedLabel }}</td>

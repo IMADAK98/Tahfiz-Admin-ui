@@ -17,9 +17,10 @@ export interface HalqaSelectOption {
 export interface ProgressRowVm {
   studentId: number;
   studentName: string;
-  hifzPercent: number;
-  tathPercent: number;
-  murPercent: number;
+  /** null = no plan item of this type (shown as '—'), unlike a real 0. */
+  hifzPercent: number | null;
+  tathPercent: number | null;
+  murPercent: number | null;
   lastUpdatedLabel: string;
   lastUpdatedRaw: string | null;
 }

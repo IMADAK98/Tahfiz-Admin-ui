@@ -19,7 +19,8 @@ export interface ProgressHalqaRef {
 
 export interface ProgressTypePercent {
   planItemType: ProgressPlanItemType | string;
-  totalPercentage: number;
+  /** null = the student has no plan item of this type. Can exceed 100. */
+  totalPercentage: number | null;
 }
 
 /**

@@ -35,7 +35,11 @@ import {
   toYearMonth,
 } from './progress-report.service';
 import { HalqaSelectOption, ProgressRowVm } from './dto/progress-report-filters.dto';
-import { normalizePercent } from './enums/progress-plan-item-type.enum';
+import {
+  formatPercent,
+  normalizePercent,
+  percentBarWidth,
+} from './enums/progress-plan-item-type.enum';
 import {
   addDays,
   formatWeekLabelAr,
@@ -75,6 +79,9 @@ export class ProgressReportComponent {
   private loadGeneration = 0;
   private termApplyGeneration = 0;
   private appliedTermId: number | undefined;
+
+  protected readonly formatPercent = formatPercent;
+  protected readonly percentBarWidth = percentBarWidth;
 
   protected readonly loading = signal(false);
   protected readonly bootstrapping = signal(true);
