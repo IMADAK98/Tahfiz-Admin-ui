@@ -1,24 +1,21 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin } from 'rxjs';
-import { CenterApiService } from '../../core/api/center-api.service';
-import { DashboardCards } from '../../core/api/models/dashboard-cards.model';
+import { Observable } from 'rxjs';
+import { DashboardApiService } from '../../core/api/dashboard-api.service';
+import { DashboardHalaqaPerformanceRow } from '../../core/api/models/halqa-performance.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { TermsService } from '../terms/terms.service';
-
-export interface DashboardPageData {
-  activeTerm: ActiveTerm | null;
-  cards: DashboardCards;
-}
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private readonly termsService = inject(TermsService);
-  private readonly centerApi = inject(CenterApiService);
+  private readonly dashboardApi = inject(DashboardApiService);
 
-  loadPage(centerId: number): Observable<DashboardPageData> {
-    return forkJoin({
-      activeTerm: this.termsService.getActiveTerm(centerId),
-      cards: this.centerApi.getDashboardCards(centerId),
-    });
+  /** GET /center/:id/active-term; `null` = no active term (the no-term state). */
+  loadActiveTerm(centerId: number): Observable<ActiveTerm | null> {
+    return this.termsService.getActiveTerm(centerId);
+  }
+
+  loadHalqaPerformance(termId: number): Observable<DashboardHalaqaPerformanceRow[]> {
+    return this.dashboardApi.getHalqaPerformance(termId);
   }
 }

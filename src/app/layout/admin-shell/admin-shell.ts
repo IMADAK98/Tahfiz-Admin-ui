@@ -23,6 +23,8 @@ const ADMIN_PAGE_TITLES: Record<string, string> = {
 };
 
 const ADMIN_PAGE_SUBTITLES: Record<string, string> = {
+  '/admin': 'ما يحتاج إلى متابعتك اليوم',
+  '/admin/dashboard': 'ما يحتاج إلى متابعتك اليوم',
   '/admin/re-enrollment': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
   '/admin/re-enrollment-requests': 'طلاب يطلبون الالتحاق بدورة / حلقة جديدة بعد انتهاء فترة سابقة',
   '/admin/reports/attendance': 'قراءة فقط — التسجيل اليومي من تطبيق المعلّم',
@@ -75,9 +77,11 @@ export class AdminShellComponent {
     }
 
     this.syncPageTitle(this.router.url);
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
-      this.syncPageTitle((event as NavigationEnd).urlAfterRedirects);
-    });
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.syncPageTitle((event as NavigationEnd).urlAfterRedirects);
+      });
   }
 
   toggleSidebar(): void {
@@ -101,9 +105,7 @@ export class AdminShellComponent {
   private syncPageTitle(url: string): void {
     const path = url.split('?')[0];
     this.isDashboard.set(
-      path === '/admin' ||
-        path === '/admin/dashboard' ||
-        path === '/admin/halaqat' ||
+      path === '/admin/halaqat' ||
         path === '/admin/teachers' ||
         path === '/admin/teacher-requests' ||
         path === '/admin/students' ||
