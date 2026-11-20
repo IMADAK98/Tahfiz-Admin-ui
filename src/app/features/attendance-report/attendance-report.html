@@ -10,6 +10,15 @@
   <div class="att-report__header">
     <p-button
       type="button"
+      [label]="excelButtonLabel"
+      severity="secondary"
+      [outlined]="true"
+      [loading]="exportingExcel()"
+      [disabled]="loading() || exportingExcel() || !allRows().length"
+      (onClick)="exportExcel()"
+    />
+    <p-button
+      type="button"
       label="تصدير CSV"
       severity="secondary"
       [outlined]="true"
