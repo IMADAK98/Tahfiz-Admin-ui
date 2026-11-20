@@ -201,6 +201,9 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     http.expectNone(PERFORMANCE_URL);
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('.empty-block h2')?.textContent).toContain('لا توجد دورة نشطة');
+    expect(element.querySelector('.empty-block p')?.textContent).toBe(
+      'أنشئ دورة، وسيظهر أداء الحلقات هنا بعد أن يبدأ المعلمون بتسجيل الحضور والتقدّم في تطبيق المعلم.',
+    );
     expect(card(fixture)).toBeNull();
   });
 });
