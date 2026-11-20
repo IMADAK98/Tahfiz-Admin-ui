@@ -5,7 +5,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router, provideRouter } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { ApiError } from '../../core/api/api-error';
 import { ActiveTerm } from '../../core/api/models/term.model';
 import { AuthService } from '../../core/auth/auth.service';
 import { API_BASE_URL } from '../../core/config/api-config';
@@ -156,7 +157,7 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     expect(rows(fixture)).toHaveLength(0);
   });
 
-  it('renders an all-null live row as dashes, never 0%, with no sample tag or marking hint', async () => {
+  it('renders an all-null live row as dashes, never 0%', async () => {
     const fixture = await render('/');
     http.expectOne(PERFORMANCE_URL).flush({ status: 200, message: 'ok', data: [nullRow] });
     fixture.detectChanges();
@@ -166,67 +167,33 @@ describe('DashboardComponent «أداء الحلقات»', () => {
       Array.from(row.querySelectorAll('.ov-num')).map((cell) => cell.textContent?.trim()),
     ).toEqual(['—', '—']);
     expect(row.textContent).not.toContain('0%');
-    expect(row.classList).not.toContain('is-inc');
-    expect(row.querySelector('p-tag')).toBeNull();
-    expect(card(fixture)?.querySelector('.tag-sample')).toBeNull();
     expect(row.getAttribute('aria-label')).toContain('حلقة الإنتاج');
   });
 
-  const sampleTagged = (fixture: ComponentFixture<DashboardComponent>) => {
-    const element = fixture.nativeElement as HTMLElement;
-    const has = (selector: string) =>
-      Array.from(element.querySelectorAll(selector)).map(
-        (block) => !!block.querySelector('.tag-sample'),
-      );
-    return {
-      term: has('.term-banner'),
-      kpis: has('.kpi-card'),
-      overview: has('[aria-labelledby="ov-h"]'),
-      students: has('[aria-labelledby="ws-h"]'),
-      completeness: has('[aria-labelledby="mc-h"]'),
-      coverage: has('[aria-labelledby="pc-h"]'),
-    };
-  };
-
-  it('labels every mock-backed block «عيّنة» in live mode, but not «أداء الحلقات»', async () => {
+  it('shows the real active-term fields in the term bar and only real-data blocks', async () => {
     const fixture = await render('/');
     http.expectOne(PERFORMANCE_URL).flush({ status: 200, message: 'ok', data: [nullRow] });
     fixture.detectChanges();
-    expect(sampleTagged(fixture)).toEqual({
-      term: [true],
-      kpis: [true, true, true, true],
-      overview: [false],
-      students: [true],
-      completeness: [true],
-      coverage: [true],
-    });
-    const tag = (fixture.nativeElement as HTMLElement).querySelector('.kpi-card .tag-sample');
-    expect(tag?.textContent?.trim()).toBe('عيّنة');
+    const element = fixture.nativeElement as HTMLElement;
+    const banner = element.querySelector<HTMLElement>('.term-banner');
+    expect(banner?.querySelector('.term-name strong')?.textContent).toBe('الدورة 30');
+    expect(banner?.querySelector('.term-meta')?.textContent?.trim()).toBe(
+      '13 سبتمبر – 24 ديسمبر 2026',
+    );
+    expect(banner?.textContent).toContain('نشطة');
+    expect(element.querySelectorAll('section[aria-labelledby]')).toHaveLength(1);
+    expect(element.querySelector('.kpi-grid, .tag-sample')).toBeNull();
   });
 
-  it('keeps the spec badges under ?mock=: term banner and «أداء الحلقات» only', async () => {
-    const fixture = await render('/?mock=populated');
-    expect(sampleTagged(fixture)).toEqual({
-      term: [true],
-      kpis: [false, false, false, false],
-      overview: [true],
-      students: [false],
-      completeness: [false],
-      coverage: [false],
-    });
-  });
-
-  it('labels the mock KPI tiles in the live no-term state', async () => {
-    const fixture = await render('/', null);
-    expect(sampleTagged(fixture).kpis).toEqual([true, true, true, true]);
-  });
-
-  it('uses mock rows under ?mock= and makes no performance call', async () => {
-    const fixture = await render('/?mock=populated');
+  it('shows the page error and makes no performance call when the active term fails', async () => {
+    getActiveTerm.mockReturnValue(throwError(() => new ApiError('تعذّر الاتصال', 500)));
+    await TestBed.inject(Router).navigateByUrl('/');
+    const fixture = TestBed.createComponent(DashboardComponent);
+    fixture.detectChanges();
     http.expectNone(PERFORMANCE_URL);
-    expect(rows(fixture)).toHaveLength(8);
-    expect(rows(fixture)[0].textContent).toContain('حلقة الناشئين');
-    expect(card(fixture)?.querySelector('.tag-sample')).not.toBeNull();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('.load-error')?.textContent).toContain('تعذّر الاتصال');
+    expect(element.querySelector('.term-banner, .empty-block')).toBeNull();
   });
 
   it('keeps the no-term state and skips the call when there is no active term', async () => {

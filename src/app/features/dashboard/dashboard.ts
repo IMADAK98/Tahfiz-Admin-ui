@@ -1,27 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ConfirmationService } from 'primeng/api';
-import { Badge } from 'primeng/badge';
-import { Card } from 'primeng/card';
-import { Chip } from 'primeng/chip';
 import { ConfirmDialog } from 'primeng/confirmdialog';
-import { DataView } from 'primeng/dataview';
-import { MeterGroup } from 'primeng/metergroup';
 import { ProgressBar } from 'primeng/progressbar';
 import { TableModule, TableRowSelectEvent } from 'primeng/table';
 import { Tag } from 'primeng/tag';
 import { Subscription } from 'rxjs';
 import { ApiError } from '../../core/api/api-error';
-import { StudyPlanItemType } from '../../core/api/models/study-plan.model';
+import { DashboardHalaqaPerformanceRow } from '../../core/api/models/halqa-performance.model';
 import { ActiveTerm } from '../../core/api/models/term.model';
-import {
-  DashboardAttentionStudent,
-  DashboardHalaqaPerformanceRow,
-  DashboardHalaqaRow,
-  DashboardTerm,
-  DashboardWeek,
-  TermDashboardResponse,
-} from '../../core/api/models/term-dashboard.model';
 import { AuthService } from '../../core/auth/auth.service';
 import { ToastMessageService } from '../../core/toast/toast-message.service';
 import { TOAST_I18N } from '../../core/ui/toast-messages';
@@ -34,9 +21,7 @@ import {
   LOW_COVERAGE_BELOW,
   isLow,
   scoreBand,
-  studentGroups,
   termDateLabels,
-  weekRangeLabel,
 } from './dto/dashboard-view';
 import { DashboardLoadState, ScoreBand } from './enums';
 import {
@@ -46,26 +31,13 @@ import {
   dashboardCopy,
 } from './i18n/dashboard-copy';
 
-const COVERAGE_TYPES: readonly { type: StudyPlanItemType; label: DashboardCopyKey }[] = [
-  { type: 'HIFZ', label: 'type.hifz' },
-  { type: 'TATHBEET', label: 'type.tathbeet' },
-  { type: 'MURAJAA', label: 'type.murajaa' },
-];
-
-type OverviewRow = DashboardHalaqaPerformanceRow | DashboardHalaqaRow;
-
 @Component({
   selector: 'app-dashboard',
   imports: [
     RouterLink,
     TableModule,
     ProgressBar,
-    DataView,
     Tag,
-    Chip,
-    Card,
-    Badge,
-    MeterGroup,
     CreateTermModalComponent,
     EditTermModalComponent,
     ConfirmDialog,
@@ -92,39 +64,13 @@ export class DashboardComponent {
   protected readonly loadState = signal(DashboardLoadState.Loading);
   protected readonly loadError = signal<string | null>(null);
   protected readonly activeTerm = signal<ActiveTerm | null>(null);
-  protected readonly dashboard = signal<TermDashboardResponse | null>(null);
   protected readonly showCreateModal = signal(false);
   protected readonly showEditModal = signal(false);
   protected readonly endingTerm = signal(false);
-  /** «أداء الحلقات» only: mock rows under `?mock=`, else the live halqa-performance endpoint. */
-  protected readonly mockMode = signal(false);
   protected readonly performanceState = signal(DashboardLoadState.Loading);
   protected readonly performanceError = signal<string | null>(null);
-  protected readonly performanceRows = signal<OverviewRow[]>([]);
+  protected readonly performanceRows = signal<DashboardHalaqaPerformanceRow[]>([]);
   private performanceSubscription?: Subscription;
-
-  protected readonly studentGroups = computed(() =>
-    studentGroups(this.dashboard()?.attentionStudents ?? []),
-  );
-  protected readonly incompleteHalaqat = computed(() =>
-    (this.dashboard()?.halaqat ?? []).filter((row) => !row.fullyMarkedThisWeek),
-  );
-  protected readonly coverageRows = computed(() => {
-    const totals = this.dashboard()?.totals;
-    return COVERAGE_TYPES.map(({ type, label }) => ({
-      type,
-      label,
-      average: totals?.typeAverages[type] ?? null,
-      students: totals?.typeStudentCounts[type] ?? 0,
-    }));
-  });
-  protected readonly meterItems = computed(() => {
-    const marking = this.dashboard()?.markingCompleteness;
-    return [
-      { label: 'marked', value: marking?.markedCells ?? 0, color: 'var(--color-primary)' },
-      { label: 'unmarked', value: marking?.notMarkedCells ?? 0, color: 'var(--sev-warn-bar)' },
-    ];
-  });
 
   constructor() {
     this.reload();
@@ -142,16 +88,11 @@ export class DashboardComponent {
     this.loadState.set(DashboardLoadState.Loading);
     this.loadError.set(null);
 
-    this.dashboardService.loadPage(centerId).subscribe({
-      next: ({ activeTerm, dashboard, mock }) => {
+    this.dashboardService.loadActiveTerm(centerId).subscribe({
+      next: (activeTerm) => {
         this.activeTerm.set(activeTerm);
-        this.dashboard.set(dashboard);
-        this.mockMode.set(mock);
         this.loadState.set(DashboardLoadState.Ready);
-        if (mock) {
-          this.performanceRows.set(dashboard.halaqat);
-          this.performanceState.set(DashboardLoadState.Ready);
-        } else if (activeTerm) {
+        if (activeTerm) {
           this.loadPerformance(activeTerm.id);
         }
       },
@@ -164,7 +105,7 @@ export class DashboardComponent {
 
   protected retryPerformance(): void {
     const term = this.activeTerm();
-    if (term && !this.mockMode()) {
+    if (term) {
       this.loadPerformance(term.id);
     }
   }
@@ -186,11 +127,6 @@ export class DashboardComponent {
     });
   }
 
-  /** Live rows carry no weekly marking, so they never show the incomplete-marking hint. */
-  protected isIncomplete(row: OverviewRow): boolean {
-    return 'fullyMarkedThisWeek' in row && !row.fullyMarkedThisWeek;
-  }
-
   protected t(key: DashboardCopyKey, values?: DashboardCopyValues): string {
     return dashboardCopy(key, values);
   }
@@ -203,21 +139,13 @@ export class DashboardComponent {
     return value === null ? this.copy['pc.dash'] : `${Math.round(value)}%`;
   }
 
-  protected termMeta(term: DashboardTerm): string {
-    return this.t('term.meta', {
-      ...termDateLabels(term.startDate, term.endDate),
-      days: term.schoolDaysToDate,
-    });
+  /** Same date range as `term.meta`, without the school-day count (no live source for it). */
+  protected termDates(term: ActiveTerm): string {
+    const { start, end } = termDateLabels(term.startDate, term.endDate);
+    return `${start} – ${end}`;
   }
 
-  protected weekSubtitle(week: DashboardWeek): string {
-    return this.t('mc.sub', {
-      range: weekRangeLabel(week.weekStart, week.weekEnd),
-      days: week.schoolDaysToDate,
-    });
-  }
-
-  protected halaqaAria(row: OverviewRow): string {
+  protected halaqaAria(row: DashboardHalaqaPerformanceRow): string {
     return this.t('ov.row_aria', {
       name: row.name,
       score: row.score === null ? this.copy['ov.aria_none'] : this.round(row.score),
@@ -232,28 +160,7 @@ export class DashboardComponent {
       : this.t('ov.aria_pct', { v: this.round(value) });
   }
 
-  protected absenceIssue(student: DashboardAttentionStudent): string {
-    return this.t('ws.issue_abs', { n: student.absentCount });
-  }
-
-  protected coverageIssue(student: DashboardAttentionStudent): string {
-    return this.t('ws.issue_cov', { p: this.round(student.coverage) });
-  }
-
-  protected studentAria(student: DashboardAttentionStudent, absenceGroup: boolean): string {
-    const issues = absenceGroup
-      ? [this.absenceIssue(student)].concat(
-          isLow(student.coverage, LOW_COVERAGE_BELOW) ? [this.coverageIssue(student)] : [],
-        )
-      : [this.coverageIssue(student)];
-    return this.t('ws.row_aria', {
-      name: student.name,
-      halaqa: student.halaqaName,
-      issue: issues.join('، '),
-    });
-  }
-
-  protected openHalaqa(event: TableRowSelectEvent<OverviewRow>): void {
+  protected openHalaqa(event: TableRowSelectEvent<DashboardHalaqaPerformanceRow>): void {
     const row = Array.isArray(event.data) ? event.data[0] : event.data;
     if (row) {
       void this.router.navigate(['/admin/halaqat', row.halaqaId]);

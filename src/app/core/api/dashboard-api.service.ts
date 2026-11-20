@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config/api-config';
 import { withSkipGlobalErrorToast } from '../http/skip-global-error-toast.token';
 import { unwrapEnvelope } from './envelope.helpers';
 import { ApiEnvelope } from './models/api-envelope.model';
-import { DashboardHalaqaPerformanceRow } from './models/term-dashboard.model';
+import { DashboardHalaqaPerformanceRow } from './models/halqa-performance.model';
 
 /** A missing or non-numeric rate stays «no data» instead of turning into 0 or NaN. */
 function rate(value: unknown): number | null {
