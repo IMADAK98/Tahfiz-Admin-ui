@@ -215,3 +215,10 @@ Done
 
 `normalizePercent` no longer caps at 100 (115/200 shown as-is); only the bar fill stops at full width. Negative/invalid still → 0.
 Null or missing plan type → `null`, shown as «—» with an empty bar (CSV writes «—»); a real 0 stays 0%. Merge with the Nest null-type PR.
+
+## Angular Admin — landing dashboard on real data only
+
+Done
+
+`/admin` keeps only real blocks: the term bar (live active-term name, status and dates with create / edit / end), «أداء الحلقات» from `GET /dashboard/term/:termId/halqa-performance`, and the no-term state.
+Removed the mock KPI tiles, student worklist, completeness and coverage cards, «عيّنة» tags, `?mock=` with its fixtures, metrics and data-source token, and their copy ids and tests.
