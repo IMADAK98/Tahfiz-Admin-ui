@@ -54,6 +54,9 @@
             ],
             "styles": [
               "src/styles/styles.scss"
+            ],
+            "allowedCommonJsDependencies": [
+              "exceljs"
             ]
           },
           "configurations": {

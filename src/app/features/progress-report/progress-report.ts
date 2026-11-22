@@ -27,6 +27,11 @@ import {
   termStatusLabel,
 } from '../report-term/report-term-context';
 import { ReportTermService } from '../report-term/report-term.service';
+import { excelExportFailureToast } from '../weekly-report-excel/excel-export-error';
+import {
+  WeeklyReportExcelService,
+  WeeklyReportExportEmpty,
+} from '../weekly-report-excel/weekly-report-excel.service';
 import { buildProgressReportCsv, downloadCsv } from './progress-report-csv';
 import {
   ProgressReportService,
@@ -71,6 +76,7 @@ const MONTH_AR = [
 })
 export class ProgressReportComponent {
   private readonly report = inject(ProgressReportService);
+  private readonly excel = inject(WeeklyReportExcelService);
   private readonly terms = inject(ReportTermService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -84,6 +90,7 @@ export class ProgressReportComponent {
   protected readonly percentBarWidth = percentBarWidth;
 
   protected readonly loading = signal(false);
+  protected readonly exportingExcel = signal(false);
   protected readonly bootstrapping = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly blockedReason = signal<string | null>(null);
@@ -262,6 +269,53 @@ export class ProgressReportComponent {
   nextWeek(): void {
     this.dateContext.set(addDays(this.dateContext(), 7));
     this.reloadTable();
+  }
+
+  protected get excelButtonLabel(): string {
+    return this.translate.instant('progressReport.exportExcel');
+  }
+
+  /** Week period only: the client workbook is a Sun–Thu grid plus the term sheet. */
+  exportExcel(): void {
+    const term = selectedTerm(this.selection());
+    const halqaId = this.selectedHalqaId();
+    if (
+      this.period() !== 'week' ||
+      !term ||
+      halqaId == null ||
+      this.tableTermId() !== term.id ||
+      !(this.table()?.students.length ?? 0) ||
+      this.exportingExcel()
+    ) {
+      this.toast.notifyWarnBody(this.translate.instant('progressReport.exportEmpty'));
+      return;
+    }
+    const halqa = (this.selectedHalqaName() ?? 'halqa').replace(/\s+/g, '-');
+    this.exportingExcel.set(true);
+    this.excel
+      .exportWorkbook({
+        termId: term.id,
+        termStart: term.startDate,
+        termEnd: term.endDate,
+        halqaId,
+        filename: `progress-${halqa}-term-${term.id}.xlsx`,
+      })
+      .subscribe({
+        next: () => {
+          this.exportingExcel.set(false);
+          this.toast.show('success', this.translate.instant('progressReport.exportExcelOk'));
+        },
+        error: (err: unknown) => {
+          this.exportingExcel.set(false);
+          if (err instanceof WeeklyReportExportEmpty) {
+            this.toast.notifyWarnBody(this.translate.instant('progressReport.exportEmpty'));
+            return;
+          }
+          this.toast.notifyErrorBody(
+            excelExportFailureToast(err, this.translate, 'progressReport.exportExcelFail'),
+          );
+        },
+      });
   }
 
   exportCsv(): void {

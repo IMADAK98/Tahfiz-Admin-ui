@@ -26,6 +26,11 @@ import {
   termStatusLabel,
 } from '../report-term/report-term-context';
 import { ReportTermService } from '../report-term/report-term.service';
+import { excelExportFailureToast } from '../weekly-report-excel/excel-export-error';
+import {
+  WeeklyReportExcelService,
+  WeeklyReportExportEmpty,
+} from '../weekly-report-excel/weekly-report-excel.service';
 import { buildAttendanceWeeklyCsv, downloadCsv } from './attendance-report-csv';
 import { AttendanceReportService } from './attendance-report.service';
 import {
@@ -53,6 +58,7 @@ import {
 })
 export class AttendanceReportComponent {
   private readonly report = inject(AttendanceReportService);
+  private readonly excel = inject(WeeklyReportExcelService);
   private readonly terms = inject(ReportTermService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -63,6 +69,7 @@ export class AttendanceReportComponent {
   private appliedTermId: number | undefined;
 
   protected readonly loading = signal(false);
+  protected readonly exportingExcel = signal(false);
   protected readonly halqaFilterReady = signal(false);
   protected readonly filterError = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
@@ -219,6 +226,47 @@ export class AttendanceReportComponent {
   nextWeek(): void {
     this.weekStartDate.set(addDays(this.weekStartDate(), 7));
     this.reloadTable();
+  }
+
+  protected get excelButtonLabel(): string {
+    return this.translate.instant('attendanceReport.exportExcel');
+  }
+
+  exportExcel(): void {
+    const term = selectedTerm(this.selection());
+    if (!term || this.tableTermId() !== term.id || !this.allRows().length || this.exportingExcel()) {
+      this.toast.notifyWarnBody(this.translate.instant('attendanceReport.exportEmpty'));
+      return;
+    }
+    const halqaValue = this.selectedHalqaValue();
+    const halqaId = halqaValue === ALL_ACTIVE_HALAQAT ? null : Number(halqaValue);
+    const slug =
+      halqaValue === ALL_ACTIVE_HALAQAT ? 'all-in-term' : this.scopeLabel().replace(/\s+/g, '-');
+    this.exportingExcel.set(true);
+    this.excel
+      .exportWorkbook({
+        termId: term.id,
+        termStart: term.startDate,
+        termEnd: term.endDate,
+        halqaId: Number.isInteger(halqaId) ? halqaId : null,
+        filename: `attendance-${slug}-term-${term.id}.xlsx`,
+      })
+      .subscribe({
+        next: () => {
+          this.exportingExcel.set(false);
+          this.toast.show('success', this.translate.instant('attendanceReport.exportExcelOk'));
+        },
+        error: (err: unknown) => {
+          this.exportingExcel.set(false);
+          if (err instanceof WeeklyReportExportEmpty) {
+            this.toast.notifyWarnBody(this.translate.instant('attendanceReport.exportEmpty'));
+            return;
+          }
+          this.toast.notifyErrorBody(
+            excelExportFailureToast(err, this.translate, 'attendanceReport.exportExcelFail'),
+          );
+        },
+      });
   }
 
   exportCsv(): void {
