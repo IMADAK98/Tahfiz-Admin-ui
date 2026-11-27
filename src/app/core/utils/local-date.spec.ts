@@ -20,6 +20,23 @@ describe('local-date', () => {
     expect(parsed.getMonth()).toBe(9);
     expect(parsed.getDate()).toBe(31);
     expect(toLocalIsoDate(parsed)).toBe('2026-10-31');
+    expect(toLocalIsoDate(parseLocalIsoDate('2026-01-05'))).toBe('2026-01-05');
+  });
+
+  it('reads the calendar prefix of a full ISO timestamp', () => {
+    const parsed = parseLocalIsoDate('2026-11-27T00:00:00.000Z');
+    expect(parsed.getFullYear()).toBe(2026);
+    expect(parsed.getMonth()).toBe(10);
+    expect(parsed.getDate()).toBe(27);
+    expect(toLocalIsoDate(parsed)).toBe('2026-11-27');
+    expect(toLocalIsoDate(parseLocalIsoDate('2026-11-27T00:00:00.000+03:00'))).toBe('2026-11-27');
+    expect(toLocalIsoDate(parseLocalIsoDate('2026-01-05T23:59:59.999Z'))).toBe('2026-01-05');
+  });
+
+  it('returns an invalid date when there is no YYYY-MM-DD prefix', () => {
+    for (const value of ['', '   ', '2026-11', '2026/11/27', 'not-a-date']) {
+      expect(Number.isNaN(parseLocalIsoDate(value).getTime())).toBe(true);
+    }
   });
 
   it('round-trips a month as yyyy-MM', () => {

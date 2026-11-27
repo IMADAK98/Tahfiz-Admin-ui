@@ -10,9 +10,18 @@ export function toLocalIsoDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+const ISO_DATE_PREFIX = /^(\d{4})-(\d{2})-(\d{2})/;
+
+/** Local calendar day from `YYYY-MM-DD` or the date prefix of an ISO timestamp. */
 export function parseLocalIsoDate(isoDate: string): Date {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
+  const match = ISO_DATE_PREFIX.exec(isoDate);
+  if (!match) {
+    return new Date(NaN);
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return new Date(year, month - 1, day);
 }
 
 /** Month input value `yyyy-MM` from a local Date. */

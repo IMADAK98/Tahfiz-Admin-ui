@@ -170,6 +170,32 @@ describe('DashboardComponent «أداء الحلقات»', () => {
     expect(row.getAttribute('aria-label')).toContain('حلقة الإنتاج');
   });
 
+  it('renders term dates and أداء الحلقات when the active term uses full ISO timestamps', async () => {
+    const fixture = await render('/', {
+      ...activeTerm,
+      id: 33,
+      name: 'الدورة 33',
+      startDate: '2026-11-27T00:00:00.000Z',
+      endDate: '2026-12-24T00:00:00.000Z',
+    });
+    http.expectOne('https://api.test/dashboard/term/33/halqa-performance').flush({
+      status: 200,
+      message: 'ok',
+      data: [nullRow],
+    });
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const banner = element.querySelector<HTMLElement>('.term-banner');
+    expect(banner?.querySelector('.term-name strong')?.textContent).toBe('الدورة 33');
+    expect(banner?.textContent).toContain('نشطة');
+    expect(banner?.querySelector('.term-meta')?.textContent?.trim()).toBe(
+      '27 نوفمبر – 24 ديسمبر 2026',
+    );
+    expect(banner?.querySelectorAll('button')).toHaveLength(2);
+    expect(card(fixture)?.querySelector('h2')?.textContent?.trim()).toBe('أداء الحلقات');
+    expect(rows(fixture)).toHaveLength(1);
+  });
+
   it('shows the real active-term fields in the term bar and only real-data blocks', async () => {
     const fixture = await render('/');
     http.expectOne(PERFORMANCE_URL).flush({ status: 200, message: 'ok', data: [nullRow] });

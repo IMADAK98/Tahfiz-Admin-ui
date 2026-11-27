@@ -26,4 +26,17 @@ describe('dashboard view helpers', () => {
     expect(dashboardCopy('ov.row_meta', { teacher: 'م', n: 10 })).toBe('م · 10 طلاب');
     expect(dashboardCopy('ov.row_meta', { teacher: 'م', n: 13 })).toBe('م · 13 طالبًا');
   });
+
+  it('formats full ISO timestamps as the same calendar labels', () => {
+    expect(termDateLabels('2026-11-27T00:00:00.000Z', '2026-12-24T00:00:00.000Z')).toEqual({
+      start: '27 نوفمبر',
+      end: '24 ديسمبر 2026',
+    });
+    expect(termDateLabels('2026-09-13T00:00:00.000Z', '2026-12-24T00:00:00.000Z')).toEqual(
+      termDateLabels('2026-09-13', '2026-12-24'),
+    );
+    expect(termDateLabels('2026-12-20T21:00:00.000Z', '2027-03-04T00:00:00.000+03:00').start).toBe(
+      '20 ديسمبر 2026',
+    );
+  });
 });
